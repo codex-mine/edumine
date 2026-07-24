@@ -4,5 +4,6 @@ pydantic==2.10.5
 pydantic-settings==2.7.1
 sqlalchemy[asyncio]==2.0.37
 asyncpg==0.30.0
+alembic==1.14.0
 slowapi==0.1.9
 python-dotenv==1.0.1
