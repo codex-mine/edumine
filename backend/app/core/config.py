@@ -17,8 +17,22 @@ class Settings(BaseSettings):
     frontend_origins: list[str] = ["http://localhost:3000"]
 
     rate_limit_default: str = "100/minute"
+    login_rate_limit: str = "10/minute"
 
     log_level: str = "INFO"
+
+    jwt_secret_key: str = "843effaceabdeec0aeedc585479bbd2ec33cee8239f0bdf7c7ed269e74d0152f"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
+
+    access_token_cookie_name: str = "access_token"
+    refresh_token_cookie_name: str = "refresh_token"
+    session_cookie_name: str = "session_role"
+
+    cookie_secure: bool = False
+    cookie_samesite: str = "lax"
+    cookie_domain: str | None = None
 
 
 @lru_cache

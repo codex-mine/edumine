@@ -43,17 +43,51 @@ export const apiClient = axios.create({
 
 // Unwraps the standard { success, message, data } envelope so callers
 // work directly with `data` via response.data.
-apiClient.interceptors.response.use(
-  (response) => {
-    const envelope = response.data as ApiSuccessEnvelope<unknown>;
-    response.data = envelope?.data;
-    return response;
-  },
-  (error) => {
-    const envelope = error.response?.data as ApiErrorEnvelope | undefined;
-    if (envelope && envelope.success === false) {
-      return Promise.reject(new ApiError(envelope));
+apiClient.interceptors.response.use((response) => {
+  const envelope = response.data as ApiSuccessEnvelope<unknown>;
+  response.data = envelope?.data;
+  return response;
+});
+
+// Endpoints excluded from the silent-refresh-and-retry flow: retrying these
+// would either loop (refresh itself) or retry a request that should just fail
+// (login, logout).
+const AUTH_ENDPOINTS = ["/auth/login", "/auth/refresh", "/auth/logout"];
+
+let refreshPromise: Promise<void> | null = null;
+
+function isAuthEndpoint(url: string | undefined): boolean {
+  return AUTH_ENDPOINTS.some((endpoint) => url?.includes(endpoint));
+}
+
+apiClient.interceptors.response.use(undefined, async (error) => {
+  const envelope = error.response?.data as ApiErrorEnvelope | undefined;
+  const config = error.config as (typeof error.config & { _retried?: boolean }) | undefined;
+
+  const isUnauthorized = error.response?.status === 401;
+  const canRetry = config && !config._retried && !isAuthEndpoint(config.url);
+
+  if (isUnauthorized && canRetry) {
+    config._retried = true;
+    try {
+      refreshPromise ??= apiClient.post("/auth/refresh").then(
+        () => undefined,
+        (refreshError) => {
+          throw refreshError;
+        }
+      );
+      await refreshPromise;
+      return apiClient.request(config);
+    } catch {
+      // Refresh failed — fall through to the normal error envelope below so
+      // callers (e.g. the auth provider) can treat this as "logged out".
+    } finally {
+      refreshPromise = null;
     }
-    return Promise.reject(error);
   }
-);
+
+  if (envelope && envelope.success === false) {
+    return Promise.reject(new ApiError(envelope));
+  }
+  return Promise.reject(error);
+});
