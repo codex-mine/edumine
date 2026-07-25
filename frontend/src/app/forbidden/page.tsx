@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 
+import { SiteHeader } from "@/components/layout/site-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { PermissionDenied } from "@/components/shared/permission-denied";
 import { useAuth } from "@/providers/auth-provider";
@@ -27,10 +28,13 @@ function ForbiddenContent() {
 
 export default function ForbiddenPage() {
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-12">
-      <Suspense fallback={<LoadingState label="Loading..." />}>
-        <ForbiddenContent />
-      </Suspense>
+    <div className="flex flex-1 flex-col">
+      <SiteHeader />
+      <div className="flex flex-1 items-center justify-center px-4 py-12">
+        <Suspense fallback={<LoadingState label="Loading..." />}>
+          <ForbiddenContent />
+        </Suspense>
+      </div>
     </div>
   );
 }

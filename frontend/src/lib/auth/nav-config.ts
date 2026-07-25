@@ -22,3 +22,15 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   student: [{ label: "Dashboard", href: "/student", icon: LayoutDashboard }],
   guardian: [{ label: "Dashboard", href: "/guardian", icon: LayoutDashboard }],
 };
+
+export interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+/** Sidebar groups the design system's shell expects (ui-design.md section 4.1).
+ * Every role has one "Overview" group today; later phases add groups (Academics,
+ * Finance, ...) alongside NAV_ITEMS without changing the sidebar component. */
+export const NAV_GROUPS: Record<Role, NavGroup[]> = Object.fromEntries(
+  Object.entries(NAV_ITEMS).map(([role, items]) => [role, [{ label: "Overview", items }]])
+) as Record<Role, NavGroup[]>;

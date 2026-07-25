@@ -6,6 +6,44 @@ export const loginSchema = z.object({
     .trim()
     .min(1, "Enter your phone number or email"),
   password: z.string().min(1, "Enter your password"),
+  rememberMe: z.boolean().optional(),
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
+
+export const registerStudentSchema = z
+  .object({
+    fullName: z.string().trim().min(1, "Enter your full name"),
+    email: z.string().trim().min(1, "Enter your email").email("Enter a valid email"),
+    phone: z
+      .string()
+      .trim()
+      .min(7, "Enter a valid phone number")
+      .max(20, "Phone number is too long"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type RegisterStudentFormValues = z.infer<typeof registerStudentSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().min(1, "Enter your email").email("Enter a valid email"),
+});
+
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;

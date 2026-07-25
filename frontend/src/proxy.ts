@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { ROLES, isRole, roleCanAccess } from "@/lib/auth/roles";
 
 const SESSION_ROLE_COOKIE = "session_role";
+const AUTH_PAGES = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
 /** Optimistic, cookie-presence-only routing (Next.js docs: "Optimistic checks with
  * Proxy"). This never decodes/verifies the JWT — it only reads the non-sensitive
@@ -31,7 +32,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(forbiddenUrl);
   }
 
-  if (pathname === "/login" && isAuthenticated) {
+  if (AUTH_PAGES.includes(pathname) && isAuthenticated) {
     return NextResponse.redirect(new URL(`/${sessionRole}`, request.url));
   }
 

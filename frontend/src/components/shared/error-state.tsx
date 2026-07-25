@@ -12,8 +12,8 @@ export function ErrorState({
 }) {
   return (
     <Alert variant="destructive">
-      <AlertTriangle className="size-4" aria-hidden="true" />
-      <AlertTitle>Error</AlertTitle>
+      <AlertTriangle className="size-8" aria-hidden="true" />
+      <AlertTitle>Error:</AlertTitle>
       <AlertDescription className="flex flex-col gap-2">
         <span>{message}</span>
         {onRetry && (

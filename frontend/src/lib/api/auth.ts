@@ -33,3 +33,22 @@ export async function getCurrentUser(): Promise<AuthenticatedUser> {
   const { data } = await apiClient.get<AuthenticatedUser>("/auth/me");
   return data;
 }
+
+export interface RegisterStudentPayload {
+  full_name: string;
+  email: string;
+  phone: string;
+  password: string;
+}
+
+export async function registerStudent(payload: RegisterStudentPayload): Promise<void> {
+  await apiClient.post("/auth/register/student", payload);
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  await apiClient.post("/auth/forgot-password", { email });
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  await apiClient.post("/auth/reset-password", { token, new_password: newPassword });
+}

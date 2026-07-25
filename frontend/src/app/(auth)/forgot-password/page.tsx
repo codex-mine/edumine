@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { LoginForm } from "@/components/auth/login-form";
+import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { useAuth } from "@/providers/auth-provider";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
@@ -16,6 +16,5 @@ export default function LoginPage() {
     }
   }, [isLoading, user, router]);
 
-
-  return <LoginForm />;
+  return <ForgotPasswordForm />;
 }
