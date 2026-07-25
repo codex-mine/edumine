@@ -14,6 +14,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.dashboard.router import router as dashboard_router
 from app.modules.guardians.router import router as guardians_router
 from app.modules.health.router import router as health_router
+from app.modules.routine.router import router as routine_router
 from app.modules.students.router import router as students_router
 from app.modules.teachers.router import router as teachers_router
 from app.modules.users.router import router as users_router
@@ -56,5 +57,6 @@ api_router.include_router(teachers_router)
 api_router.include_router(guardians_router)
 api_router.include_router(users_router)
 api_router.include_router(academic_router)
+api_router.include_router(routine_router)
 
 app.include_router(api_router)

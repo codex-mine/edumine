@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BookMarked,
+  CalendarClock,
   CalendarRange,
   ClipboardList,
   DoorOpen,
@@ -42,6 +43,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   teacher: [
     { label: "Dashboard", href: "/teacher", icon: LayoutDashboard },
+    { label: "My Schedule", href: "/teacher/routine", icon: CalendarClock },
     { label: "My Profile", href: "/teacher/profile", icon: UserCircle },
   ],
   accountant: [
@@ -58,10 +60,12 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   student: [
     { label: "Dashboard", href: "/student", icon: LayoutDashboard },
+    { label: "My Routine", href: "/student/routine", icon: CalendarClock },
     { label: "My Profile", href: "/student/profile", icon: UserCircle },
   ],
   guardian: [
     { label: "Dashboard", href: "/guardian", icon: LayoutDashboard },
+    { label: "Children's Routines", href: "/guardian/routine", icon: CalendarClock },
     { label: "My Profile", href: "/guardian/profile", icon: UserCircle },
   ],
 };
@@ -74,6 +78,7 @@ const ACADEMIC_NAV_ITEMS: NavItem[] = [
   { label: "Classes & Subjects", href: "/admin/academic/structure", icon: BookMarked },
   { label: "Sections & Assignment", href: "/admin/academic/sections", icon: DoorOpen },
   { label: "Enrollment & Promotion", href: "/admin/academic/enrollment", icon: ClipboardList },
+  { label: "Routine Builder", href: "/admin/academic/routine", icon: CalendarClock },
 ];
 
 export interface NavGroup {
