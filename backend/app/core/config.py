@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     app_name: str = "Codex Edumine API"
     environment: str = "development"
     debug: bool = True
+    api_v1_prefix: str = "/api/v1"
 
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/codex_edumine"
 

@@ -4,10 +4,11 @@ import uuid
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 
-from fastapi import Cookie, Depends
+from fastapi import Cookie, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.schemas import PaginationParams
 from app.core.config import get_settings
 from app.core.exceptions import AuthException, PermissionDeniedException
 from app.core.security import TokenError, decode_access_token
@@ -111,3 +112,10 @@ def require_role(*roles: str):
         return current_user
 
     return _check
+
+
+def get_pagination(
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+) -> PaginationParams:
+    return PaginationParams(page=page, limit=limit)

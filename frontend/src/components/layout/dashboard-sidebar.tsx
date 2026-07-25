@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { NAV_GROUPS } from "@/lib/auth/nav-config";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/auth/roles";
+import Image from "next/image";
 
 function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -15,14 +16,20 @@ function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => v
 
   return (
     <>
-      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4 text-sm font-medium whitespace-nowrap text-sidebar-foreground">
-        <GraduationCap className="size-5 shrink-0 text-sidebar-primary" aria-hidden="true" />
+      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4 text-xl font-medium whitespace-nowrap text-sidebar-foreground my-4">
+        <Image
+          src="/logo.png"
+          alt="Codex Edumine Logo"
+          width={32}
+          height={32}
+          className="rounded"
+        />
         <span>Codex Edumine</span>
       </div>
-      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-3">
+      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
         {groups.map((group) => (
           <div key={group.label} className="flex flex-col gap-1">
-            <span className="px-2.5 text-[11px] font-semibold tracking-wide text-sidebar-foreground/50 uppercase">
+            <span className="px-2.5 text-sm font-semibold text-sidebar-foreground/50 ">
               {group.label}
             </span>
             {group.items.map((item) => {
@@ -34,13 +41,13 @@ function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => v
                   href={item.href}
                   onClick={onNavigate}
                   className={cn(
-                    "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-2 rounded px-2.5 py-3 my-2  font-medium transition-colors",
                     isActive
                       ? "bg-sidebar-primary text-sidebar-primary-foreground"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
-                  <Icon className="size-4 shrink-0" aria-hidden="true" />
+                  <Icon className="size-8 shrink-0" aria-hidden="true" />
                   {item.label}
                 </Link>
               );

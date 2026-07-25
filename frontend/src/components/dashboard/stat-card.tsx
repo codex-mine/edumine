@@ -34,8 +34,8 @@ export function StatCard({
     <Card className={cn(className)}>
       <CardContent className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium text-muted-foreground">{label}</span>
-          <span className="text-[22px] font-bold leading-none text-foreground">{value}</span>
+          <span className="  font-medium text-muted-foreground">{label}</span>
+          <span className=" text-2xl font-bold leading-none text-foreground">{value}</span>
           {(delta || caption) && (
             <div className="mt-1 flex items-center gap-1.5 text-xs">
               {delta && (
@@ -46,9 +46,9 @@ export function StatCard({
                   )}
                 >
                   {delta.direction === "up" ? (
-                    <TrendingUp className="size-3" aria-hidden="true" />
+                    <TrendingUp className="size-20" aria-hidden="true" />
                   ) : (
-                    <TrendingDown className="size-3" aria-hidden="true" />
+                    <TrendingDown className="size-20" aria-hidden="true" />
                   )}
                   {delta.value}
                 </span>
@@ -58,7 +58,7 @@ export function StatCard({
           )}
         </div>
         <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg", ACCENT_CLASSES[accent])}>
-          <Icon className="size-5" aria-hidden="true" />
+          <Icon className="size-10" aria-hidden="true" />
         </div>
       </CardContent>
     </Card>

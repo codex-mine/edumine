@@ -39,7 +39,7 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   if (!user) return null;
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card px-4">
+    <header className="flex  py-4 shrink-0 items-center gap-3 border-b border-border bg-card px-4">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -49,7 +49,7 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
             onClick={onMenuClick}
             aria-label="Open navigation menu"
           >
-            <Menu className="size-4" aria-hidden="true" />
+            <Menu className="size-8" aria-hidden="true" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>Open menu</TooltipContent>
@@ -65,13 +65,13 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-4">
         <Popover>
           <Tooltip>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon-sm" aria-label="Notifications">
-                  <Bell className="size-4" aria-hidden="true" />
+                  <Bell className="size-8" aria-hidden="true" />
                 </Button>
               </PopoverTrigger>
             </TooltipTrigger>
@@ -91,24 +91,25 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-2 rounded-lg px-1.5 py-1 outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="flex items-center gap-2 cursor-pointer rounded-lg px-1.5 py-1 outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <Avatar className="size-7">
-                <AvatarFallback>{initials(user.full_name)}</AvatarFallback>
+              <Avatar className="size-10">
+                <AvatarFallback className="p-2">
+                  {initials(user.full_name)}
+                </AvatarFallback>
               </Avatar>
-              <span className="hidden text-sm font-medium sm:inline">{user.full_name}</span>
-            </button>
+             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent className="w-100" >
             <DropdownMenuLabel className="flex flex-col gap-1">
               <span className="text-sm font-medium text-foreground">{user.full_name}</span>
-              <Badge variant="muted" className="w-fit">
+              <Badge variant="muted" className="w-fit ">
                 {ROLE_LABELS[user.role] ?? user.role}
               </Badge>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="mt-4" />
             <DropdownMenuItem
-              variant="destructive"
+              variant="destructive" 
               disabled={isLoggingOut}
               onSelect={async (event) => {
                 event.preventDefault();
@@ -116,7 +117,7 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
                 router.replace("/login");
               }}
             >
-              <LogOut aria-hidden="true" />
+              <LogOut aria-hidden="true" className="h-8" />
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

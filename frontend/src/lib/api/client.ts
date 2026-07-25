@@ -33,8 +33,14 @@ export class ApiError extends Error {
   }
 }
 
+export interface PageMeta {
+  page: number;
+  limit: number;
+  total: number;
+}
+
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -42,12 +48,31 @@ export const apiClient = axios.create({
 });
 
 // Unwraps the standard { success, message, data } envelope so callers
-// work directly with `data` via response.data.
+// work directly with `data` via response.data. `meta` (pagination) is kept
+// on the response object itself since `data` for list endpoints is the bare array.
 apiClient.interceptors.response.use((response) => {
   const envelope = response.data as ApiSuccessEnvelope<unknown>;
+  const meta = envelope?.meta as PageMeta | undefined;
   response.data = envelope?.data;
+  if (meta) {
+    (response as typeof response & { meta?: PageMeta }).meta = meta;
+  }
   return response;
 });
+
+/** Fetches a paginated list endpoint, pairing the unwrapped items with the envelope's `meta`. */
+export async function getPaginated<T>(
+  url: string,
+  params?: Record<string, unknown>
+): Promise<{ items: T[]; meta: PageMeta }> {
+  const response = await apiClient.get<T[]>(url, { params });
+  const meta = (response as typeof response & { meta?: PageMeta }).meta ?? {
+    page: 1,
+    limit: response.data.length,
+    total: response.data.length,
+  };
+  return { items: response.data, meta };
+}
 
 // Endpoints excluded from the silent-refresh-and-retry flow: retrying these
 // would either loop (refresh itself) or retry a request that should just fail

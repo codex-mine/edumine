@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api/client";
+import { apiClient, getPaginated, type PageMeta } from "@/lib/api/client";
 
 export interface PendingStudent {
   id: string;
@@ -9,6 +9,65 @@ export interface PendingStudent {
   created_at: string;
 }
 
+export type StudentStatus = "active" | "transferred" | "graduated" | "dropped";
+
+export interface Student {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string | null;
+  phone: string;
+  gender: "male" | "female" | "other" | null;
+  date_of_birth: string | null;
+  is_active: boolean;
+  admission_number: string;
+  admission_date: string;
+  blood_group: string | null;
+  address: string | null;
+  emergency_contact: string | null;
+  status: StudentStatus;
+  created_at: string;
+}
+
+export interface LinkedGuardianSummary {
+  guardian_id: string;
+  full_name: string;
+  phone: string;
+  relation: string;
+  is_primary: boolean;
+}
+
+export interface StudentDetail extends Student {
+  guardians: LinkedGuardianSummary[];
+}
+
+export interface CreateStudentPayload {
+  full_name: string;
+  email?: string | null;
+  phone: string;
+  password: string;
+  gender?: "male" | "female" | "other" | null;
+  date_of_birth?: string | null;
+  admission_number?: string | null;
+  admission_date?: string | null;
+  blood_group?: string | null;
+  address?: string | null;
+  emergency_contact?: string | null;
+}
+
+export interface UpdateStudentPayload {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  gender?: "male" | "female" | "other" | null;
+  date_of_birth?: string | null;
+  is_active?: boolean;
+  blood_group?: string | null;
+  address?: string | null;
+  emergency_contact?: string | null;
+  status?: StudentStatus;
+}
+
 export async function listPendingStudents(): Promise<PendingStudent[]> {
   const { data } = await apiClient.get<PendingStudent[]>("/students/pending");
   return data;
@@ -16,4 +75,61 @@ export async function listPendingStudents(): Promise<PendingStudent[]> {
 
 export async function activateStudent(userId: string): Promise<void> {
   await apiClient.post(`/students/${userId}/activate`);
+}
+
+export async function listStudents(params: {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: StudentStatus;
+}): Promise<{ items: Student[]; meta: PageMeta }> {
+  return getPaginated<Student>("/students", params);
+}
+
+export async function getStudent(studentId: string): Promise<StudentDetail> {
+  const { data } = await apiClient.get<StudentDetail>(`/students/${studentId}`);
+  return data;
+}
+
+export async function getOwnStudentProfile(): Promise<StudentDetail> {
+  const { data } = await apiClient.get<StudentDetail>("/students/me");
+  return data;
+}
+
+export async function createStudent(payload: CreateStudentPayload): Promise<Student> {
+  const { data } = await apiClient.post<Student>("/students", payload);
+  return data;
+}
+
+export async function updateStudent(studentId: string, payload: UpdateStudentPayload): Promise<Student> {
+  const { data } = await apiClient.patch<Student>(`/students/${studentId}`, payload);
+  return data;
+}
+
+export async function softDeleteStudent(studentId: string): Promise<void> {
+  await apiClient.delete(`/students/${studentId}`);
+}
+
+export async function hardDeleteStudent(studentId: string): Promise<void> {
+  await apiClient.delete(`/students/${studentId}/hard`);
+}
+
+export async function linkGuardianToStudent(
+  studentId: string,
+  guardianId: string,
+  payload: { relation: string; is_primary: boolean }
+): Promise<void> {
+  await apiClient.post(`/students/${studentId}/guardians/${guardianId}`, payload);
+}
+
+export async function updateGuardianLink(
+  studentId: string,
+  guardianId: string,
+  payload: { relation?: string; is_primary?: boolean }
+): Promise<void> {
+  await apiClient.patch(`/students/${studentId}/guardians/${guardianId}`, payload);
+}
+
+export async function unlinkGuardianFromStudent(studentId: string, guardianId: string): Promise<void> {
+  await apiClient.delete(`/students/${studentId}/guardians/${guardianId}`);
 }
