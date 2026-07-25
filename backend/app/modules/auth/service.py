@@ -1,17 +1,25 @@
+import uuid
 from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import AuthException
+from app.core.config import get_settings
+from app.core.email import send_password_reset_email
+from app.core.exceptions import AuthException, ConflictException, NotFoundException
 from app.core.security import (
     create_access_token,
+    generate_password_reset_token,
     generate_refresh_token,
+    hash_password,
     hash_refresh_token,
     verify_password,
 )
 from app.modules.auth import repository
 from app.modules.auth.models import User
+from app.modules.auth.schemas import RegisterStudentRequest
+
+settings = get_settings()
 
 # Deliberately generic on every failure branch (unknown identifier vs. wrong
 # password) so the endpoint never reveals which accounts exist.
@@ -95,3 +103,60 @@ async def logout(db: AsyncSession, raw_refresh_token: str | None) -> None:
     if raw_refresh_token:
         await repository.revoke_refresh_token_by_hash(db, hash_refresh_token(raw_refresh_token))
         await db.commit()
+
+
+async def register_student(db: AsyncSession, payload: RegisterStudentRequest) -> None:
+    if await repository.get_user_by_email(db, payload.email) is not None:
+        raise ConflictException("An account with this email already exists")
+    if await repository.get_user_by_phone(db, payload.phone) is not None:
+        raise ConflictException("An account with this phone number already exists")
+
+    role = await repository.get_role_by_name(db, "student")
+    if role is None:
+        raise AuthException("Student role is not configured")
+
+    password_hash = hash_password(payload.password)
+    user = await repository.create_student_user(
+        db,
+        role_id=role.id,
+        full_name=payload.full_name,
+        email=payload.email,
+        phone=payload.phone,
+        password_hash=password_hash,
+        gender=payload.gender,
+        date_of_birth=payload.date_of_birth,
+    )
+    # Real admission numbering lands with Phase 4 (People & Identity Management);
+    # this placeholder just satisfies the NOT NULL/unique constraint until an
+    # admin reviews and finalizes the admission.
+    admission_number = f"PENDING-{uuid.uuid4().hex[:8].upper()}"
+    await repository.create_student_profile(db, user_id=user.id, admission_number=admission_number)
+    await db.commit()
+
+
+async def forgot_password(db: AsyncSession, email: str) -> None:
+    """Always succeeds from the caller's perspective regardless of whether the
+    email exists or the account is active — same enumeration-safety principle
+    as INVALID_CREDENTIALS_MESSAGE above."""
+    user = await repository.get_user_by_email(db, email)
+    if user is None or not user.is_active or user.deleted_at is not None:
+        return
+
+    raw_token, token_hash, expires_at = generate_password_reset_token()
+    await repository.create_password_reset_token(db, user_id=user.id, token_hash=token_hash, expires_at=expires_at)
+    await db.commit()
+
+    reset_link = f"{settings.frontend_url}/reset-password?token={raw_token}"
+    await send_password_reset_email(user.email, user.full_name, reset_link)
+
+
+async def reset_password(db: AsyncSession, raw_token: str, new_password: str) -> None:
+    token_hash = hash_refresh_token(raw_token)
+    token = await repository.get_valid_password_reset_token(db, token_hash)
+    if token is None:
+        raise NotFoundException("This reset link is invalid or has expired")
+
+    await repository.update_user_password(db, token.user_id, hash_password(new_password))
+    await repository.mark_password_reset_token_used(db, token)
+    await repository.revoke_all_refresh_tokens_for_user(db, token.user_id)
+    await db.commit()

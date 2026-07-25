@@ -8,7 +8,13 @@ from app.core.rate_limiter import limiter
 from app.core.response import success_response
 from app.core.security import apply_auth_cookies, clear_auth_cookies
 from app.modules.auth import service
-from app.modules.auth.schemas import AuthenticatedUser, LoginRequest
+from app.modules.auth.schemas import (
+    AuthenticatedUser,
+    ForgotPasswordRequest,
+    LoginRequest,
+    RegisterStudentRequest,
+    ResetPasswordRequest,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
@@ -106,3 +112,41 @@ async def me(current_user: CurrentUser = Depends(get_current_user)):
         ),
         message="Current session",
     )
+
+
+@router.post("/register/student", status_code=201)
+@limiter.limit(settings.register_rate_limit)
+async def register_student(
+    request: Request,
+    payload: RegisterStudentRequest,
+    db: AsyncSession = Depends(get_db_session),
+):
+    await service.register_student(db, payload)
+    return success_response(
+        data=None,
+        message="Registration submitted. Your account will be reviewed and activated by an administrator.",
+        status_code=201,
+    )
+
+
+@router.post("/forgot-password")
+@limiter.limit(settings.password_reset_rate_limit)
+async def forgot_password(
+    request: Request,
+    payload: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_db_session),
+):
+    await service.forgot_password(db, payload.email)
+    return success_response(
+        data=None,
+        message="If an account with that email exists, a reset link has been sent.",
+    )
+
+
+@router.post("/reset-password")
+async def reset_password(
+    payload: ResetPasswordRequest,
+    db: AsyncSession = Depends(get_db_session),
+):
+    await service.reset_password(db, payload.token, payload.new_password)
+    return success_response(data=None, message="Password reset successfully. Please log in with your new password.")

@@ -34,6 +34,19 @@ class Settings(BaseSettings):
     cookie_samesite: str = "lax"
     cookie_domain: str | None = None
 
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_use_tls: bool = True
+    smtp_from_email: str | None = None
+    smtp_from_name: str = "Codex Edumine"
+
+    frontend_url: str = "http://localhost:3000"
+    password_reset_token_expire_minutes: int = 30
+    register_rate_limit: str = "5/minute"
+    password_reset_rate_limit: str = "5/minute"
+
 
 @lru_cache
 def get_settings() -> Settings:

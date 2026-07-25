@@ -73,3 +73,18 @@ class RefreshToken(Base, UUIDPrimaryKeyMixin, CreatedAtMixin):
     device_info: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_revoked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text("false"))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class PasswordResetToken(Base, UUIDPrimaryKeyMixin, CreatedAtMixin):
+    __tablename__ = "password_reset_tokens"
+    __table_args__ = (
+        Index("ix_password_reset_tokens_user_id", "user_id"),
+        Index("ix_password_reset_tokens_expires_at", "expires_at"),
+    )
+
+    user_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    token_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

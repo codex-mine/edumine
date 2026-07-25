@@ -76,6 +76,15 @@ def hash_refresh_token(raw_token: str) -> str:
     return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
 
+def generate_password_reset_token() -> tuple[str, str, datetime]:
+    """Returns (raw_token, sha256_hex_hash, expires_at). Reuses the generic
+    SHA-256 hasher above — it isn't actually refresh-token-specific."""
+    raw_token = secrets.token_urlsafe(32)
+    token_hash = hash_refresh_token(raw_token)
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.password_reset_token_expire_minutes)
+    return raw_token, token_hash, expires_at
+
+
 CookieAction = Literal["set", "clear"]
 
 
