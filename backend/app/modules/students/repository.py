@@ -2,10 +2,11 @@ import uuid
 from datetime import date, datetime, timezone
 from typing import Any
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.enums import GenderType, StudentStatus
+from app.common.enums import EnrollmentStatus, GenderType, StudentStatus
+from app.modules.academic.models import Class, Section, StudentEnrollment
 from app.modules.auth.models import Role, User
 from app.modules.guardians.models import Guardian
 from app.modules.students.models import Student, StudentGuardian
@@ -119,9 +120,33 @@ async def get_student_by_user_id(db: AsyncSession, user_id: uuid.UUID) -> tuple[
     return result.first()
 
 
+StudentEnrollmentRow = tuple[Student, User, StudentEnrollment | None, Section | None, Class | None]
+
+
+def _student_with_enrollment_select(*, academic_year_id: uuid.UUID | None):
+    enrollment_on = and_(
+        StudentEnrollment.student_id == Student.id,
+        StudentEnrollment.academic_year_id == academic_year_id,
+        StudentEnrollment.status == EnrollmentStatus.active,
+    )
+    return (
+        select(Student, User, StudentEnrollment, Section, Class)
+        .join(User, User.id == Student.user_id)
+        .outerjoin(StudentEnrollment, enrollment_on)
+        .outerjoin(Section, Section.id == StudentEnrollment.section_id)
+        .outerjoin(Class, Class.id == Section.class_id)
+    )
+
+
 async def list_students(
-    db: AsyncSession, *, search: str | None, status: StudentStatus | None, offset: int, limit: int
-) -> tuple[list[tuple[Student, User]], int]:
+    db: AsyncSession,
+    *,
+    search: str | None,
+    status: StudentStatus | None,
+    offset: int,
+    limit: int,
+    academic_year_id: uuid.UUID | None,
+) -> tuple[list[StudentEnrollmentRow], int]:
     filters = [Student.deleted_at.is_(None), User.is_active.is_(True)]
     if status is not None:
         filters.append(Student.status == status)
@@ -137,14 +162,31 @@ async def list_students(
     total = count_result.scalar_one()
 
     result = await db.execute(
-        select(Student, User)
-        .join(User, User.id == Student.user_id)
+        _student_with_enrollment_select(academic_year_id=academic_year_id)
         .where(*filters)
         .order_by(User.created_at.desc())
         .offset(offset)
         .limit(limit)
     )
     return list(result.all()), total
+
+
+async def get_active_enrollment_for_student(
+    db: AsyncSession, student_id: uuid.UUID, academic_year_id: uuid.UUID | None
+) -> tuple[StudentEnrollment, Section, Class] | None:
+    if academic_year_id is None:
+        return None
+    result = await db.execute(
+        select(StudentEnrollment, Section, Class)
+        .join(Section, Section.id == StudentEnrollment.section_id)
+        .join(Class, Class.id == Section.class_id)
+        .where(
+            StudentEnrollment.student_id == student_id,
+            StudentEnrollment.academic_year_id == academic_year_id,
+            StudentEnrollment.status == EnrollmentStatus.active,
+        )
+    )
+    return result.first()
 
 
 async def update_student_fields(db: AsyncSession, student: Student, fields: dict[str, Any]) -> None:

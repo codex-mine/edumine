@@ -24,6 +24,7 @@ venv/
 .env.local
 .env.*.local
 !.env.example
+.env.production
 
 # --- Editors / OS ---
 .vscode/*

@@ -17,7 +17,7 @@ import {
 } from "@/hooks/use-students";
 import { useAuth } from "@/providers/auth-provider";
 
-const LIMIT = 20;
+const LIMIT = 5;
 
 export default function AdminStudentsPage() {
   const { user } = useAuth();
@@ -36,14 +36,24 @@ export default function AdminStudentsPage() {
       </div>
     ),
     admission_number: student.admission_number,
+    class_section: student.class_name ? (
+      <div className="flex flex-col">
+        <span className="font-medium text-foreground">
+          {student.class_name} - {student.section_name}
+        </span>
+        <span className="text-xs text-muted-foreground">Roll {student.roll_number}</span>
+      </div>
+    ) : (
+      <span className="text-xs text-muted-foreground">Not enrolled</span>
+    ),
     status: <StatusBadge status={student.status} />,
     active: <ActiveBadge isActive={student.is_active} />,
     guardians: (
       <GuardianLinkManagerDialog
         studentId={student.id}
         trigger={
-          <Button variant="outline" size="sm">
-            <UserCog className="size-4" aria-hidden="true" />
+          <Button variant="outline"  >
+            <UserCog className="size-6" aria-hidden="true" />
             Guardians
           </Button>
         }
@@ -63,7 +73,7 @@ export default function AdminStudentsPage() {
       <StudentFormDialog
         student={student}
         trigger={
-          <Button variant="ghost" size="sm">
+          <Button variant="secondary" >
             Edit
           </Button>
         }
@@ -84,11 +94,12 @@ export default function AdminStudentsPage() {
         columns={[
           { key: "name", label: "Student" },
           { key: "admission_number", label: "Admission #" },
+          { key: "class_section", label: "Class / Roll" },
           { key: "status", label: "Status" },
           { key: "active", label: "Account" },
           { key: "guardians", label: "Guardians" },
-          { key: "edit", label: "" },
-          { key: "actions", label: "" },
+          { key: "edit", label: "Edit" },
+          { key: "actions", label: "Actions" },
         ]}
         rows={rows}
         isLoading={query.isLoading}
@@ -109,8 +120,8 @@ export default function AdminStudentsPage() {
         toolbarActions={
           <StudentFormDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button  >
+                <Plus className="size-6"  aria-hidden="true" />
                 Admit student
               </Button>
             }

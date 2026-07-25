@@ -9,6 +9,7 @@ from app.core.logging import configure_logging
 from app.core.middleware import SecureHeadersMiddleware
 from app.core.rate_limiter import limiter
 from app.core.response import error_response
+from app.modules.academic.router import router as academic_router
 from app.modules.auth.router import router as auth_router
 from app.modules.dashboard.router import router as dashboard_router
 from app.modules.guardians.router import router as guardians_router
@@ -54,5 +55,6 @@ api_router.include_router(students_router)
 api_router.include_router(teachers_router)
 api_router.include_router(guardians_router)
 api_router.include_router(users_router)
+api_router.include_router(academic_router)
 
 app.include_router(api_router)

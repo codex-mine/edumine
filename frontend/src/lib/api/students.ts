@@ -27,6 +27,9 @@ export interface Student {
   emergency_contact: string | null;
   status: StudentStatus;
   created_at: string;
+  class_name: string | null;
+  section_name: string | null;
+  roll_number: string | null;
 }
 
 export interface LinkedGuardianSummary {
@@ -45,14 +48,18 @@ export interface CreateStudentPayload {
   full_name: string;
   email?: string | null;
   phone: string;
-  password: string;
   gender?: "male" | "female" | "other" | null;
-  date_of_birth?: string | null;
-  admission_number?: string | null;
+  date_of_birth: string;
+  section_id: string;
   admission_date?: string | null;
   blood_group?: string | null;
   address?: string | null;
   emergency_contact?: string | null;
+}
+
+export interface AdmitStudentResult extends Student {
+  temporary_password: string;
+  academic_year_name: string;
 }
 
 export interface UpdateStudentPayload {
@@ -96,8 +103,8 @@ export async function getOwnStudentProfile(): Promise<StudentDetail> {
   return data;
 }
 
-export async function createStudent(payload: CreateStudentPayload): Promise<Student> {
-  const { data } = await apiClient.post<Student>("/students", payload);
+export async function createStudent(payload: CreateStudentPayload): Promise<AdmitStudentResult> {
+  const { data } = await apiClient.post<AdmitStudentResult>("/students", payload);
   return data;
 }
 

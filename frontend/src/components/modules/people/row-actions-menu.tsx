@@ -32,8 +32,8 @@ export function RowActionsMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label="Row actions">
-          <MoreHorizontal className="size-4" aria-hidden="true" />
+        <Button variant="outline" aria-label="Row actions">
+          <MoreHorizontal className="size-6" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-40">
@@ -49,7 +49,7 @@ export function RowActionsMenu({
             <ConfirmDialog
               trigger={
                 <DropdownMenuItem variant="destructive" onSelect={(event) => event.preventDefault()}>
-                  <Trash2 className="size-4" aria-hidden="true" />
+                  <Trash2 className="!size-8" aria-hidden="true" />
                   {softDeleteLabel}
                 </DropdownMenuItem>
               }
@@ -64,8 +64,8 @@ export function RowActionsMenu({
         {onHardDelete && (
           <ConfirmDialog
             trigger={
-              <DropdownMenuItem variant="destructive" onSelect={(event) => event.preventDefault()}>
-                <ShieldAlert className="size-4" aria-hidden="true" />
+              <DropdownMenuItem variant="destructive"  onSelect={(event) => event.preventDefault()}>
+                <ShieldAlert className="!size-8" aria-hidden="true" />
                 Permanently delete
               </DropdownMenuItem>
             }

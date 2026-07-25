@@ -1,5 +1,16 @@
 import type { LucideIcon } from "lucide-react";
-import { GraduationCap, HeartHandshake, LayoutDashboard, UserCircle, UserCog, Users } from "lucide-react";
+import {
+  BookMarked,
+  CalendarRange,
+  ClipboardList,
+  DoorOpen,
+  GraduationCap,
+  HeartHandshake,
+  LayoutDashboard,
+  UserCircle,
+  UserCog,
+  Users,
+} from "lucide-react";
 
 import type { Role } from "@/lib/auth/roles";
 
@@ -55,14 +66,32 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
 };
 
+/** Phase 5 (Academic Structure Management) — Admin/Principal only. Principal
+ * reaches these via the same shared /admin/academic/* pages, through the
+ * existing role-bypass in roleCanAccess. */
+const ACADEMIC_NAV_ITEMS: NavItem[] = [
+  { label: "Academic Years", href: "/admin/academic/years", icon: CalendarRange },
+  { label: "Classes & Subjects", href: "/admin/academic/structure", icon: BookMarked },
+  { label: "Sections & Assignment", href: "/admin/academic/sections", icon: DoorOpen },
+  { label: "Enrollment & Promotion", href: "/admin/academic/enrollment", icon: ClipboardList },
+];
+
 export interface NavGroup {
   label: string;
   items: NavItem[];
 }
 
 /** Sidebar groups the design system's shell expects (ui-design.md section 4.1).
- * Every role has one "Overview" group today; later phases add groups (Academics,
- * Finance, ...) alongside NAV_ITEMS without changing the sidebar component. */
+ * Most roles have a single "Overview" group; Admin/Principal additionally get
+ * an "Academics" group. Later phases append further groups the same way. */
 export const NAV_GROUPS: Record<Role, NavGroup[]> = Object.fromEntries(
-  Object.entries(NAV_ITEMS).map(([role, items]) => [role, [{ label: "Overview", items }]])
+  Object.entries(NAV_ITEMS).map(([role, items]) => [
+    role,
+    role === "admin" || role === "principal"
+      ? [
+          { label: "Overview", items },
+          { label: "Academics", items: ACADEMIC_NAV_ITEMS },
+        ]
+      : [{ label: "Overview", items }],
+  ])
 ) as Record<Role, NavGroup[]>;

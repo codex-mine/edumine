@@ -110,8 +110,8 @@ export function GuardianLinkManagerDialog({ trigger, studentId }: { trigger: Rea
                       )}
                       <ConfirmDialog
                         trigger={
-                          <Button variant="ghost" size="icon-sm" aria-label="Unlink guardian">
-                            <Trash2 className="size-4" aria-hidden="true" />
+                          <Button variant="destructive" size="icon-sm" aria-label="Unlink guardian">
+                            <Trash2 className="size-6" aria-hidden="true" />
                           </Button>
                         }
                         title="Unlink this guardian?"
@@ -160,7 +160,7 @@ export function GuardianLinkManagerDialog({ trigger, studentId }: { trigger: Rea
               )}
 
               {selectedGuardianId && (
-                <div className="flex flex-col gap-2 rounded border border-border p-2">
+                <div className="flex flex-col gap-4 rounded border border-border p-2 mt-10">
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="relation">Relation</Label>
                     <Input
@@ -175,13 +175,12 @@ export function GuardianLinkManagerDialog({ trigger, studentId }: { trigger: Rea
                     Set as primary contact
                   </label>
                   <Button
-                    type="button"
-                    size="sm"
+                    type="button" 
                     disabled={!relation || linkMutation.isPending}
                     onClick={handleLink}
                     className="w-fit"
                   >
-                    <UserPlus className="size-4" aria-hidden="true" />
+                    <UserPlus className="size-6" aria-hidden="true" />
                     Link guardian
                   </Button>
                 </div>

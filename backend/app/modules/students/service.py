@@ -10,11 +10,16 @@ from app.common.enums import StudentStatus
 from app.common.schemas import PaginationParams
 from app.core.exceptions import ConflictException, NotFoundException, ValidationException
 from app.core.security import hash_password
+from app.modules.academic import repository as academic_repository
+from app.modules.academic import service as academic_service
+from app.modules.academic.models import Class, Section, StudentEnrollment
+from app.modules.academic.repository import EnrollmentRow
 from app.modules.auth import repository as auth_repository
 from app.modules.auth.models import User
 from app.modules.guardians import service as guardians_service
 from app.modules.students import repository
 from app.modules.students.models import Student
+from app.modules.students.repository import StudentEnrollmentRow
 from app.modules.students.schemas import (
     CreateStudentRequest,
     LinkedGuardianSummary,
@@ -23,6 +28,7 @@ from app.modules.students.schemas import (
 )
 
 StudentRecord = tuple[Student, User]
+EnrollmentSummary = tuple[StudentEnrollment, Section, Class] | None
 
 
 async def list_pending_students(db: AsyncSession) -> list[PendingStudentSummary]:
@@ -60,12 +66,16 @@ async def _assert_unique_contact(db: AsyncSession, *, email: str | None, phone: 
             raise ConflictException("An account with this phone number already exists")
 
 
-async def create_student(db: AsyncSession, actor: CurrentUser, payload: CreateStudentRequest) -> StudentRecord:
+async def create_student(
+    db: AsyncSession, actor: CurrentUser, payload: CreateStudentRequest
+) -> tuple[Student, User, EnrollmentRow, str]:
     await _assert_unique_contact(db, email=payload.email, phone=payload.phone)
 
     role = await auth_repository.get_role_by_name(db, "student")
     if role is None:
         raise NotFoundException("Student role is not configured")
+
+    generated_password = payload.date_of_birth.strftime("%d%m%Y")
 
     user = await repository.create_student_user_active(
         db,
@@ -73,12 +83,12 @@ async def create_student(db: AsyncSession, actor: CurrentUser, payload: CreateSt
         full_name=payload.full_name,
         email=payload.email,
         phone=payload.phone,
-        password_hash=hash_password(payload.password),
+        password_hash=hash_password(generated_password),
         gender=payload.gender,
         date_of_birth=payload.date_of_birth,
     )
 
-    admission_number = payload.admission_number or generate_identifier("STU")
+    admission_number = generate_identifier("STU")
     student = await repository.create_student_profile_full(
         db,
         user_id=user.id,
@@ -89,23 +99,48 @@ async def create_student(db: AsyncSession, actor: CurrentUser, payload: CreateSt
         emergency_contact=payload.emergency_contact,
     )
 
+    enrollment = await academic_service.enroll_student_in_section(
+        db,
+        student_id=student.id,
+        academic_year_id=None,
+        section_id=payload.section_id,
+        roll_number=None,
+    )
+
     await record_audit_log(
         db,
         actor_id=actor.id,
         action="create",
         entity_type="student",
         entity_id=student.id,
-        new_value={"full_name": payload.full_name, "admission_number": admission_number},
+        new_value={
+            "full_name": payload.full_name,
+            "admission_number": admission_number,
+            "roll_number": enrollment.roll_number,
+        },
     )
     await db.commit()
-    return student, user
+
+    enrollment_row = await academic_service.get_enrollment(db, enrollment.id)
+    return student, user, enrollment_row, generated_password
+
+
+async def _get_active_academic_year_id(db: AsyncSession) -> uuid.UUID | None:
+    year = await academic_repository.get_active_academic_year(db)
+    return year.id if year else None
 
 
 async def list_students(
     db: AsyncSession, *, search: str | None, status: StudentStatus | None, pagination: PaginationParams
-) -> tuple[list[StudentRecord], int]:
+) -> tuple[list[StudentEnrollmentRow], int]:
+    academic_year_id = await _get_active_academic_year_id(db)
     return await repository.list_students(
-        db, search=search, status=status, offset=pagination.offset, limit=pagination.limit
+        db,
+        search=search,
+        status=status,
+        offset=pagination.offset,
+        limit=pagination.limit,
+        academic_year_id=academic_year_id,
     )
 
 
@@ -114,6 +149,11 @@ async def get_student(db: AsyncSession, student_id: uuid.UUID) -> StudentRecord:
     if record is None:
         raise NotFoundException("Student not found")
     return record
+
+
+async def get_student_enrollment_summary(db: AsyncSession, student_id: uuid.UUID) -> EnrollmentSummary:
+    academic_year_id = await _get_active_academic_year_id(db)
+    return await repository.get_active_enrollment_for_student(db, student_id, academic_year_id)
 
 
 async def get_own_student_profile(db: AsyncSession, actor: CurrentUser) -> StudentRecord:

@@ -1,3 +1,4 @@
+import uuid
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, field_validator
@@ -17,16 +18,21 @@ class PendingStudentSummary(BaseModel):
 
 class CreateStudentRequest(BaseModel):
     """Admin/Principal-driven admission — distinct from the self-service
-    /auth/register/student + /students/{id}/activate flow (kept unmodified)."""
+    /auth/register/student + /students/{id}/activate flow (kept unmodified).
+
+    Admission number, roll number, and the initial login password are all
+    generated automatically: admission number is a system-generated code,
+    roll number is the next available number in the chosen section, and the
+    password is the student's date of birth as DDMMYYYY."""
 
     full_name: str = Field(..., min_length=1, max_length=150)
     email: str | None = Field(default=None, max_length=255)
     phone: str = Field(..., min_length=7, max_length=20)
-    password: str = Field(..., min_length=8, max_length=255)
     gender: GenderType | None = None
-    date_of_birth: date | None = None
+    date_of_birth: date = Field(..., description="Also used to generate the student's login password (DDMMYYYY)")
 
-    admission_number: str | None = Field(default=None, max_length=30)
+    section_id: uuid.UUID
+
     admission_date: date | None = None
     blood_group: str | None = Field(default=None, max_length=5)
     address: str | None = None
@@ -73,6 +79,19 @@ class StudentResponse(BaseModel):
     emergency_contact: str | None
     status: StudentStatus
     created_at: datetime
+
+    class_name: str | None = None
+    section_name: str | None = None
+    roll_number: str | None = None
+
+
+class AdmitStudentResponse(StudentResponse):
+    """Returned only from the create-student endpoint — carries the
+    system-generated login password so the admin can hand it to the student.
+    Never returned from list/get endpoints."""
+
+    temporary_password: str
+    academic_year_name: str
 
 
 class LinkedGuardianSummary(BaseModel):
