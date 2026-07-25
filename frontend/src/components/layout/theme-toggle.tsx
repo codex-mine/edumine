@@ -28,13 +28,14 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="outline"
-      size="sm"
+      variant="ghost"
       onClick={() => setTheme(isDark ? "light" : "dark")}
+       
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      
     >
-      {isDark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}
-      {isDark ? "Light mode" : "Dark mode"}
+      {isDark ? <Sun className="size-8" aria-hidden="true" /> : <Moon className="size-8" aria-hidden="true" />}
+
     </Button>
   );
 }
