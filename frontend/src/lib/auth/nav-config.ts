@@ -3,6 +3,7 @@ import {
   BookMarked,
   CalendarClock,
   CalendarRange,
+  ClipboardCheck,
   ClipboardList,
   DoorOpen,
   GraduationCap,
@@ -33,6 +34,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Teachers", href: "/admin/teachers", icon: GraduationCap },
     { label: "Guardians", href: "/admin/guardians", icon: HeartHandshake },
     { label: "Staff & Accounts", href: "/admin/accounts", icon: UserCog },
+    { label: "Attendance", href: "/admin/attendance", icon: ClipboardCheck },
   ],
   admin: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -40,10 +42,12 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Teachers", href: "/admin/teachers", icon: GraduationCap },
     { label: "Guardians", href: "/admin/guardians", icon: HeartHandshake },
     { label: "Staff & Accounts", href: "/admin/accounts", icon: UserCog },
+    { label: "Attendance", href: "/admin/attendance", icon: ClipboardCheck },
   ],
   teacher: [
     { label: "Dashboard", href: "/teacher", icon: LayoutDashboard },
     { label: "My Schedule", href: "/teacher/routine", icon: CalendarClock },
+    { label: "Class Attendance", href: "/teacher/attendance", icon: ClipboardCheck },
     { label: "My Profile", href: "/teacher/profile", icon: UserCircle },
   ],
   accountant: [
@@ -56,16 +60,19 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   staff: [
     { label: "Dashboard", href: "/staff", icon: LayoutDashboard },
+    { label: "My Attendance", href: "/staff/attendance", icon: ClipboardCheck },
     { label: "My Profile", href: "/staff/profile", icon: UserCircle },
   ],
   student: [
     { label: "Dashboard", href: "/student", icon: LayoutDashboard },
     { label: "My Routine", href: "/student/routine", icon: CalendarClock },
+    { label: "My Attendance", href: "/student/attendance", icon: ClipboardCheck },
     { label: "My Profile", href: "/student/profile", icon: UserCircle },
   ],
   guardian: [
     { label: "Dashboard", href: "/guardian", icon: LayoutDashboard },
     { label: "Children's Routines", href: "/guardian/routine", icon: CalendarClock },
+    { label: "Children's Attendance", href: "/guardian/attendance", icon: ClipboardCheck },
     { label: "My Profile", href: "/guardian/profile", icon: UserCircle },
   ],
 };

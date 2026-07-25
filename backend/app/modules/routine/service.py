@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.audit import record_audit_log
@@ -213,7 +214,13 @@ async def update_slot(
 
 async def delete_slot(db: AsyncSession, actor: CurrentUser, slot_id: uuid.UUID) -> None:
     slot = (await get_slot(db, slot_id))[0]
-    await repository.delete_slot(db, slot)
+    try:
+        await repository.delete_slot(db, slot)
+    except IntegrityError as exc:
+        await db.rollback()
+        raise ConflictException(
+            "This routine slot has attendance already recorded against it and cannot be deleted"
+        ) from exc
     await record_audit_log(db, actor_id=actor.id, action="delete", entity_type="routine_slot", entity_id=slot_id)
     await db.commit()
 
