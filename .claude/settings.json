@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"EXIT CODE: $?\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(./.venv/Scripts/python.exe -c ' *)",
+      "Bash(python -c ' *)",
+      "Bash(python -m alembic history)",
+      "Bash(python -m alembic current)"
+    ]
+  }
+}

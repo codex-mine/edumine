@@ -13,8 +13,10 @@ from app.modules.academic.router import router as academic_router
 from app.modules.attendance.router import router as attendance_router
 from app.modules.auth.router import router as auth_router
 from app.modules.dashboard.router import router as dashboard_router
+from app.modules.exams.router import router as exams_router
 from app.modules.guardians.router import router as guardians_router
 from app.modules.health.router import router as health_router
+from app.modules.results.router import router as results_router
 from app.modules.routine.router import router as routine_router
 from app.modules.students.router import router as students_router
 from app.modules.teachers.router import router as teachers_router
@@ -60,5 +62,7 @@ api_router.include_router(users_router)
 api_router.include_router(academic_router)
 api_router.include_router(routine_router)
 api_router.include_router(attendance_router)
+api_router.include_router(exams_router)
+api_router.include_router(results_router)
 
 app.include_router(api_router)

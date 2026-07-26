@@ -70,3 +70,73 @@ async def send_password_reset_email(to_email: str, full_name: str, reset_link: s
     </div>
     """
     await send_email(to_email, subject, html_body, text_body)
+
+
+async def send_exam_question_assignment_email(
+    to_email: str, teacher_name: str, *, exam_name: str, class_name: str, subject_name: str, deadline: str
+) -> None:
+    subject = f"Exam questions needed: {subject_name} — {exam_name}"
+    text_body = (
+        f"Hi {teacher_name},\n\n"
+        f"You have been assigned to prepare and submit exam questions for {subject_name} ({class_name}) "
+        f"as part of {exam_name}.\n\n"
+        f"Submission deadline: {deadline}\n\n"
+        "Please log in to Codex Edumine to prepare and submit your questions before the deadline.\n\n"
+        "- Codex Edumine"
+    )
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1e1b2e;">
+      <h2 style="color: #4f46e5;">Exam questions needed</h2>
+      <p>Hi {teacher_name},</p>
+      <p>You have been assigned to prepare and submit exam questions for <strong>{subject_name}</strong> ({class_name}) as part of <strong>{exam_name}</strong>.</p>
+      <p><strong>Submission deadline:</strong> {deadline}</p>
+      <p style="font-size: 13px; color: #6b7280;">Log in to Codex Edumine to prepare and submit your questions before the deadline.</p>
+    </div>
+    """
+    await send_email(to_email, subject, html_body, text_body)
+
+
+async def send_deadline_extension_request_email(
+    to_email: str, admin_name: str, *, teacher_name: str, exam_name: str, class_name: str, subject_name: str,
+    reason: str, requested_deadline: str,
+) -> None:
+    subject = f"Deadline extension requested: {subject_name} — {exam_name}"
+    text_body = (
+        f"Hi {admin_name},\n\n"
+        f"{teacher_name} has requested a question submission deadline extension for {subject_name} ({class_name}), "
+        f"{exam_name}.\n\n"
+        f"Reason: {reason}\n"
+        f"Requested new deadline: {requested_deadline}\n\n"
+        "Review and act on this request from the Exams module.\n\n"
+        "- Codex Edumine"
+    )
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1e1b2e;">
+      <h2 style="color: #4f46e5;">Deadline extension requested</h2>
+      <p>Hi {admin_name},</p>
+      <p><strong>{teacher_name}</strong> has requested a question submission deadline extension for <strong>{subject_name}</strong> ({class_name}), {exam_name}.</p>
+      <p><strong>Reason:</strong> {reason}</p>
+      <p><strong>Requested new deadline:</strong> {requested_deadline}</p>
+    </div>
+    """
+    await send_email(to_email, subject, html_body, text_body)
+
+
+async def send_deadline_extended_email(
+    to_email: str, teacher_name: str, *, exam_name: str, class_name: str, subject_name: str, new_deadline: str
+) -> None:
+    subject = f"Deadline extended: {subject_name} — {exam_name}"
+    text_body = (
+        f"Hi {teacher_name},\n\n"
+        f"Your question submission deadline for {subject_name} ({class_name}), {exam_name} has been extended to "
+        f"{new_deadline}.\n\n"
+        "- Codex Edumine"
+    )
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1e1b2e;">
+      <h2 style="color: #4f46e5;">Deadline extended</h2>
+      <p>Hi {teacher_name},</p>
+      <p>Your question submission deadline for <strong>{subject_name}</strong> ({class_name}), {exam_name} has been extended to <strong>{new_deadline}</strong>.</p>
+    </div>
+    """
+    await send_email(to_email, subject, html_body, text_body)

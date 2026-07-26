@@ -1,7 +1,7 @@
 from datetime import date, datetime
 
 from sqlalchemy import Date, DateTime, ForeignKey, Index, SmallInteger, String, UniqueConstraint, text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.common.base_model import TimestampMixin, UUIDPrimaryKeyMixin
@@ -57,5 +57,6 @@ class ExamSubject(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     pass_marks: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     question_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     question_submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    questions_payload: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     marks_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     marks_submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
