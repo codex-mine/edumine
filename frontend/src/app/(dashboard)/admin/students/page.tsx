@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { GuardianLinkManagerDialog } from "@/components/modules/people/guardian-link-manager-dialog";
 import { RowActionsMenu } from "@/components/modules/people/row-actions-menu";
+import { StudentDetailDialog } from "@/components/modules/people/student-detail-dialog";
 import { StudentFormDialog } from "@/components/modules/people/student-form-dialog";
 import { ActiveBadge, StatusBadge } from "@/components/modules/people/status-badge";
 import { loginErrorMessage } from "@/hooks/use-auth";
@@ -17,12 +18,13 @@ import {
 } from "@/hooks/use-students";
 import { useAuth } from "@/providers/auth-provider";
 
-const LIMIT = 20;
+const LIMIT = 5;
 
 export default function AdminStudentsPage() {
   const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [detailStudentId, setDetailStudentId] = useState<string | null>(null);
 
   const query = useStudentsQuery({ page, limit: LIMIT, search: search || undefined });
   const softDeleteMutation = useSoftDeleteStudentMutation();
@@ -36,14 +38,24 @@ export default function AdminStudentsPage() {
       </div>
     ),
     admission_number: student.admission_number,
+    class_section: student.class_name ? (
+      <div className="flex flex-col">
+        <span className="font-medium text-foreground">
+          {student.class_name} - {student.section_name}
+        </span>
+        <span className="text-xs text-muted-foreground">Roll {student.roll_number}</span>
+      </div>
+    ) : (
+      <span className="text-xs text-muted-foreground">Not enrolled</span>
+    ),
     status: <StatusBadge status={student.status} />,
     active: <ActiveBadge isActive={student.is_active} />,
     guardians: (
       <GuardianLinkManagerDialog
         studentId={student.id}
         trigger={
-          <Button variant="outline" size="sm">
-            <UserCog className="size-4" aria-hidden="true" />
+          <Button variant="outline"  >
+            <UserCog className="size-6" aria-hidden="true" />
             Guardians
           </Button>
         }
@@ -63,7 +75,7 @@ export default function AdminStudentsPage() {
       <StudentFormDialog
         student={student}
         trigger={
-          <Button variant="ghost" size="sm">
+          <Button variant="secondary" >
             Edit
           </Button>
         }
@@ -84,11 +96,12 @@ export default function AdminStudentsPage() {
         columns={[
           { key: "name", label: "Student" },
           { key: "admission_number", label: "Admission #" },
+          { key: "class_section", label: "Class / Roll" },
           { key: "status", label: "Status" },
           { key: "active", label: "Account" },
           { key: "guardians", label: "Guardians" },
-          { key: "edit", label: "" },
-          { key: "actions", label: "" },
+          { key: "edit", label: "Edit" },
+          { key: "actions", label: "Actions" },
         ]}
         rows={rows}
         isLoading={query.isLoading}
@@ -106,16 +119,28 @@ export default function AdminStudentsPage() {
         limit={LIMIT}
         total={query.data?.meta.total ?? 0}
         onPageChange={setPage}
+        onRowClick={(index) => {
+          const rowStudent = query.data?.items[index];
+          if (rowStudent) setDetailStudentId(rowStudent.id);
+        }}
         toolbarActions={
           <StudentFormDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button  >
+                <Plus className="size-6"  aria-hidden="true" />
                 Admit student
               </Button>
             }
           />
         }
+      />
+
+      <StudentDetailDialog
+        studentId={detailStudentId}
+        open={detailStudentId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetailStudentId(null);
+        }}
       />
     </div>
   );

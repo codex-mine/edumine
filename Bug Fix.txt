@@ -1,0 +1,72 @@
+# Bug Fix & Feature Requirements
+
+## Students
+
+1. Blood Group must be a **select/dropdown field**, not a text input.
+2. Students must be **linked to a Guardian**.
+3. After successfully registering a student, provide a **Print option** to print the student's registration information.
+4. When clicking any student table row, open a **modal displaying the student's complete details**.
+5. In the **Relation** section, Guardian selection must be implemented as a **select/dropdown field**.
+
+## Teachers
+
+1. When adding a new teacher, **Qualifications must support multiple entries**. Each qualification should include:
+
+   * Education Title
+   * Institute
+   * Grade
+   * Passing Year
+   * Additional Information
+   * Document upload (Certificate, Marksheet)
+2. Add **NID Card upload** functionality.
+3. Add **Previous Employment** information as an optional field/section.
+4. The default password for a teacher should be their **Date of Birth (DOB)**, same as the student account logic.
+5. **Designation** must be a select/dropdown field.
+6. Add a **View Teacher** functionality to display the teacher's complete details.
+
+## Staff
+
+Apply the same account and profile requirements to **Staff** as applicable.
+
+After every successful **Teacher or Staff registration**, automatically send an email containing:
+
+* Login credentials
+* Basic profile information
+
+## Exam Section
+
+1. Exam subjects must be fully configurable.
+2. Each subject should have a **Full Marks** field.
+3. Support multiple configurable subsections within a subject, such as:
+
+   * CQ
+   * MCQ
+   * Practical
+   * Lab
+   * Other custom sections
+4. Each subsection must have dedicated:
+
+   * Total Marks
+   * Pass Marks
+5. **Question and Marks Submission Deadline** must support a selectable **date range**.
+6. In the **Result Approval** section, if there is no data available, display a clear **"No Data Found"** state instead of showing an empty interface.
+
+## Routine Builder
+
+The current hierarchy is:
+
+**Academic Year → Section**
+
+Change it to:
+
+**Academic Year → Class → Section**
+
+When adding a routine slot, the **Teacher selection/list is currently not displaying teachers**. Fix this so that available teachers are correctly loaded and selectable when creating a routine slot.
+
+## Global Table Behavior
+
+Apply consistent behavior across **all tables**:
+
+* When a user clicks any table row, open a **details modal**.
+* The modal must display the **complete details/data associated with that row**.
+* Ensure this behavior is consistent across all relevant modules and tables.

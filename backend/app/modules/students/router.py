@@ -17,6 +17,7 @@ from app.core.exceptions import PermissionDeniedException
 from app.core.response import success_response
 from app.modules.students import service
 from app.modules.students.schemas import (
+    AdmitStudentResponse,
     CreateStudentRequest,
     LinkGuardianRequest,
     StudentDetailResponse,
@@ -28,9 +29,8 @@ from app.modules.students.schemas import (
 router = APIRouter(prefix="/students", tags=["students"])
 
 
-def _to_response(record) -> dict:
-    student, user = record
-    return StudentResponse(
+def _student_fields(student, user, enrollment=None, section=None, class_entity=None) -> dict:
+    return dict(
         id=str(student.id),
         user_id=str(user.id),
         full_name=user.full_name,
@@ -46,14 +46,29 @@ def _to_response(record) -> dict:
         emergency_contact=student.emergency_contact,
         status=student.status,
         created_at=student.created_at,
-    ).model_dump(mode="json")
+        class_name=class_entity.name if class_entity else None,
+        section_name=section.name if section else None,
+        roll_number=enrollment.roll_number if enrollment else None,
+    )
+
+
+def _to_response(record) -> dict:
+    student, user = record
+    return StudentResponse(**_student_fields(student, user)).model_dump(mode="json")
+
+
+def _to_list_response(record) -> dict:
+    student, user, enrollment, section, class_entity = record
+    return StudentResponse(**_student_fields(student, user, enrollment, section, class_entity)).model_dump(mode="json")
 
 
 async def _to_detail_response(db: AsyncSession, record) -> dict:
-    base = _to_response(record)
-    student, _ = record
+    student, user = record
+    enrollment_summary = await service.get_student_enrollment_summary(db, student.id)
+    enrollment, section, class_entity = enrollment_summary if enrollment_summary else (None, None, None)
+    fields = _student_fields(student, user, enrollment, section, class_entity)
     guardians = await service.get_linked_guardians(db, student.id)
-    return StudentDetailResponse(**base, guardians=guardians).model_dump(mode="json")
+    return StudentDetailResponse(**fields, guardians=guardians).model_dump(mode="json")
 
 
 @router.post("", dependencies=[Depends(require_permission("students.create"))], status_code=201)
@@ -62,8 +77,13 @@ async def create_student(
     current_user: CurrentUser = Depends(require_permission("students.create")),
     db: AsyncSession = Depends(get_db_session),
 ):
-    record = await service.create_student(db, current_user, payload)
-    return success_response(data=_to_response(record), message="Student admitted successfully", status_code=201)
+    student, user, enrollment_row, generated_password = await service.create_student(db, current_user, payload)
+    enrollment, _, _, academic_year, section, class_entity = enrollment_row
+    fields = _student_fields(student, user, enrollment, section, class_entity)
+    data = AdmitStudentResponse(
+        **fields, temporary_password=generated_password, academic_year_name=academic_year.name
+    ).model_dump(mode="json")
+    return success_response(data=data, message="Student admitted successfully", status_code=201)
 
 
 @router.get("", dependencies=[Depends(require_permission("students.view"))])
@@ -75,7 +95,7 @@ async def list_students(
 ):
     items, total = await service.list_students(db, search=search, status=status, pagination=pagination)
     return success_response(
-        data=[_to_response(item) for item in items],
+        data=[_to_list_response(item) for item in items],
         message="Students retrieved",
         meta=pagination_meta(pagination, total),
     )

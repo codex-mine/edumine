@@ -24,6 +24,7 @@ venv/
 .env.local
 .env.*.local
 !.env.example
+.env.production
 
 # --- Editors / OS ---
 .vscode/*
@@ -45,4 +46,8 @@ htmlcov/
 dist/
 build/
 
- 
+# --- User-uploaded files (local dev storage) ---
+backend/uploads/
+
+edumine_deploy_key.pub/
+edumine_deploy_key/

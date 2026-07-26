@@ -65,7 +65,7 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex shrink-0 items-center gap-4">
+      <div className="flex shrink-0 items-center gap-4 mr-6">
         <Popover>
           <Tooltip>
             <TooltipTrigger asChild>

@@ -2,12 +2,13 @@ import uuid
 from datetime import date, datetime, timezone
 from typing import Any
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.enums import GenderType
 from app.modules.auth.models import User
-from app.modules.teachers.models import Teacher
+from app.modules.teachers.models import Teacher, TeacherQualification
+from app.modules.teachers.schemas import QualificationInput
 
 
 async def create_teacher_user(
@@ -44,6 +45,9 @@ async def create_teacher_profile(
     joining_date: date,
     designation: str | None,
     qualification: str | None,
+    nid_number: str | None = None,
+    nid_document_url: str | None = None,
+    previous_employment: str | None = None,
 ) -> Teacher:
     teacher = Teacher(
         user_id=user_id,
@@ -51,10 +55,31 @@ async def create_teacher_profile(
         joining_date=joining_date,
         designation=designation,
         qualification=qualification,
+        nid_number=nid_number,
+        nid_document_url=nid_document_url,
+        previous_employment=previous_employment,
     )
     db.add(teacher)
     await db.flush()
     return teacher
+
+
+async def replace_qualifications(
+    db: AsyncSession, teacher_id: uuid.UUID, qualifications: list[QualificationInput]
+) -> None:
+    await db.execute(delete(TeacherQualification).where(TeacherQualification.teacher_id == teacher_id))
+    for entry in qualifications:
+        db.add(TeacherQualification(teacher_id=teacher_id, **entry.model_dump()))
+    await db.flush()
+
+
+async def list_qualifications(db: AsyncSession, teacher_id: uuid.UUID) -> list[TeacherQualification]:
+    result = await db.execute(
+        select(TeacherQualification)
+        .where(TeacherQualification.teacher_id == teacher_id)
+        .order_by(TeacherQualification.created_at.asc())
+    )
+    return list(result.scalars().all())
 
 
 async def get_teacher_by_id(db: AsyncSession, teacher_id: uuid.UUID) -> tuple[Teacher, User] | None:

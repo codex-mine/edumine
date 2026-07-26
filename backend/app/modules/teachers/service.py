@@ -6,12 +6,13 @@ from app.common.audit import record_audit_log
 from app.common.codes import generate_identifier
 from app.common.dependencies import CurrentUser
 from app.common.schemas import PaginationParams
+from app.core.email import send_account_welcome_email
 from app.core.exceptions import ConflictException, NotFoundException
 from app.core.security import hash_password
 from app.modules.auth import repository as auth_repository
-from app.modules.teachers import repository
-from app.modules.teachers.models import Teacher
 from app.modules.auth.models import User
+from app.modules.teachers import repository
+from app.modules.teachers.models import Teacher, TeacherQualification
 from app.modules.teachers.schemas import CreateTeacherRequest, UpdateTeacherRequest
 
 TeacherRecord = tuple[Teacher, User]
@@ -28,12 +29,16 @@ async def _assert_unique_contact(db: AsyncSession, *, email: str | None, phone: 
             raise ConflictException("An account with this phone number already exists")
 
 
-async def create_teacher(db: AsyncSession, actor: CurrentUser, payload: CreateTeacherRequest) -> TeacherRecord:
+async def create_teacher(
+    db: AsyncSession, actor: CurrentUser, payload: CreateTeacherRequest
+) -> tuple[Teacher, User, str]:
     await _assert_unique_contact(db, email=payload.email, phone=payload.phone)
 
     role = await auth_repository.get_role_by_name(db, "teacher")
     if role is None:
         raise NotFoundException("Teacher role is not configured")
+
+    generated_password = payload.date_of_birth.strftime("%d%m%Y")
 
     user = await repository.create_teacher_user(
         db,
@@ -41,7 +46,7 @@ async def create_teacher(db: AsyncSession, actor: CurrentUser, payload: CreateTe
         full_name=payload.full_name,
         email=payload.email,
         phone=payload.phone,
-        password_hash=hash_password(payload.password),
+        password_hash=hash_password(generated_password),
         gender=payload.gender,
         date_of_birth=payload.date_of_birth,
     )
@@ -54,7 +59,13 @@ async def create_teacher(db: AsyncSession, actor: CurrentUser, payload: CreateTe
         joining_date=payload.joining_date,
         designation=payload.designation,
         qualification=payload.qualification,
+        nid_number=payload.nid_number,
+        nid_document_url=payload.nid_document_url,
+        previous_employment=payload.previous_employment,
     )
+
+    if payload.qualifications:
+        await repository.replace_qualifications(db, teacher.id, payload.qualifications)
 
     await record_audit_log(
         db,
@@ -65,7 +76,18 @@ async def create_teacher(db: AsyncSession, actor: CurrentUser, payload: CreateTe
         new_value={"full_name": payload.full_name, "email": payload.email, "employee_code": employee_code},
     )
     await db.commit()
-    return teacher, user
+
+    await send_account_welcome_email(
+        payload.email,
+        payload.full_name,
+        role_label="Teacher",
+        employee_code=employee_code,
+        temporary_password=generated_password,
+        designation=payload.designation,
+        joining_date=payload.joining_date.isoformat(),
+    )
+
+    return teacher, user, generated_password
 
 
 async def list_teachers(db: AsyncSession, *, search: str | None, pagination: PaginationParams) -> tuple[list[TeacherRecord], int]:
@@ -84,6 +106,10 @@ async def get_own_teacher_profile(db: AsyncSession, actor: CurrentUser) -> Teach
     if record is None:
         raise NotFoundException("No teacher profile found for your account")
     return record
+
+
+async def get_qualifications(db: AsyncSession, teacher_id: uuid.UUID) -> list[TeacherQualification]:
+    return await repository.list_qualifications(db, teacher_id)
 
 
 async def update_teacher(
@@ -112,12 +138,18 @@ async def update_teacher(
         for key, value in (
             ("designation", payload.designation),
             ("qualification", payload.qualification),
+            ("nid_number", payload.nid_number),
+            ("nid_document_url", payload.nid_document_url),
+            ("previous_employment", payload.previous_employment),
             ("status", payload.status),
         )
         if value is not None
     }
     if teacher_fields:
         await repository.update_teacher_fields(db, teacher, teacher_fields)
+
+    if payload.qualifications is not None:
+        await repository.replace_qualifications(db, teacher.id, payload.qualifications)
 
     await record_audit_log(
         db, actor_id=actor.id, action="update", entity_type="teacher", entity_id=teacher_id, new_value=user_fields

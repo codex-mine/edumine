@@ -24,6 +24,17 @@ class GenderType(str, enum.Enum):
     other = "other"
 
 
+class BloodGroupType(str, enum.Enum):
+    a_positive = "A+"
+    a_negative = "A-"
+    b_positive = "B+"
+    b_negative = "B-"
+    ab_positive = "AB+"
+    ab_negative = "AB-"
+    o_positive = "O+"
+    o_negative = "O-"
+
+
 class StudentStatus(str, enum.Enum):
     active = "active"
     transferred = "transferred"

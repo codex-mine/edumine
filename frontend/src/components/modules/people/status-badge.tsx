@@ -12,6 +12,7 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "mu
   transferred: "info",
   graduated: "info",
   dropped: "destructive",
+  promoted: "info",
 };
 
 export function StatusBadge({ status }: { status: string }) {

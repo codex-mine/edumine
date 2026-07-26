@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     register_rate_limit: str = "5/minute"
     password_reset_rate_limit: str = "5/minute"
 
+    anthropic_api_key: str | None = None
+
+    upload_dir: str = "uploads"
+    upload_base_url: str = "/uploads"
+    max_upload_size_mb: int = 10
+
 
 @lru_cache
 def get_settings() -> Settings:

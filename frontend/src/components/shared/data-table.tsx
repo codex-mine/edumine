@@ -34,6 +34,7 @@ export interface DataTableProps {
   limit: number;
   total: number;
   onPageChange: (page: number) => void;
+  onRowClick?: (rowIndex: number) => void;
 }
 
 export function DataTable({
@@ -49,17 +50,18 @@ export function DataTable({
   toolbarActions,
   searchValue,
   onSearchChange,
-  searchPlaceholder = "Search...",
+    searchPlaceholder = "Search...",
   page,
   limit,
   total,
   onPageChange,
+  onRowClick,
 }: DataTableProps) {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
-    <Card>
-      <CardHeader>
+    <Card >
+      <CardHeader className="p-4">
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
         {toolbarActions && <CardAction>{toolbarActions}</CardAction>}
@@ -67,12 +69,12 @@ export function DataTable({
 
       <div className="flex flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-6 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="h-9 pl-9 text-sm"
+            className="pl-10"
           />
         </div>
       </div>
@@ -90,14 +92,14 @@ export function DataTable({
       ) : (
         <>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left ">
               <thead className="bg-muted">
                 <tr>
                   {columns.map((column) => (
                     <th
                       key={column.key}
                       className={cn(
-                        "px-4 py-2 text-xs font-medium text-muted-foreground",
+                        "px-4 py-4   font-medium text-muted-foreground",
                         column.align === "right" && "text-right"
                       )}
                     >
@@ -108,7 +110,20 @@ export function DataTable({
               </thead>
               <tbody className="divide-y divide-border">
                 {rows.map((row, index) => (
-                  <tr key={index} className="hover:bg-muted/50">
+                  <tr
+                    key={index}
+                    className={cn("hover:bg-muted/50", onRowClick && "cursor-pointer")}
+                    onClick={
+                      onRowClick
+                        ? (event) => {
+                            if ((event.target as HTMLElement).closest("button, a, input, select, [role='menuitem']")) {
+                              return;
+                            }
+                            onRowClick(index);
+                          }
+                        : undefined
+                    }
+                  >
                     {columns.map((column) => (
                       <td key={column.key} className={cn("px-4 py-2.5", column.align === "right" && "text-right")}>
                         {row[column.key]}
@@ -120,17 +135,16 @@ export function DataTable({
             </table>
           </div>
 
-          <div className="flex items-center justify-between px-4 pt-1 text-xs text-muted-foreground">
+          <div className="flex items-center justify-between px-4 pt-1  text-muted-foreground">
             <span>
               Page {page} of {totalPages} &middot; {total} total
             </span>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+              <Button    disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
                 Previous
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                 
                 disabled={page >= totalPages}
                 onClick={() => onPageChange(page + 1)}
               >

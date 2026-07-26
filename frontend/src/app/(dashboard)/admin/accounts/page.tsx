@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { RowActionsMenu } from "@/components/modules/people/row-actions-menu";
+import { UserAccountDetailDialog } from "@/components/modules/people/user-account-detail-dialog";
 import { UserAccountFormDialog } from "@/components/modules/people/user-account-form-dialog";
 import { ActiveBadge } from "@/components/modules/people/status-badge";
 import { loginErrorMessage } from "@/hooks/use-auth";
@@ -29,6 +30,7 @@ export default function AdminAccountsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<UserAccountRole | "all">("all");
+  const [detailUserId, setDetailUserId] = useState<string | null>(null);
 
   const visibleTabs = user?.role === "principal" ? TABS : TABS.filter((t) => t.value !== "admin");
 
@@ -137,6 +139,10 @@ export default function AdminAccountsPage() {
         limit={LIMIT}
         total={query.data?.meta.total ?? 0}
         onPageChange={setPage}
+        onRowClick={(index) => {
+          const rowAccount = query.data?.items[index];
+          if (rowAccount) setDetailUserId(rowAccount.id);
+        }}
         toolbarActions={
           <UserAccountFormDialog
             currentUserRole={user?.role ?? "admin"}
@@ -148,6 +154,14 @@ export default function AdminAccountsPage() {
             }
           />
         }
+      />
+
+      <UserAccountDetailDialog
+        userId={detailUserId}
+        open={detailUserId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetailUserId(null);
+        }}
       />
     </div>
   );

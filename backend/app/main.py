@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -9,12 +12,18 @@ from app.core.logging import configure_logging
 from app.core.middleware import SecureHeadersMiddleware
 from app.core.rate_limiter import limiter
 from app.core.response import error_response
+from app.modules.academic.router import router as academic_router
+from app.modules.attendance.router import router as attendance_router
 from app.modules.auth.router import router as auth_router
 from app.modules.dashboard.router import router as dashboard_router
+from app.modules.exams.router import router as exams_router
 from app.modules.guardians.router import router as guardians_router
 from app.modules.health.router import router as health_router
+from app.modules.results.router import router as results_router
+from app.modules.routine.router import router as routine_router
 from app.modules.students.router import router as students_router
 from app.modules.teachers.router import router as teachers_router
+from app.modules.uploads.router import router as uploads_router
 from app.modules.users.router import router as users_router
 
 settings = get_settings()
@@ -36,6 +45,9 @@ async def rate_limit_handler(request, exc: RateLimitExceeded):
     )
 
 
+Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
+app.mount(settings.upload_base_url, StaticFiles(directory=settings.upload_dir), name="uploads")
+
 app.add_middleware(SecureHeadersMiddleware)
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(
@@ -54,5 +66,11 @@ api_router.include_router(students_router)
 api_router.include_router(teachers_router)
 api_router.include_router(guardians_router)
 api_router.include_router(users_router)
+api_router.include_router(academic_router)
+api_router.include_router(routine_router)
+api_router.include_router(attendance_router)
+api_router.include_router(exams_router)
+api_router.include_router(results_router)
+api_router.include_router(uploads_router)
 
 app.include_router(api_router)
