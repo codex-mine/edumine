@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.common.enums import GenderType, StudentStatus
+from app.common.enums import BloodGroupType, GenderType, StudentStatus
 from app.common.validators import normalize_email
 
 
@@ -34,7 +34,7 @@ class CreateStudentRequest(BaseModel):
     section_id: uuid.UUID
 
     admission_date: date | None = None
-    blood_group: str | None = Field(default=None, max_length=5)
+    blood_group: BloodGroupType | None = None
     address: str | None = None
     emergency_contact: str | None = Field(default=None, max_length=20)
 
@@ -52,7 +52,7 @@ class UpdateStudentRequest(BaseModel):
     date_of_birth: date | None = None
     is_active: bool | None = None
 
-    blood_group: str | None = Field(default=None, max_length=5)
+    blood_group: BloodGroupType | None = None
     address: str | None = None
     emergency_contact: str | None = Field(default=None, max_length=20)
     status: StudentStatus | None = None
@@ -74,7 +74,7 @@ class StudentResponse(BaseModel):
     is_active: bool
     admission_number: str
     admission_date: date
-    blood_group: str | None
+    blood_group: BloodGroupType | None
     address: str | None
     emergency_contact: str | None
     status: StudentStatus

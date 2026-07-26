@@ -34,6 +34,7 @@ export interface DataTableProps {
   limit: number;
   total: number;
   onPageChange: (page: number) => void;
+  onRowClick?: (rowIndex: number) => void;
 }
 
 export function DataTable({
@@ -54,6 +55,7 @@ export function DataTable({
   limit,
   total,
   onPageChange,
+  onRowClick,
 }: DataTableProps) {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
@@ -108,7 +110,20 @@ export function DataTable({
               </thead>
               <tbody className="divide-y divide-border">
                 {rows.map((row, index) => (
-                  <tr key={index} className="hover:bg-muted/50">
+                  <tr
+                    key={index}
+                    className={cn("hover:bg-muted/50", onRowClick && "cursor-pointer")}
+                    onClick={
+                      onRowClick
+                        ? (event) => {
+                            if ((event.target as HTMLElement).closest("button, a, input, select, [role='menuitem']")) {
+                              return;
+                            }
+                            onRowClick(index);
+                          }
+                        : undefined
+                    }
+                  >
                     {columns.map((column) => (
                       <td key={column.key} className={cn("px-4 py-2.5", column.align === "right" && "text-right")}>
                         {row[column.key]}

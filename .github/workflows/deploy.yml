@@ -1,0 +1,101 @@
+name: Deploy 
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build (standalone output)
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: npm run build
+
+      - name: Assemble standalone bundle
+        working-directory: frontend
+        run: |
+          cp -r public .next/standalone/public
+          cp -r .next/static .next/standalone/.next/static
+
+      - name: Package artifact
+        working-directory: frontend/.next/standalone
+        run: tar czf ../../../frontend-build.tar.gz .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend-build.tar.gz
+          retention-days: 1
+
+  deploy:
+    needs: build-frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+
+      - name: Copy frontend build to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "frontend-build.tar.gz"
+          target: "/home/ubuntu/app"
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            # --- Backend: pull latest source, install deps, migrate ---
+            # UPDATED: Pointing explicitly to your exact custom app folder paths
+            cd /home/ubuntu/app/edumine
+            git fetch origin main
+            git reset --hard origin/main
+
+            cd backend
+            source venv/bin/activate
+            
+            # UPDATED: Using the ultra-fast uv toolchain we configured to prevent CPU hangs
+            uv pip install -r requirements.txt
+            python -m alembic upgrade head
+            deactivate
+
+            # --- Frontend: swap in the CI-built bundle ---
+            rm -rf /home/ubuntu/app/frontend-release-new
+            mkdir -p /home/ubuntu/app/frontend-release-new
+            tar xzf /home/ubuntu/app/frontend-build.tar.gz -C /home/ubuntu/app/frontend-release-new
+            rm -rf /home/ubuntu/app/frontend-release-old
+            mv /home/ubuntu/app/frontend-release /home/ubuntu/app/frontend-release-old 2>/dev/null || true
+            mv /home/ubuntu/app/frontend-release-new /home/ubuntu/app/frontend-release
+            rm -f /home/ubuntu/app/frontend-build.tar.gz
+
+            # --- Restart services ---
+            sudo systemctl restart edumine-backend
+            sudo systemctl restart edumine-frontend
+            sudo systemctl enable edumine-frontend
+
+            sleep 3
+            curl -f http://127.0.0.1:8000/api/v1/health
+            curl -f http://127.0.0.1:3000

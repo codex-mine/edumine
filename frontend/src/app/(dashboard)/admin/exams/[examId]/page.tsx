@@ -11,10 +11,11 @@ import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
+import { ExamSectionsDialog } from "@/components/modules/exams/exam-sections-dialog";
 import { ExtendDeadlineDialog } from "@/components/modules/exams/extend-deadline-dialog";
 import { loginErrorMessage } from "@/hooks/use-auth";
 import { useCandidateSubjectsQuery, useConfigureExamSubjectsMutation, useExamQuery } from "@/hooks/use-exams";
-import { EXAM_STATUS_LABELS, type ExamStatus } from "@/lib/api/exams";
+import { EXAM_STATUS_LABELS, type ExamStatus, type ExamSubjectSectionInput } from "@/lib/api/exams";
 
 const STATUS_BADGE_VARIANT: Record<ExamStatus, "muted" | "warning" | "success" | "info"> = {
   draft: "muted",
@@ -28,8 +29,11 @@ interface RowConfig {
   selected: boolean;
   full_marks: number;
   pass_marks: number;
+  question_window_opens_at: string;
   question_deadline: string;
+  marks_window_opens_at: string;
   marks_deadline: string;
+  sections: ExamSubjectSectionInput[];
 }
 
 function defaultRowConfig(defaultFullMarks: number): RowConfig {
@@ -37,8 +41,11 @@ function defaultRowConfig(defaultFullMarks: number): RowConfig {
     selected: false,
     full_marks: defaultFullMarks,
     pass_marks: Math.round(defaultFullMarks * 0.33),
+    question_window_opens_at: "",
     question_deadline: "",
+    marks_window_opens_at: "",
     marks_deadline: "",
+    sections: [],
   };
 }
 
@@ -81,8 +88,13 @@ export default function ExamDetailPage() {
           subject_id: c.subject_id,
           full_marks: cfg.full_marks,
           pass_marks: cfg.pass_marks,
+          question_window_opens_at: cfg.question_window_opens_at
+            ? new Date(cfg.question_window_opens_at).toISOString()
+            : null,
           question_deadline: cfg.question_deadline ? new Date(cfg.question_deadline).toISOString() : "",
+          marks_window_opens_at: cfg.marks_window_opens_at ? new Date(cfg.marks_window_opens_at).toISOString() : null,
           marks_deadline: cfg.marks_deadline ? new Date(cfg.marks_deadline).toISOString() : "",
+          sections: cfg.sections,
         };
       });
 
@@ -92,6 +104,13 @@ export default function ExamDetailPage() {
     }
     if (items.some((item) => !item.question_deadline || !item.marks_deadline)) {
       setFormError("Set both a question deadline and a marks deadline for every selected subject.");
+      return;
+    }
+    const unbalanced = items.some(
+      (item) => item.sections.length > 0 && item.sections.reduce((sum, s) => sum + s.full_marks, 0) !== item.full_marks
+    );
+    if (unbalanced) {
+      setFormError("Section marks must sum to exactly the full marks for every subject with sections configured.");
       return;
     }
 
@@ -149,8 +168,9 @@ export default function ExamDetailPage() {
                     <th className="px-3 py-2 font-medium text-muted-foreground">Teacher</th>
                     <th className="px-3 py-2 font-medium text-muted-foreground">Full marks</th>
                     <th className="px-3 py-2 font-medium text-muted-foreground">Pass marks</th>
-                    <th className="px-3 py-2 font-medium text-muted-foreground">Question deadline</th>
-                    <th className="px-3 py-2 font-medium text-muted-foreground">Marks deadline</th>
+                    <th className="px-3 py-2 font-medium text-muted-foreground">Sections</th>
+                    <th className="px-3 py-2 font-medium text-muted-foreground">Question submission window</th>
+                    <th className="px-3 py-2 font-medium text-muted-foreground">Marks submission window</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -201,28 +221,68 @@ export default function ExamDetailPage() {
                           />
                         </td>
                         <td className="px-3 py-2">
-                          <Input
-                            type="datetime-local"
-                            className="w-52"
-                            value={cfg.question_deadline}
-                            onChange={(e) =>
-                              updateRow(c.class_id, c.subject_id, c.default_full_marks, {
-                                question_deadline: e.target.value,
-                              })
+                          <ExamSectionsDialog
+                            fullMarks={cfg.full_marks}
+                            sections={cfg.sections}
+                            onChange={(sections) => updateRow(c.class_id, c.subject_id, c.default_full_marks, { sections })}
+                            trigger={
+                              <Button type="button" variant="outline" size="sm">
+                                {cfg.sections.length > 0 ? `${cfg.sections.length} section(s)` : "Configure"}
+                              </Button>
                             }
                           />
                         </td>
                         <td className="px-3 py-2">
-                          <Input
-                            type="datetime-local"
-                            className="w-52"
-                            value={cfg.marks_deadline}
-                            onChange={(e) =>
-                              updateRow(c.class_id, c.subject_id, c.default_full_marks, {
-                                marks_deadline: e.target.value,
-                              })
-                            }
-                          />
+                          <div className="flex flex-col gap-1">
+                            <label className="text-xs text-muted-foreground">Opens</label>
+                            <Input
+                              type="datetime-local"
+                              className="w-52"
+                              value={cfg.question_window_opens_at}
+                              onChange={(e) =>
+                                updateRow(c.class_id, c.subject_id, c.default_full_marks, {
+                                  question_window_opens_at: e.target.value,
+                                })
+                              }
+                            />
+                            <label className="text-xs text-muted-foreground">Closes (deadline)</label>
+                            <Input
+                              type="datetime-local"
+                              className="w-52"
+                              value={cfg.question_deadline}
+                              onChange={(e) =>
+                                updateRow(c.class_id, c.subject_id, c.default_full_marks, {
+                                  question_deadline: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex flex-col gap-1">
+                            <label className="text-xs text-muted-foreground">Opens</label>
+                            <Input
+                              type="datetime-local"
+                              className="w-52"
+                              value={cfg.marks_window_opens_at}
+                              onChange={(e) =>
+                                updateRow(c.class_id, c.subject_id, c.default_full_marks, {
+                                  marks_window_opens_at: e.target.value,
+                                })
+                              }
+                            />
+                            <label className="text-xs text-muted-foreground">Closes (deadline)</label>
+                            <Input
+                              type="datetime-local"
+                              className="w-52"
+                              value={cfg.marks_deadline}
+                              onChange={(e) =>
+                                updateRow(c.class_id, c.subject_id, c.default_full_marks, {
+                                  marks_deadline: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
                         </td>
                       </tr>
                     );
@@ -260,7 +320,8 @@ export default function ExamDetailPage() {
                     <th className="px-3 py-2 font-medium text-muted-foreground">Class</th>
                     <th className="px-3 py-2 font-medium text-muted-foreground">Subject</th>
                     <th className="px-3 py-2 font-medium text-muted-foreground">Teacher</th>
-                    <th className="px-3 py-2 font-medium text-muted-foreground">Question deadline</th>
+                    <th className="px-3 py-2 font-medium text-muted-foreground">Marks</th>
+                    <th className="px-3 py-2 font-medium text-muted-foreground">Question submission window</th>
                     <th className="px-3 py-2 font-medium text-muted-foreground">Status</th>
                     <th className="px-3 py-2" />
                   </tr>
@@ -271,7 +332,28 @@ export default function ExamDetailPage() {
                       <td className="px-3 py-2">{s.class_name}</td>
                       <td className="px-3 py-2">{s.subject_name}</td>
                       <td className="px-3 py-2">{s.teacher_name}</td>
-                      <td className="px-3 py-2">{new Date(s.question_deadline).toLocaleString()}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex flex-col">
+                          <span>
+                            {s.full_marks} full &middot; {s.pass_marks} pass
+                          </span>
+                          {s.sections.length > 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              {s.sections.map((section) => `${section.name} (${section.full_marks})`).join(", ")}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex flex-col">
+                          {s.question_window_opens_at && (
+                            <span className="text-xs text-muted-foreground">
+                              Opens {new Date(s.question_window_opens_at).toLocaleString()}
+                            </span>
+                          )}
+                          <span>Closes {new Date(s.question_deadline).toLocaleString()}</span>
+                        </div>
+                      </td>
                       <td className="px-3 py-2">
                         {s.question_submitted_at ? (
                           <Badge variant="success">Submitted</Badge>

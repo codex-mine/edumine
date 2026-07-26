@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { GuardianLinkManagerDialog } from "@/components/modules/people/guardian-link-manager-dialog";
 import { RowActionsMenu } from "@/components/modules/people/row-actions-menu";
+import { StudentDetailDialog } from "@/components/modules/people/student-detail-dialog";
 import { StudentFormDialog } from "@/components/modules/people/student-form-dialog";
 import { ActiveBadge, StatusBadge } from "@/components/modules/people/status-badge";
 import { loginErrorMessage } from "@/hooks/use-auth";
@@ -23,6 +24,7 @@ export default function AdminStudentsPage() {
   const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [detailStudentId, setDetailStudentId] = useState<string | null>(null);
 
   const query = useStudentsQuery({ page, limit: LIMIT, search: search || undefined });
   const softDeleteMutation = useSoftDeleteStudentMutation();
@@ -117,6 +119,10 @@ export default function AdminStudentsPage() {
         limit={LIMIT}
         total={query.data?.meta.total ?? 0}
         onPageChange={setPage}
+        onRowClick={(index) => {
+          const rowStudent = query.data?.items[index];
+          if (rowStudent) setDetailStudentId(rowStudent.id);
+        }}
         toolbarActions={
           <StudentFormDialog
             trigger={
@@ -127,6 +133,14 @@ export default function AdminStudentsPage() {
             }
           />
         }
+      />
+
+      <StudentDetailDialog
+        studentId={detailStudentId}
+        open={detailStudentId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetailStudentId(null);
+        }}
       />
     </div>
   );

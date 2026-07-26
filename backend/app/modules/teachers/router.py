@@ -14,14 +14,34 @@ from app.common.dependencies import (
 from app.common.schemas import PaginationParams, pagination_meta
 from app.core.response import success_response
 from app.modules.teachers import service
-from app.modules.teachers.schemas import CreateTeacherRequest, TeacherResponse, UpdateTeacherRequest
+from app.modules.teachers.models import TeacherQualification
+from app.modules.teachers.schemas import (
+    CreateTeacherRequest,
+    CreateTeacherResponse,
+    QualificationResponse,
+    TeacherDetailResponse,
+    TeacherResponse,
+    UpdateTeacherRequest,
+)
 
 router = APIRouter(prefix="/teachers", tags=["teachers"])
 
 
-def _to_response(record) -> dict:
-    teacher, user = record
-    return TeacherResponse(
+def _qualification_response(row: TeacherQualification) -> QualificationResponse:
+    return QualificationResponse(
+        id=str(row.id),
+        education_title=row.education_title,
+        institute=row.institute,
+        grade=row.grade,
+        passing_year=row.passing_year,
+        additional_info=row.additional_info,
+        certificate_url=row.certificate_url,
+        marksheet_url=row.marksheet_url,
+    )
+
+
+def _teacher_fields(teacher, user) -> dict:
+    return dict(
         id=str(teacher.id),
         user_id=str(user.id),
         full_name=user.full_name,
@@ -34,8 +54,25 @@ def _to_response(record) -> dict:
         joining_date=teacher.joining_date,
         designation=teacher.designation,
         qualification=teacher.qualification,
+        nid_number=teacher.nid_number,
+        nid_document_url=teacher.nid_document_url,
+        previous_employment=teacher.previous_employment,
         status=teacher.status,
         created_at=teacher.created_at,
+    )
+
+
+def _to_response(record) -> dict:
+    teacher, user = record
+    return TeacherResponse(**_teacher_fields(teacher, user)).model_dump(mode="json")
+
+
+async def _to_detail_response(db: AsyncSession, record) -> dict:
+    teacher, user = record
+    qualifications = await service.get_qualifications(db, teacher.id)
+    return TeacherDetailResponse(
+        **_teacher_fields(teacher, user),
+        qualifications=[_qualification_response(row) for row in qualifications],
     ).model_dump(mode="json")
 
 
@@ -45,8 +82,14 @@ async def create_teacher(
     current_user: CurrentUser = Depends(require_permission("teachers.create")),
     db: AsyncSession = Depends(get_db_session),
 ):
-    record = await service.create_teacher(db, current_user, payload)
-    return success_response(data=_to_response(record), message="Teacher created successfully", status_code=201)
+    teacher, user, generated_password = await service.create_teacher(db, current_user, payload)
+    qualifications = await service.get_qualifications(db, teacher.id)
+    data = CreateTeacherResponse(
+        **_teacher_fields(teacher, user),
+        qualifications=[_qualification_response(row) for row in qualifications],
+        temporary_password=generated_password,
+    ).model_dump(mode="json")
+    return success_response(data=data, message="Teacher created successfully", status_code=201)
 
 
 @router.get("", dependencies=[Depends(require_permission("teachers.view"))])
@@ -69,13 +112,13 @@ async def get_own_teacher_profile(
     db: AsyncSession = Depends(get_db_session),
 ):
     record = await service.get_own_teacher_profile(db, current_user)
-    return success_response(data=_to_response(record), message="Your teacher profile")
+    return success_response(data=await _to_detail_response(db, record), message="Your teacher profile")
 
 
 @router.get("/{teacher_id}", dependencies=[Depends(require_permission("teachers.view"))])
 async def get_teacher(teacher_id: uuid.UUID, db: AsyncSession = Depends(get_db_session)):
     record = await service.get_teacher(db, teacher_id)
-    return success_response(data=_to_response(record), message="Teacher retrieved")
+    return success_response(data=await _to_detail_response(db, record), message="Teacher retrieved")
 
 
 @router.patch("/{teacher_id}", dependencies=[Depends(require_permission("teachers.update"))])
@@ -86,7 +129,7 @@ async def update_teacher(
     db: AsyncSession = Depends(get_db_session),
 ):
     record = await service.update_teacher(db, current_user, teacher_id, payload)
-    return success_response(data=_to_response(record), message="Teacher updated successfully")
+    return success_response(data=await _to_detail_response(db, record), message="Teacher updated successfully")
 
 
 @router.delete("/{teacher_id}", dependencies=[Depends(require_permission("teachers.delete"))])

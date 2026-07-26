@@ -2,13 +2,14 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.models import AuditLog
 from app.modules.academic.models import Class, Subject
 from app.modules.auth.models import Role, User
-from app.modules.exams.models import Exam, ExamClass, ExamSubject
+from app.modules.exams.models import Exam, ExamClass, ExamSubject, ExamSubjectSection
+from app.modules.exams.schemas import ExamSubjectSectionInput
 from app.modules.teachers.models import Teacher
 
 ExamSubjectRow = tuple[ExamSubject, Exam, Class, Subject, Teacher, User]
@@ -102,7 +103,9 @@ async def create_exam_subject(
     teacher_id: uuid.UUID,
     full_marks: int,
     pass_marks: int,
+    question_window_opens_at: datetime | None,
     question_deadline: datetime,
+    marks_window_opens_at: datetime | None,
     marks_deadline: datetime,
 ) -> ExamSubject:
     entity = ExamSubject(
@@ -112,12 +115,40 @@ async def create_exam_subject(
         teacher_id=teacher_id,
         full_marks=full_marks,
         pass_marks=pass_marks,
+        question_window_opens_at=question_window_opens_at,
         question_deadline=question_deadline,
+        marks_window_opens_at=marks_window_opens_at,
         marks_deadline=marks_deadline,
     )
     db.add(entity)
     await db.flush()
     return entity
+
+
+async def replace_exam_subject_sections(
+    db: AsyncSession, exam_subject_id: uuid.UUID, sections: list[ExamSubjectSectionInput]
+) -> None:
+    await db.execute(delete(ExamSubjectSection).where(ExamSubjectSection.exam_subject_id == exam_subject_id))
+    for order, section in enumerate(sections):
+        db.add(
+            ExamSubjectSection(
+                exam_subject_id=exam_subject_id,
+                name=section.name,
+                full_marks=section.full_marks,
+                pass_marks=section.pass_marks,
+                display_order=order,
+            )
+        )
+    await db.flush()
+
+
+async def list_exam_subject_sections(db: AsyncSession, exam_subject_id: uuid.UUID) -> list[ExamSubjectSection]:
+    result = await db.execute(
+        select(ExamSubjectSection)
+        .where(ExamSubjectSection.exam_subject_id == exam_subject_id)
+        .order_by(ExamSubjectSection.display_order.asc())
+    )
+    return list(result.scalars().all())
 
 
 async def get_exam_subject(db: AsyncSession, exam_subject_id: uuid.UUID) -> ExamSubjectRow | None:

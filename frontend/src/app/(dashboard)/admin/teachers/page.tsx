@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { RowActionsMenu } from "@/components/modules/people/row-actions-menu";
+import { TeacherDetailDialog } from "@/components/modules/people/teacher-detail-dialog";
 import { TeacherFormDialog } from "@/components/modules/people/teacher-form-dialog";
 import { ActiveBadge, StatusBadge } from "@/components/modules/people/status-badge";
 import { loginErrorMessage } from "@/hooks/use-auth";
@@ -18,6 +19,7 @@ export default function AdminTeachersPage() {
   const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [detailTeacherId, setDetailTeacherId] = useState<string | null>(null);
 
   const query = useTeachersQuery({ page, limit: LIMIT, search: search || undefined });
   const softDeleteMutation = useSoftDeleteTeacherMutation();
@@ -90,6 +92,10 @@ export default function AdminTeachersPage() {
         limit={LIMIT}
         total={query.data?.meta.total ?? 0}
         onPageChange={setPage}
+        onRowClick={(index) => {
+          const rowTeacher = query.data?.items[index];
+          if (rowTeacher) setDetailTeacherId(rowTeacher.id);
+        }}
         toolbarActions={
           <TeacherFormDialog
             trigger={
@@ -100,6 +106,14 @@ export default function AdminTeachersPage() {
             }
           />
         }
+      />
+
+      <TeacherDetailDialog
+        teacherId={detailTeacherId}
+        open={detailTeacherId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetailTeacherId(null);
+        }}
       />
     </div>
   );

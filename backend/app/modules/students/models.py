@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.common.base_model import SoftDeleteMixin, TimestampMixin, UUIDPrimaryKeyMixin
-from app.common.enums import StudentStatus, pg_enum
+from app.common.enums import BloodGroupType, StudentStatus, pg_enum
 from app.db.base import Base
 
 
@@ -17,7 +17,7 @@ class Student(Base, UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin):
     )
     admission_number: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
     admission_date: Mapped[date] = mapped_column(Date, nullable=False)
-    blood_group: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    blood_group: Mapped[BloodGroupType | None] = mapped_column(pg_enum(BloodGroupType, "blood_group"), nullable=True)
     address: Mapped[str | None] = mapped_column(Text, nullable=True)
     emergency_contact: Mapped[str | None] = mapped_column(String(20), nullable=True)
     status: Mapped[StudentStatus] = mapped_column(

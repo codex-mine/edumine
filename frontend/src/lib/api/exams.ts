@@ -51,13 +51,28 @@ export interface CandidateSubject {
   exam_subject_id: string | null;
 }
 
+export interface ExamSubjectSectionInput {
+  name: string;
+  full_marks: number;
+  pass_marks: number;
+}
+
+export interface ExamSubjectSection extends ExamSubjectSectionInput {
+  id: string;
+}
+
+export const EXAM_SECTION_NAME_PRESETS = ["CQ", "MCQ", "Practical", "Lab"] as const;
+
 export interface ExamSubjectConfigItem {
   class_id: string;
   subject_id: string;
   full_marks?: number | null;
   pass_marks: number;
+  question_window_opens_at?: string | null;
   question_deadline: string;
+  marks_window_opens_at?: string | null;
   marks_deadline: string;
+  sections?: ExamSubjectSectionInput[];
 }
 
 export interface ExamSubject {
@@ -73,13 +88,16 @@ export interface ExamSubject {
   teacher_name: string;
   full_marks: number;
   pass_marks: number;
+  question_window_opens_at: string | null;
   question_deadline: string;
   question_submitted_at: string | null;
+  marks_window_opens_at: string | null;
   marks_deadline: string;
   marks_submitted_at: string | null;
   is_overdue: boolean;
   extension_requested: boolean;
   questions: QuestionItem[] | null;
+  sections: ExamSubjectSection[];
 }
 
 export interface QuestionItem {

@@ -5,7 +5,7 @@ from typing import Any
 from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.enums import EnrollmentStatus, GenderType, StudentStatus
+from app.common.enums import BloodGroupType, EnrollmentStatus, GenderType, StudentStatus
 from app.modules.academic.models import Class, Section, StudentEnrollment
 from app.modules.auth.models import Role, User
 from app.modules.guardians.models import Guardian
@@ -78,7 +78,7 @@ async def create_student_profile_full(
     user_id: uuid.UUID,
     admission_number: str,
     admission_date: date,
-    blood_group: str | None,
+    blood_group: BloodGroupType | None,
     address: str | None,
     emergency_contact: str | None,
 ) -> Student:

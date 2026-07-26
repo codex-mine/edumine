@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState } from "@/components/shared/empty-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { loginErrorMessage } from "@/hooks/use-auth";
@@ -28,11 +29,14 @@ import {
   useUpdateGuardianLinkMutation,
 } from "@/hooks/use-students";
 
+const RELATION_OPTIONS = ["Father", "Mother", "Grandfather", "Grandmother", "Legal guardian", "Other"] as const;
+
 export function GuardianLinkManagerDialog({ trigger, studentId }: { trigger: React.ReactNode; studentId: string }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedGuardianId, setSelectedGuardianId] = useState<string | null>(null);
   const [relation, setRelation] = useState("");
+  const [customRelation, setCustomRelation] = useState("");
   const [isPrimary, setIsPrimary] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,13 +49,16 @@ export function GuardianLinkManagerDialog({ trigger, studentId }: { trigger: Rea
   const linkedIds = new Set((studentQuery.data?.guardians ?? []).map((g) => g.guardian_id));
   const candidates = (guardianSearchQuery.data?.items ?? []).filter((g) => !linkedIds.has(g.id));
 
+  const effectiveRelation = relation === "Other" ? customRelation : relation;
+
   async function handleLink() {
-    if (!selectedGuardianId || !relation) return;
+    if (!selectedGuardianId || !effectiveRelation) return;
     setError(null);
     try {
-      await linkMutation.mutateAsync({ studentId, guardianId: selectedGuardianId, relation, isPrimary });
+      await linkMutation.mutateAsync({ studentId, guardianId: selectedGuardianId, relation: effectiveRelation, isPrimary });
       setSelectedGuardianId(null);
       setRelation("");
+      setCustomRelation("");
       setIsPrimary(false);
       setSearch("");
     } catch (mutationError) {
@@ -137,46 +144,59 @@ export function GuardianLinkManagerDialog({ trigger, studentId }: { trigger: Rea
                   setSelectedGuardianId(null);
                 }}
               />
-              {search && (
-                <div className="flex max-h-32 flex-col gap-1 overflow-y-auto rounded border border-border p-1">
-                  {candidates.length === 0 ? (
-                    <p className="px-2 py-1 text-xs text-muted-foreground">No matching guardians.</p>
-                  ) : (
-                    candidates.map((candidate) => (
-                      <button
-                        type="button"
-                        key={candidate.id}
-                        onClick={() => setSelectedGuardianId(candidate.id)}
-                        className={`flex items-center justify-between rounded px-2 py-1.5 text-left text-sm ${
-                          selectedGuardianId === candidate.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
-                        }`}
-                      >
-                        <span>{candidate.full_name}</span>
-                        <span className="text-xs text-muted-foreground">{candidate.phone}</span>
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
+              <Select
+                value={selectedGuardianId ?? undefined}
+                onValueChange={(value) => setSelectedGuardianId(value)}
+              >
+                <SelectTrigger id="guardian_select">
+                  <SelectValue placeholder={candidates.length === 0 ? "No matching guardians" : "Select a guardian"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {candidates.map((candidate) => (
+                    <SelectItem key={candidate.id} value={candidate.id}>
+                      {candidate.full_name} &middot; {candidate.phone}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               {selectedGuardianId && (
                 <div className="flex flex-col gap-4 rounded border border-border p-2 mt-10">
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="relation">Relation</Label>
-                    <Input
-                      id="relation"
-                      value={relation}
-                      onChange={(e) => setRelation(e.target.value)}
-                      placeholder="father, mother, legal_guardian..."
-                    />
+                    <Select
+                      value={relation || undefined}
+                      onValueChange={(value) => {
+                        setRelation(value);
+                        if (value !== "Other") setCustomRelation("");
+                      }}
+                    >
+                      <SelectTrigger id="relation">
+                        <SelectValue placeholder="Select relation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RELATION_OPTIONS.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {relation === "Other" && (
+                      <Input
+                        value={customRelation}
+                        onChange={(e) => setCustomRelation(e.target.value)}
+                        placeholder="Specify relation"
+                      />
+                    )}
                   </div>
                   <label className="flex items-center gap-2 text-sm">
                     <input type="checkbox" checked={isPrimary} onChange={(e) => setIsPrimary(e.target.checked)} />
                     Set as primary contact
                   </label>
                   <Button
-                    type="button" 
-                    disabled={!relation || linkMutation.isPending}
+                    type="button"
+                    disabled={!effectiveRelation || linkMutation.isPending}
                     onClick={handleLink}
                     className="w-fit"
                   >

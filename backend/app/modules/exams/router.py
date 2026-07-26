@@ -36,12 +36,13 @@ def _exam_response(exam: Exam, classes: list) -> dict:
     }
 
 
-def _exam_subject_response(row: ExamSubjectRow, *, extension_requested: bool = False) -> dict:
+async def _exam_subject_response(db: AsyncSession, row: ExamSubjectRow, *, extension_requested: bool = False) -> dict:
     exam_subject, exam, class_entity, subject, teacher, teacher_user = row
     now = datetime.now(timezone.utc)
     deadline = exam_subject.question_deadline
     deadline_aware = deadline if deadline.tzinfo is not None else deadline.replace(tzinfo=timezone.utc)
     is_overdue = exam_subject.question_submitted_at is None and now > deadline_aware
+    sections = await service.get_exam_subject_sections(db, exam_subject.id)
     return {
         "id": str(exam_subject.id),
         "exam_id": str(exam.id),
@@ -55,13 +56,28 @@ def _exam_subject_response(row: ExamSubjectRow, *, extension_requested: bool = F
         "teacher_name": teacher_user.full_name,
         "full_marks": exam_subject.full_marks,
         "pass_marks": exam_subject.pass_marks,
+        "question_window_opens_at": exam_subject.question_window_opens_at.isoformat()
+        if exam_subject.question_window_opens_at
+        else None,
         "question_deadline": exam_subject.question_deadline.isoformat(),
         "question_submitted_at": exam_subject.question_submitted_at.isoformat() if exam_subject.question_submitted_at else None,
+        "marks_window_opens_at": exam_subject.marks_window_opens_at.isoformat()
+        if exam_subject.marks_window_opens_at
+        else None,
         "marks_deadline": exam_subject.marks_deadline.isoformat(),
         "marks_submitted_at": exam_subject.marks_submitted_at.isoformat() if exam_subject.marks_submitted_at else None,
         "is_overdue": is_overdue,
         "extension_requested": extension_requested,
         "questions": exam_subject.questions_payload,
+        "sections": [
+            {
+                "id": str(section.id),
+                "name": section.name,
+                "full_marks": section.full_marks,
+                "pass_marks": section.pass_marks,
+            }
+            for section in sections
+        ],
     }
 
 
@@ -98,7 +114,7 @@ async def get_exam(exam_id: uuid.UUID, db: AsyncSession = Depends(get_db_session
     classes = await service.repository.list_exam_classes(db, exam.id)
     subjects = await service.repository.list_exam_subjects_for_exam(db, exam.id)
     data = _exam_response(exam, classes)
-    data["subjects"] = [_exam_subject_response(row) for row in subjects]
+    data["subjects"] = [await _exam_subject_response(db, row) for row in subjects]
     return success_response(data=data, message="Exam retrieved")
 
 
@@ -117,7 +133,7 @@ async def configure_exam_subjects(
 ):
     rows = await service.configure_exam_subjects(db, current_user, exam_id, payload)
     return success_response(
-        data=[_exam_subject_response(row) for row in rows],
+        data=[await _exam_subject_response(db, row) for row in rows],
         message="Exam subjects configured and assigned teachers notified",
     )
 
@@ -147,7 +163,7 @@ async def extend_deadline(
     db: AsyncSession = Depends(get_db_session),
 ):
     row = await service.extend_deadline(db, current_user, exam_subject_id, payload)
-    return success_response(data=_exam_subject_response(row), message="Question deadline extended")
+    return success_response(data=await _exam_subject_response(db, row), message="Question deadline extended")
 
 
 # --- Teacher-facing question submission --------------------------------------
@@ -162,7 +178,7 @@ async def list_my_submissions(
     pending_requests = await service.list_extension_requests(db)
     pending_ids = {item["exam_subject_id"] for item in pending_requests}
     data = [
-        _exam_subject_response(row, extension_requested=str(row[0].id) in pending_ids) for row in rows
+        await _exam_subject_response(db, row, extension_requested=str(row[0].id) in pending_ids) for row in rows
     ]
     return success_response(data=data, message="Your exam question submissions")
 
@@ -175,7 +191,7 @@ async def submit_questions(
     db: AsyncSession = Depends(get_db_session),
 ):
     row = await service.submit_questions(db, current_user, exam_subject_id, payload)
-    return success_response(data=_exam_subject_response(row), message="Questions submitted")
+    return success_response(data=await _exam_subject_response(db, row), message="Questions submitted")
 
 
 @router.post(
@@ -189,7 +205,9 @@ async def request_extension(
     db: AsyncSession = Depends(get_db_session),
 ):
     row = await service.request_extension(db, current_user, exam_subject_id, payload)
-    return success_response(data=_exam_subject_response(row), message="Deadline extension request sent to admin")
+    return success_response(
+        data=await _exam_subject_response(db, row), message="Deadline extension request sent to admin"
+    )
 
 
 @router.post(

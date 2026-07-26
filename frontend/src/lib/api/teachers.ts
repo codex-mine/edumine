@@ -1,6 +1,18 @@
 import { apiClient, getPaginated, type PageMeta } from "@/lib/api/client";
+import type { Qualification, QualificationInput } from "@/lib/api/qualifications";
 
 export type EmploymentStatus = "active" | "on_leave" | "resigned" | "terminated";
+
+export const TEACHER_DESIGNATIONS = [
+  "Head Teacher",
+  "Assistant Head Teacher",
+  "Senior Teacher",
+  "Assistant Teacher",
+  "Subject Teacher",
+  "Physical Education Teacher",
+  "Librarian Teacher",
+  "Vice Principal",
+] as const;
 
 export interface Teacher {
   id: string;
@@ -15,21 +27,35 @@ export interface Teacher {
   joining_date: string;
   designation: string | null;
   qualification: string | null;
+  nid_number: string | null;
+  nid_document_url: string | null;
+  previous_employment: string | null;
   status: EmploymentStatus;
   created_at: string;
+}
+
+export interface TeacherDetail extends Teacher {
+  qualifications: Qualification[];
 }
 
 export interface CreateTeacherPayload {
   full_name: string;
   email: string;
   phone: string;
-  password: string;
   gender?: "male" | "female" | "other" | null;
-  date_of_birth?: string | null;
+  date_of_birth: string;
   employee_code?: string | null;
   joining_date: string;
   designation?: string | null;
   qualification?: string | null;
+  nid_number?: string | null;
+  nid_document_url?: string | null;
+  previous_employment?: string | null;
+  qualifications?: QualificationInput[];
+}
+
+export interface CreateTeacherResult extends TeacherDetail {
+  temporary_password: string;
 }
 
 export interface UpdateTeacherPayload {
@@ -41,7 +67,11 @@ export interface UpdateTeacherPayload {
   is_active?: boolean;
   designation?: string | null;
   qualification?: string | null;
+  nid_number?: string | null;
+  nid_document_url?: string | null;
+  previous_employment?: string | null;
   status?: EmploymentStatus;
+  qualifications?: QualificationInput[];
 }
 
 export async function listTeachers(params: {
@@ -52,23 +82,23 @@ export async function listTeachers(params: {
   return getPaginated<Teacher>("/teachers", params);
 }
 
-export async function getTeacher(teacherId: string): Promise<Teacher> {
-  const { data } = await apiClient.get<Teacher>(`/teachers/${teacherId}`);
+export async function getTeacher(teacherId: string): Promise<TeacherDetail> {
+  const { data } = await apiClient.get<TeacherDetail>(`/teachers/${teacherId}`);
   return data;
 }
 
-export async function getOwnTeacherProfile(): Promise<Teacher> {
-  const { data } = await apiClient.get<Teacher>("/teachers/me");
+export async function getOwnTeacherProfile(): Promise<TeacherDetail> {
+  const { data } = await apiClient.get<TeacherDetail>("/teachers/me");
   return data;
 }
 
-export async function createTeacher(payload: CreateTeacherPayload): Promise<Teacher> {
-  const { data } = await apiClient.post<Teacher>("/teachers", payload);
+export async function createTeacher(payload: CreateTeacherPayload): Promise<CreateTeacherResult> {
+  const { data } = await apiClient.post<CreateTeacherResult>("/teachers", payload);
   return data;
 }
 
-export async function updateTeacher(teacherId: string, payload: UpdateTeacherPayload): Promise<Teacher> {
-  const { data } = await apiClient.patch<Teacher>(`/teachers/${teacherId}`, payload);
+export async function updateTeacher(teacherId: string, payload: UpdateTeacherPayload): Promise<TeacherDetail> {
+  const { data } = await apiClient.patch<TeacherDetail>(`/teachers/${teacherId}`, payload);
   return data;
 }
 

@@ -6,7 +6,8 @@
       "Bash(./.venv/Scripts/python.exe -c ' *)",
       "Bash(python -c ' *)",
       "Bash(python -m alembic history)",
-      "Bash(python -m alembic current)"
+      "Bash(python -m alembic current)",
+      "Bash(python -m py_compile app/db/migrations/versions/9c1e5f2a7b48_convert_student_blood_group_to_enum.py)"
     ]
   }
 }

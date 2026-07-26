@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PartyPopper } from "lucide-react";
+import { PartyPopper, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CheckboxUi } from "@/components/ui/checkbox";
@@ -22,7 +22,7 @@ import { useCreateStudentMutation, useUpdateStudentMutation } from "@/hooks/use-
 import { useActiveAcademicYearQuery, useClassesQuery, useSectionsQuery } from "@/hooks/use-academic";
 import { loginErrorMessage } from "@/hooks/use-auth";
 import { formatSectionOccupancy, isSectionFull } from "@/lib/api/academic";
-import type { AdmitStudentResult, Student } from "@/lib/api/students";
+import { BLOOD_GROUPS, type AdmitStudentResult, type Student } from "@/lib/api/students";
 
 export function StudentFormDialog({ trigger, student }: { trigger: React.ReactNode; student?: Student }) {
   const isEdit = Boolean(student);
@@ -126,7 +126,8 @@ export function StudentFormDialog({ trigger, student }: { trigger: React.ReactNo
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex flex-col gap-2 rounded border border-border p-3 text-sm">
+            <div className="print-area flex flex-col gap-2 rounded border border-border p-3 text-sm">
+              <p className="hidden pb-2 text-base font-semibold print:block">Student registration slip</p>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Name</span>
                 <span className="font-medium text-foreground">{admitted.full_name}</span>
@@ -159,6 +160,10 @@ export function StudentFormDialog({ trigger, student }: { trigger: React.ReactNo
             </div>
 
             <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => window.print()}>
+                <Printer className="size-6" aria-hidden="true" />
+                Print
+              </Button>
               <Button type="button" onClick={() => handleOpenChange(false)}>
                 Done
               </Button>
@@ -276,12 +281,21 @@ export function StudentFormDialog({ trigger, student }: { trigger: React.ReactNo
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="s_blood_group">Blood group</Label>
-                  <Input
-                    id="s_blood_group"
-                    value={bloodGroup ?? ""}
-                    onChange={(e) => setBloodGroup(e.target.value)}
-                    placeholder="e.g. O+"
-                  />
+                  <Select
+                    value={bloodGroup || undefined}
+                    onValueChange={(value) => setBloodGroup(value)}
+                  >
+                    <SelectTrigger id="s_blood_group">
+                      <SelectValue placeholder="Select blood group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BLOOD_GROUPS.map((group) => (
+                        <SelectItem key={group} value={group}>
+                          {group}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="s_emergency_contact">Emergency contact</Label>

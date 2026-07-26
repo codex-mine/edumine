@@ -137,6 +137,10 @@ async def configure_exam_subjects(
         full_marks = item.full_marks or class_subject.full_marks
         if item.pass_marks > full_marks:
             raise ValidationException("pass_marks cannot exceed full_marks")
+        if item.sections:
+            section_total = sum(section.full_marks for section in item.sections)
+            if section_total != full_marks:
+                raise ValidationException(f"Section marks must sum to exactly {full_marks} (got {section_total})")
 
         existing = await repository.get_exam_subject_by_exam_class_subject(
             db, exam_id=exam.id, class_id=item.class_id, subject_id=item.subject_id
@@ -152,10 +156,13 @@ async def configure_exam_subjects(
                 {
                     "full_marks": full_marks,
                     "pass_marks": item.pass_marks,
+                    "question_window_opens_at": item.question_window_opens_at,
                     "question_deadline": item.question_deadline,
+                    "marks_window_opens_at": item.marks_window_opens_at,
                     "marks_deadline": item.marks_deadline,
                 },
             )
+            await repository.replace_exam_subject_sections(db, existing.id, item.sections)
             continue
 
         entity = await repository.create_exam_subject(
@@ -166,9 +173,12 @@ async def configure_exam_subjects(
             teacher_id=class_subject.teacher_id,
             full_marks=full_marks,
             pass_marks=item.pass_marks,
+            question_window_opens_at=item.question_window_opens_at,
             question_deadline=item.question_deadline,
+            marks_window_opens_at=item.marks_window_opens_at,
             marks_deadline=item.marks_deadline,
         )
+        await repository.replace_exam_subject_sections(db, entity.id, item.sections)
         created_ids.append(entity.id)
 
     if exam.status == ExamStatus.draft and (created_ids or await repository.list_exam_subjects_for_exam(db, exam.id)):
@@ -235,6 +245,10 @@ async def get_exam_subject_or_404(db: AsyncSession, exam_subject_id: uuid.UUID) 
     return row
 
 
+async def get_exam_subject_sections(db: AsyncSession, exam_subject_id: uuid.UUID):
+    return await repository.list_exam_subject_sections(db, exam_subject_id)
+
+
 async def _assert_owns_exam_subject(db: AsyncSession, actor: CurrentUser, exam_subject: ExamSubject) -> None:
     if actor.role in ("admin", "principal"):
         return
@@ -250,7 +264,10 @@ async def submit_questions(
     exam_subject, exam, _class_entity, _subject, _teacher, _teacher_user = row
     await _assert_owns_exam_subject(db, actor, exam_subject)
 
-    if _now() > _ensure_aware(exam_subject.question_deadline):
+    now = _now()
+    if exam_subject.question_window_opens_at is not None and now < _ensure_aware(exam_subject.question_window_opens_at):
+        raise ValidationException("The question submission window has not opened yet.")
+    if now > _ensure_aware(exam_subject.question_deadline):
         raise ValidationException(
             "The question submission deadline has passed. Ask an admin to extend it before submitting."
         )

@@ -2,12 +2,13 @@ import uuid
 from datetime import date, datetime, timezone
 from typing import Any
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.enums import EmploymentStatus, GenderType
 from app.modules.auth.models import Role, User
-from app.modules.users.models import Staff
+from app.modules.users.models import Staff, StaffQualification
+from app.modules.users.schemas import QualificationInput
 
 STAFF_LIKE_ROLES = ("staff", "accountant", "receptionist")
 
@@ -47,6 +48,9 @@ async def create_staff_profile(
     department: str | None,
     designation: str | None,
     joining_date: date,
+    nid_number: str | None = None,
+    nid_document_url: str | None = None,
+    previous_employment: str | None = None,
 ) -> Staff:
     staff = Staff(
         user_id=user_id,
@@ -54,10 +58,29 @@ async def create_staff_profile(
         department=department,
         designation=designation,
         joining_date=joining_date,
+        nid_number=nid_number,
+        nid_document_url=nid_document_url,
+        previous_employment=previous_employment,
     )
     db.add(staff)
     await db.flush()
     return staff
+
+
+async def replace_qualifications(db: AsyncSession, staff_id: uuid.UUID, qualifications: list[QualificationInput]) -> None:
+    await db.execute(delete(StaffQualification).where(StaffQualification.staff_id == staff_id))
+    for entry in qualifications:
+        db.add(StaffQualification(staff_id=staff_id, **entry.model_dump()))
+    await db.flush()
+
+
+async def list_qualifications(db: AsyncSession, staff_id: uuid.UUID) -> list[StaffQualification]:
+    result = await db.execute(
+        select(StaffQualification)
+        .where(StaffQualification.staff_id == staff_id)
+        .order_by(StaffQualification.created_at.asc())
+    )
+    return list(result.scalars().all())
 
 
 async def get_user_with_staff(db: AsyncSession, user_id: uuid.UUID) -> tuple[User, str, Staff | None] | None:

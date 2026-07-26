@@ -72,6 +72,52 @@ async def send_password_reset_email(to_email: str, full_name: str, reset_link: s
     await send_email(to_email, subject, html_body, text_body)
 
 
+async def send_account_welcome_email(
+    to_email: str,
+    full_name: str,
+    *,
+    role_label: str,
+    employee_code: str,
+    temporary_password: str,
+    designation: str | None = None,
+    joining_date: str | None = None,
+) -> None:
+    subject = f"Welcome to Codex Edumine — your {role_label} account"
+    profile_lines = [f"Employee ID: {employee_code}"]
+    if designation:
+        profile_lines.append(f"Designation: {designation}")
+    if joining_date:
+        profile_lines.append(f"Joining date: {joining_date}")
+    profile_text = "\n".join(profile_lines)
+    profile_html = "".join(f"<p>{line}</p>" for line in profile_lines)
+
+    text_body = (
+        f"Hi {full_name},\n\n"
+        f"Your {role_label} account has been created on Codex Edumine.\n\n"
+        f"{profile_text}\n\n"
+        f"Login email: {to_email}\n"
+        f"Temporary password: {temporary_password}\n\n"
+        "This is your date of birth (DDMMYYYY). Please change it after your first login.\n\n"
+        "- Codex Edumine"
+    )
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1e1b2e;">
+      <h2 style="color: #4f46e5;">Welcome to Codex Edumine</h2>
+      <p>Hi {full_name},</p>
+      <p>Your <strong>{role_label}</strong> account has been created.</p>
+      {profile_html}
+      <p style="margin: 24px 0; padding: 12px 16px; background: #f1f3f6; border-radius: 8px;">
+        <strong>Login email:</strong> {to_email}<br/>
+        <strong>Temporary password:</strong> {temporary_password}
+      </p>
+      <p style="font-size: 13px; color: #6b7280;">
+        The temporary password is your date of birth (DDMMYYYY). Please change it after your first login.
+      </p>
+    </div>
+    """
+    await send_email(to_email, subject, html_body, text_body)
+
+
 async def send_exam_question_assignment_email(
     to_email: str, teacher_name: str, *, exam_name: str, class_name: str, subject_name: str, deadline: str
 ) -> None:

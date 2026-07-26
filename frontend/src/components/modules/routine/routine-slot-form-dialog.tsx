@@ -52,7 +52,7 @@ export function RoutineSlotFormDialog({
   const [error, setError] = useState<string | null>(null);
 
   const classSubjectsQuery = useClassSubjectsQuery({ academic_year_id: academicYearId, class_id: classId });
-  const teachersQuery = useTeachersQuery({ page: 1, limit: 200 });
+  const teachersQuery = useTeachersQuery({ page: 1, limit: 100 });
   const roomsQuery = useRoomsQuery();
 
   const createMutation = useCreateRoutineSlotMutation();
@@ -177,9 +177,21 @@ export function RoutineSlotFormDialog({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="rs_teacher">Teacher</Label>
-            <Select value={teacherId || undefined} onValueChange={setTeacherId}>
+            <Select
+              value={teacherId || undefined}
+              onValueChange={setTeacherId}
+              disabled={teachersQuery.isLoading || teachersQuery.isError}
+            >
               <SelectTrigger id="rs_teacher">
-                <SelectValue placeholder="Select a teacher" />
+                <SelectValue
+                  placeholder={
+                    teachersQuery.isLoading
+                      ? "Loading teachers..."
+                      : teachersQuery.isError
+                        ? "Failed to load teachers"
+                        : "Select a teacher"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {(teachersQuery.data?.items ?? []).map((teacher) => (
@@ -189,6 +201,9 @@ export function RoutineSlotFormDialog({
                 ))}
               </SelectContent>
             </Select>
+            {teachersQuery.isError && (
+              <p className="text-xs text-destructive">{loginErrorMessage(teachersQuery.error)}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">

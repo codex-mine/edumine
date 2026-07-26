@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -20,6 +23,7 @@ from app.modules.results.router import router as results_router
 from app.modules.routine.router import router as routine_router
 from app.modules.students.router import router as students_router
 from app.modules.teachers.router import router as teachers_router
+from app.modules.uploads.router import router as uploads_router
 from app.modules.users.router import router as users_router
 
 settings = get_settings()
@@ -40,6 +44,9 @@ async def rate_limit_handler(request, exc: RateLimitExceeded):
         status_code=429,
     )
 
+
+Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
+app.mount(settings.upload_base_url, StaticFiles(directory=settings.upload_dir), name="uploads")
 
 app.add_middleware(SecureHeadersMiddleware)
 app.add_middleware(SlowAPIMiddleware)
@@ -64,5 +71,6 @@ api_router.include_router(routine_router)
 api_router.include_router(attendance_router)
 api_router.include_router(exams_router)
 api_router.include_router(results_router)
+api_router.include_router(uploads_router)
 
 app.include_router(api_router)

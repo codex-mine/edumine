@@ -14,7 +14,7 @@ import { AcademicYearSelect } from "@/components/modules/academic/academic-year-
 import { RoutineGrid, RoutineSlotCard } from "@/components/modules/routine/routine-grid";
 import { RoutineSlotFormDialog } from "@/components/modules/routine/routine-slot-form-dialog";
 import { loginErrorMessage } from "@/hooks/use-auth";
-import { useActiveAcademicYearQuery, useSectionsQuery } from "@/hooks/use-academic";
+import { useActiveAcademicYearQuery, useClassesQuery, useSectionsQuery } from "@/hooks/use-academic";
 import { useDeleteRoutineSlotMutation, useSectionRoutineQuery } from "@/hooks/use-routine";
 
 export default function AdminRoutinePage() {
@@ -22,7 +22,10 @@ export default function AdminRoutinePage() {
   const [selectedYearOverride, setSelectedYearOverride] = useState("");
   const selectedYearId = selectedYearOverride || activeYearQuery.data?.id || "";
 
-  const sectionsQuery = useSectionsQuery({ academic_year_id: selectedYearId || undefined });
+  const classesQuery = useClassesQuery();
+  const [classId, setClassId] = useState("");
+
+  const sectionsQuery = useSectionsQuery({ academic_year_id: selectedYearId || undefined, class_id: classId || undefined });
   const [sectionId, setSectionId] = useState("");
   const section = (sectionsQuery.data ?? []).find((s) => s.id === sectionId);
 
@@ -42,20 +45,49 @@ export default function AdminRoutinePage() {
       <Card>
         <CardHeader>
           <CardTitle>Scope</CardTitle>
-          <CardDescription>Choose the academic year and section to schedule.</CardDescription>
+          <CardDescription>Choose the academic year, class, and section to schedule.</CardDescription>
         </CardHeader>
         <div className="flex flex-col gap-3 px-4 pb-4 sm:flex-row sm:items-end">
-          <AcademicYearSelect value={selectedYearId} onChange={setSelectedYearOverride} />
+          <AcademicYearSelect
+            value={selectedYearId}
+            onChange={(value) => {
+              setSelectedYearOverride(value);
+              setClassId("");
+              setSectionId("");
+            }}
+          />
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="routine_class">Class</Label>
+            <Select
+              value={classId || undefined}
+              onValueChange={(value) => {
+                setClassId(value);
+                setSectionId("");
+              }}
+              disabled={!selectedYearId}
+            >
+              <SelectTrigger id="routine_class" className="w-full sm:w-[14rem]">
+                <SelectValue placeholder={selectedYearId ? "Select a class" : "Select a year first"} />
+              </SelectTrigger>
+              <SelectContent>
+                {(classesQuery.data ?? []).map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="routine_section">Section</Label>
-            <Select value={sectionId || undefined} onValueChange={setSectionId}>
+            <Select value={sectionId || undefined} onValueChange={setSectionId} disabled={!classId}>
               <SelectTrigger id="routine_section" className="w-full sm:w-[16rem]">
-                <SelectValue placeholder="Select a section" />
+                <SelectValue placeholder={classId ? "Select a section" : "Select a class first"} />
               </SelectTrigger>
               <SelectContent>
                 {(sectionsQuery.data ?? []).map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.class_name} - {s.name}
+                    {s.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -69,6 +101,13 @@ export default function AdminRoutinePage() {
           <CardHeader>
             <CardTitle>No academic year selected</CardTitle>
             <CardDescription>Create and activate an academic year first, then return here.</CardDescription>
+          </CardHeader>
+        </Card>
+      ) : !classId ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>No class selected</CardTitle>
+            <CardDescription>Choose a class above to pick a section and build its weekly routine.</CardDescription>
           </CardHeader>
         </Card>
       ) : !sectionId || !section ? (

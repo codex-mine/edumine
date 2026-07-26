@@ -55,8 +55,27 @@ class ExamSubject(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     teacher_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("teachers.id"), nullable=False)
     full_marks: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     pass_marks: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    question_window_opens_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     question_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     question_submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     questions_payload: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    marks_window_opens_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     marks_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     marks_submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ExamSubjectSection(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    """A configurable mark-scheme breakdown within a subject (e.g. CQ, MCQ,
+    Practical, Lab, or a custom name), each with its own total and pass marks.
+    Optional — an exam subject with no sections is graded as a single block,
+    preserving the pre-existing flat full_marks/pass_marks behavior."""
+
+    __tablename__ = "exam_subject_sections"
+
+    exam_subject_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("exam_subjects.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
+    full_marks: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    pass_marks: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    display_order: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0, server_default=text("0"))

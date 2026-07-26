@@ -54,13 +54,39 @@ class CandidateSubjectResponse(BaseModel):
     exam_subject_id: str | None
 
 
+class ExamSubjectSectionInput(BaseModel):
+    """A named mark-scheme breakdown within a subject, e.g. CQ, MCQ, Practical,
+    Lab, or a custom section name — each with its own total and pass marks."""
+
+    name: str = Field(..., min_length=1, max_length=50)
+    full_marks: int = Field(..., ge=1, le=1000)
+    pass_marks: int = Field(..., ge=0, le=1000)
+
+    @model_validator(mode="after")
+    def check_marks(self) -> "ExamSubjectSectionInput":
+        if self.pass_marks > self.full_marks:
+            raise ValueError("A section's pass_marks cannot exceed its full_marks")
+        return self
+
+
+class ExamSubjectSectionResponse(ExamSubjectSectionInput):
+    id: str
+
+
 class ExamSubjectConfigItem(BaseModel):
     class_id: uuid.UUID
     subject_id: uuid.UUID
     full_marks: int | None = Field(default=None, ge=1, le=1000)
     pass_marks: int = Field(..., ge=0, le=1000)
+    question_window_opens_at: datetime | None = None
     question_deadline: datetime
+    marks_window_opens_at: datetime | None = None
     marks_deadline: datetime
+    sections: list[ExamSubjectSectionInput] = Field(
+        default_factory=list,
+        description="Optional marks breakdown (CQ/MCQ/Practical/Lab/custom). When provided, "
+        "section full_marks must sum to exactly this subject's full_marks.",
+    )
 
     @model_validator(mode="after")
     def check_marks(self) -> "ExamSubjectConfigItem":
@@ -68,6 +94,14 @@ class ExamSubjectConfigItem(BaseModel):
             raise ValueError("pass_marks cannot exceed full_marks")
         if self.marks_deadline < self.question_deadline:
             raise ValueError("marks_deadline cannot be before question_deadline")
+        if self.question_window_opens_at is not None and self.question_window_opens_at > self.question_deadline:
+            raise ValueError("question submission window cannot open after its own deadline")
+        if self.marks_window_opens_at is not None and self.marks_window_opens_at > self.marks_deadline:
+            raise ValueError("marks submission window cannot open after its own deadline")
+        if self.sections and self.full_marks is not None:
+            section_total = sum(section.full_marks for section in self.sections)
+            if section_total != self.full_marks:
+                raise ValueError(f"Section marks must sum to exactly {self.full_marks} (got {section_total})")
         return self
 
 
@@ -95,13 +129,16 @@ class ExamSubjectResponse(BaseModel):
     teacher_name: str
     full_marks: int
     pass_marks: int
+    question_window_opens_at: datetime | None
     question_deadline: datetime
     question_submitted_at: datetime | None
+    marks_window_opens_at: datetime | None
     marks_deadline: datetime
     marks_submitted_at: datetime | None
     is_overdue: bool
     extension_requested: bool
     questions: list[QuestionItem] | None = None
+    sections: list[ExamSubjectSectionResponse] = Field(default_factory=list)
 
 
 class SubmitQuestionsRequest(BaseModel):
