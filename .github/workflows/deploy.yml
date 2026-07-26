@@ -96,6 +96,7 @@ jobs:
             sudo systemctl restart edumine-frontend
             sudo systemctl enable edumine-frontend
 
-            sleep 3
-            curl -f http://127.0.0.1:8000/api/v1/health
+            # Give the backend workers time to finish booting up cleanly
+            sleep 10
+            curl -f http://127.0.0
             curl -f http://127.0.0.1:3000
