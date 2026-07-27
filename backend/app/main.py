@@ -18,6 +18,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.billing.router import router as billing_router
 from app.modules.dashboard.router import router as dashboard_router
 from app.modules.exams.router import router as exams_router
+from app.modules.expenses.router import router as expenses_router
 from app.modules.guardians.router import router as guardians_router
 from app.modules.health.router import router as health_router
 from app.modules.payroll.router import router as payroll_router
@@ -75,6 +76,7 @@ api_router.include_router(exams_router)
 api_router.include_router(results_router)
 api_router.include_router(billing_router)
 api_router.include_router(payroll_router)
+api_router.include_router(expenses_router)
 api_router.include_router(uploads_router)
 
 app.include_router(api_router)

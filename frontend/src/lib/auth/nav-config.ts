@@ -11,6 +11,7 @@ import {
   GraduationCap,
   HeartHandshake,
   LayoutDashboard,
+  Receipt,
   ScrollText,
   UserCircle,
   UserCog,
@@ -43,6 +44,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Results Approval", href: "/principal/results", icon: ScrollText },
     { label: "Billing & Fees", href: "/admin/billing", icon: Wallet },
     { label: "HR & Payroll", href: "/admin/payroll", icon: Banknote },
+    { label: "Expenses", href: "/admin/expenses", icon: Receipt },
   ],
   admin: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -55,6 +57,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Results", href: "/admin/results", icon: ScrollText },
     { label: "Billing & Fees", href: "/admin/billing", icon: Wallet },
     { label: "HR & Payroll", href: "/admin/payroll", icon: Banknote },
+    { label: "Expenses", href: "/admin/expenses", icon: Receipt },
   ],
   teacher: [
     { label: "Dashboard", href: "/teacher", icon: LayoutDashboard },
@@ -68,6 +71,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Dashboard", href: "/accountant", icon: LayoutDashboard },
     { label: "Billing & Fees", href: "/accountant/billing", icon: Wallet },
     { label: "HR & Payroll", href: "/accountant/payroll", icon: Banknote },
+    { label: "Expenses", href: "/accountant/expenses", icon: Receipt },
     { label: "My Profile", href: "/accountant/profile", icon: UserCircle },
   ],
   receptionist: [
