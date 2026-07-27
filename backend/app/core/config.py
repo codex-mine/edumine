@@ -50,6 +50,13 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str | None = None
 
+    # Generic HTTP SMS gateway (Phase 14). Leave sms_gateway_url unset to run
+    # without a real provider — sends are then logged as "failed" in sms_logs
+    # rather than falsely reported as delivered.
+    sms_gateway_url: str | None = None
+    sms_gateway_api_key: str | None = None
+    sms_sender_id: str = "CodexEdumine"
+
     upload_dir: str = "uploads"
     upload_base_url: str = "/uploads"
     max_upload_size_mb: int = 10

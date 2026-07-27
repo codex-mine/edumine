@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Archive,
   Banknote,
   BookMarked,
   CalendarClock,
@@ -11,6 +12,7 @@ import {
   GraduationCap,
   HeartHandshake,
   LayoutDashboard,
+  Megaphone,
   Receipt,
   ScrollText,
   UserCircle,
@@ -45,6 +47,8 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Billing & Fees", href: "/admin/billing", icon: Wallet },
     { label: "HR & Payroll", href: "/admin/payroll", icon: Banknote },
     { label: "Expenses", href: "/admin/expenses", icon: Receipt },
+    { label: "Assets", href: "/admin/assets", icon: Archive },
+    { label: "Communication", href: "/admin/communication", icon: Megaphone },
   ],
   admin: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -58,6 +62,8 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Billing & Fees", href: "/admin/billing", icon: Wallet },
     { label: "HR & Payroll", href: "/admin/payroll", icon: Banknote },
     { label: "Expenses", href: "/admin/expenses", icon: Receipt },
+    { label: "Assets", href: "/admin/assets", icon: Archive },
+    { label: "Communication", href: "/admin/communication", icon: Megaphone },
   ],
   teacher: [
     { label: "Dashboard", href: "/teacher", icon: LayoutDashboard },
@@ -65,6 +71,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Class Attendance", href: "/teacher/attendance", icon: ClipboardCheck },
     { label: "Exam Questions", href: "/teacher/exams", icon: FileQuestion },
     { label: "Marks Entry", href: "/teacher/results", icon: ScrollText },
+    { label: "Communication", href: "/teacher/communication", icon: Megaphone },
     { label: "My Profile", href: "/teacher/profile", icon: UserCircle },
   ],
   accountant: [
@@ -77,11 +84,14 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   receptionist: [
     { label: "Dashboard", href: "/receptionist", icon: LayoutDashboard },
     { label: "Billing & Fees", href: "/receptionist/billing", icon: Wallet },
+    { label: "Communication", href: "/receptionist/communication", icon: Megaphone },
     { label: "My Profile", href: "/receptionist/profile", icon: UserCircle },
   ],
   staff: [
     { label: "Dashboard", href: "/staff", icon: LayoutDashboard },
     { label: "My Attendance", href: "/staff/attendance", icon: ClipboardCheck },
+    { label: "Assets", href: "/staff/assets", icon: Archive },
+    { label: "Communication", href: "/staff/communication", icon: Megaphone },
     { label: "My Profile", href: "/staff/profile", icon: UserCircle },
   ],
   student: [
@@ -90,6 +100,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "My Attendance", href: "/student/attendance", icon: ClipboardCheck },
     { label: "My Results", href: "/student/results", icon: ScrollText },
     { label: "My Billing", href: "/student/billing", icon: Wallet },
+    { label: "Communication", href: "/student/communication", icon: Megaphone },
     { label: "My Profile", href: "/student/profile", icon: UserCircle },
   ],
   guardian: [
@@ -98,6 +109,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Children's Attendance", href: "/guardian/attendance", icon: ClipboardCheck },
     { label: "Children's Results", href: "/guardian/results", icon: ScrollText },
     { label: "Children's Billing", href: "/guardian/billing", icon: Wallet },
+    { label: "Communication", href: "/guardian/communication", icon: Megaphone },
     { label: "My Profile", href: "/guardian/profile", icon: UserCircle },
   ],
 };

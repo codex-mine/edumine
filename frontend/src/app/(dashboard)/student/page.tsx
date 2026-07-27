@@ -1,5 +1,5 @@
-import { DashboardShell } from "@/components/shared/dashboard-shell";
+import { StudentDashboard } from "@/components/dashboard/student-dashboard";
 
 export default function StudentDashboardPage() {
-  return <DashboardShell role="student" />;
+  return <StudentDashboard />;
 }

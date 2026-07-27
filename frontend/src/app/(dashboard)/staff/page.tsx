@@ -1,5 +1,5 @@
-import { DashboardShell } from "@/components/shared/dashboard-shell";
+import { StaffDashboard } from "@/components/dashboard/staff-dashboard";
 
 export default function StaffDashboardPage() {
-  return <DashboardShell role="staff" />;
+  return <StaffDashboard />;
 }

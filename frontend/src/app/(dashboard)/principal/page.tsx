@@ -1,5 +1,5 @@
-import { DashboardShell } from "@/components/shared/dashboard-shell";
+import { PrincipalDashboard } from "@/components/dashboard/principal-dashboard";
 
 export default function PrincipalDashboardPage() {
-  return <DashboardShell role="principal" />;
+  return <PrincipalDashboard />;
 }

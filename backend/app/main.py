@@ -13,9 +13,11 @@ from app.core.middleware import SecureHeadersMiddleware
 from app.core.rate_limiter import limiter
 from app.core.response import error_response
 from app.modules.academic.router import router as academic_router
+from app.modules.assets.router import router as assets_router
 from app.modules.attendance.router import router as attendance_router
 from app.modules.auth.router import router as auth_router
 from app.modules.billing.router import router as billing_router
+from app.modules.communication.router import router as communication_router
 from app.modules.dashboard.router import router as dashboard_router
 from app.modules.exams.router import router as exams_router
 from app.modules.expenses.router import router as expenses_router
@@ -77,6 +79,8 @@ api_router.include_router(results_router)
 api_router.include_router(billing_router)
 api_router.include_router(payroll_router)
 api_router.include_router(expenses_router)
+api_router.include_router(assets_router)
+api_router.include_router(communication_router)
 api_router.include_router(uploads_router)
 
 app.include_router(api_router)

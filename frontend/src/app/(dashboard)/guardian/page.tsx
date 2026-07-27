@@ -1,5 +1,5 @@
-import { DashboardShell } from "@/components/shared/dashboard-shell";
+import { GuardianDashboard } from "@/components/dashboard/guardian-dashboard";
 
 export default function GuardianDashboardPage() {
-  return <DashboardShell role="guardian" />;
+  return <GuardianDashboard />;
 }
