@@ -15,10 +15,12 @@ from app.core.response import error_response
 from app.modules.academic.router import router as academic_router
 from app.modules.attendance.router import router as attendance_router
 from app.modules.auth.router import router as auth_router
+from app.modules.billing.router import router as billing_router
 from app.modules.dashboard.router import router as dashboard_router
 from app.modules.exams.router import router as exams_router
 from app.modules.guardians.router import router as guardians_router
 from app.modules.health.router import router as health_router
+from app.modules.payroll.router import router as payroll_router
 from app.modules.results.router import router as results_router
 from app.modules.routine.router import router as routine_router
 from app.modules.students.router import router as students_router
@@ -71,6 +73,8 @@ api_router.include_router(routine_router)
 api_router.include_router(attendance_router)
 api_router.include_router(exams_router)
 api_router.include_router(results_router)
+api_router.include_router(billing_router)
+api_router.include_router(payroll_router)
 api_router.include_router(uploads_router)
 
 app.include_router(api_router)

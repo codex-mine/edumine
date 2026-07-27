@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Banknote,
   BookMarked,
   CalendarClock,
   CalendarRange,
@@ -14,6 +15,7 @@ import {
   UserCircle,
   UserCog,
   Users,
+  Wallet,
 } from "lucide-react";
 
 import type { Role } from "@/lib/auth/roles";
@@ -39,6 +41,8 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Attendance", href: "/admin/attendance", icon: ClipboardCheck },
     { label: "Exams", href: "/admin/exams", icon: FileQuestion },
     { label: "Results Approval", href: "/principal/results", icon: ScrollText },
+    { label: "Billing & Fees", href: "/admin/billing", icon: Wallet },
+    { label: "HR & Payroll", href: "/admin/payroll", icon: Banknote },
   ],
   admin: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -49,6 +53,8 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Attendance", href: "/admin/attendance", icon: ClipboardCheck },
     { label: "Exams", href: "/admin/exams", icon: FileQuestion },
     { label: "Results", href: "/admin/results", icon: ScrollText },
+    { label: "Billing & Fees", href: "/admin/billing", icon: Wallet },
+    { label: "HR & Payroll", href: "/admin/payroll", icon: Banknote },
   ],
   teacher: [
     { label: "Dashboard", href: "/teacher", icon: LayoutDashboard },
@@ -60,10 +66,13 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   accountant: [
     { label: "Dashboard", href: "/accountant", icon: LayoutDashboard },
+    { label: "Billing & Fees", href: "/accountant/billing", icon: Wallet },
+    { label: "HR & Payroll", href: "/accountant/payroll", icon: Banknote },
     { label: "My Profile", href: "/accountant/profile", icon: UserCircle },
   ],
   receptionist: [
     { label: "Dashboard", href: "/receptionist", icon: LayoutDashboard },
+    { label: "Billing & Fees", href: "/receptionist/billing", icon: Wallet },
     { label: "My Profile", href: "/receptionist/profile", icon: UserCircle },
   ],
   staff: [
@@ -76,6 +85,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "My Routine", href: "/student/routine", icon: CalendarClock },
     { label: "My Attendance", href: "/student/attendance", icon: ClipboardCheck },
     { label: "My Results", href: "/student/results", icon: ScrollText },
+    { label: "My Billing", href: "/student/billing", icon: Wallet },
     { label: "My Profile", href: "/student/profile", icon: UserCircle },
   ],
   guardian: [
@@ -83,6 +93,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Children's Routines", href: "/guardian/routine", icon: CalendarClock },
     { label: "Children's Attendance", href: "/guardian/attendance", icon: ClipboardCheck },
     { label: "Children's Results", href: "/guardian/results", icon: ScrollText },
+    { label: "Children's Billing", href: "/guardian/billing", icon: Wallet },
     { label: "My Profile", href: "/guardian/profile", icon: UserCircle },
   ],
 };
