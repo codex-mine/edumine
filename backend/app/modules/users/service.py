@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.audit import record_audit_log
@@ -224,5 +225,12 @@ async def hard_delete_user_account(db: AsyncSession, actor: CurrentUser, user_id
         entity_id=user_id,
         old_value={"role": role_name, "full_name": user.full_name, "email": user.email, "phone": user.phone},
     )
-    await repository.hard_delete_user(db, user)
-    await db.commit()
+    try:
+        await repository.hard_delete_user(db, user)
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise ConflictException(
+            "Cannot hard-delete an account with existing related records "
+            "(e.g. payroll, expenses, approvals) -- soft-delete instead to preserve them"
+        ) from exc

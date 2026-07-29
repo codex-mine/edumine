@@ -1,6 +1,7 @@
 import uuid
 from datetime import date
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.audit import record_audit_log
@@ -239,8 +240,15 @@ async def hard_delete_student(db: AsyncSession, actor: CurrentUser, student_id: 
         entity_id=student_id,
         old_value={"full_name": user.full_name, "admission_number": student.admission_number},
     )
-    await repository.hard_delete_student(db, user)
-    await db.commit()
+    try:
+        await repository.hard_delete_student(db, user)
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise ConflictException(
+            "Cannot hard-delete a student with existing financial or academic records "
+            "(e.g. invoices) -- soft-delete instead to preserve them"
+        ) from exc
 
 
 # --- Guardian linking ---------------------------------------------------

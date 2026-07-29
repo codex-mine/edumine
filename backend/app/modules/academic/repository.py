@@ -129,6 +129,18 @@ async def soft_delete_class(db: AsyncSession, entity: Class) -> None:
     await db.flush()
 
 
+async def count_sections_for_class(db: AsyncSession, class_id: uuid.UUID) -> int:
+    result = await db.execute(
+        select(func.count()).select_from(Section).where(Section.class_id == class_id, Section.deleted_at.is_(None))
+    )
+    return result.scalar_one()
+
+
+async def count_class_subjects_for_class(db: AsyncSession, class_id: uuid.UUID) -> int:
+    result = await db.execute(select(func.count()).select_from(ClassSubject).where(ClassSubject.class_id == class_id))
+    return result.scalar_one()
+
+
 # --- Rooms -----------------------------------------------------------------
 
 
@@ -213,6 +225,13 @@ async def soft_delete_subject(db: AsyncSession, entity: Subject) -> None:
     await db.flush()
 
 
+async def count_class_subjects_for_subject(db: AsyncSession, subject_id: uuid.UUID) -> int:
+    result = await db.execute(
+        select(func.count()).select_from(ClassSubject).where(ClassSubject.subject_id == subject_id)
+    )
+    return result.scalar_one()
+
+
 # --- Sections ----------------------------------------------------------------
 
 SectionRow = tuple[Section, Class, Room | None, Teacher | None, User | None]
@@ -289,6 +308,15 @@ async def update_section_fields(db: AsyncSession, entity: Section, fields: dict[
 async def soft_delete_section(db: AsyncSession, entity: Section) -> None:
     entity.deleted_at = datetime.now(timezone.utc)
     await db.flush()
+
+
+async def count_active_enrollments_for_section(db: AsyncSession, section_id: uuid.UUID) -> int:
+    result = await db.execute(
+        select(func.count())
+        .select_from(StudentEnrollment)
+        .where(StudentEnrollment.section_id == section_id, StudentEnrollment.status == EnrollmentStatus.active)
+    )
+    return result.scalar_one()
 
 
 # --- Class-Subjects (class-subject-teacher assignment) -----------------------

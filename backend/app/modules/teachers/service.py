@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.audit import record_audit_log
@@ -179,5 +180,12 @@ async def hard_delete_teacher(db: AsyncSession, actor: CurrentUser, teacher_id: 
         entity_id=teacher_id,
         old_value={"full_name": user.full_name, "email": user.email, "employee_code": teacher.employee_code},
     )
-    await repository.hard_delete_teacher(db, user)
-    await db.commit()
+    try:
+        await repository.hard_delete_teacher(db, user)
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise ConflictException(
+            "Cannot hard-delete a teacher with existing academic records "
+            "(e.g. routine slots, exam subjects, payroll) -- soft-delete instead to preserve them"
+        ) from exc

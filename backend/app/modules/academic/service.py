@@ -196,6 +196,10 @@ async def update_class(db: AsyncSession, actor: CurrentUser, class_id: uuid.UUID
 
 async def soft_delete_class(db: AsyncSession, actor: CurrentUser, class_id: uuid.UUID) -> None:
     entity = await get_class(db, class_id)
+    if await repository.count_sections_for_class(db, class_id) > 0:
+        raise ConflictException("Cannot delete a class that still has active sections")
+    if await repository.count_class_subjects_for_class(db, class_id) > 0:
+        raise ConflictException("Cannot delete a class that still has assigned class-subjects")
     await repository.soft_delete_class(db, entity)
     await record_audit_log(db, actor_id=actor.id, action="soft_delete", entity_type="class", entity_id=class_id)
     await db.commit()
@@ -289,6 +293,8 @@ async def update_subject(
 
 async def soft_delete_subject(db: AsyncSession, actor: CurrentUser, subject_id: uuid.UUID) -> None:
     entity = await get_subject(db, subject_id)
+    if await repository.count_class_subjects_for_subject(db, subject_id) > 0:
+        raise ConflictException("Cannot delete a subject that is still assigned to a class")
     await repository.soft_delete_subject(db, entity)
     await record_audit_log(db, actor_id=actor.id, action="soft_delete", entity_type="subject", entity_id=subject_id)
     await db.commit()
@@ -383,6 +389,8 @@ async def update_section(
 
 async def soft_delete_section(db: AsyncSession, actor: CurrentUser, section_id: uuid.UUID) -> None:
     section, _, _, _, _ = await get_section(db, section_id)
+    if await repository.count_active_enrollments_for_section(db, section_id) > 0:
+        raise ConflictException("Cannot delete a section that still has actively enrolled students")
     await repository.soft_delete_section(db, section)
     await record_audit_log(db, actor_id=actor.id, action="soft_delete", entity_type="section", entity_id=section_id)
     await db.commit()

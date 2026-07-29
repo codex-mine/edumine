@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.audit import record_audit_log
@@ -148,5 +149,11 @@ async def hard_delete_guardian(db: AsyncSession, actor: CurrentUser, guardian_id
         entity_id=guardian_id,
         old_value={"full_name": user.full_name, "email": user.email},
     )
-    await repository.hard_delete_guardian(db, user)
-    await db.commit()
+    try:
+        await repository.hard_delete_guardian(db, user)
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise ConflictException(
+            "Cannot hard-delete a guardian due to existing related records -- soft-delete instead to preserve them"
+        ) from exc
