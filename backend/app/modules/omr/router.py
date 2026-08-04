@@ -1,6 +1,9 @@
+import io
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Path, Query, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.dependencies import CurrentUser, get_db_session, require_permission
@@ -14,6 +17,7 @@ from app.modules.omr.schemas import (
     BatchResponse,
     CreateBatchRequest,
     EligibilityResponse,
+    PatchSheetRequest,
     SaveAnswerKeyRequest,
     SheetDetailResponse,
     SheetResponse,
@@ -213,3 +217,80 @@ async def get_sheet(
         data=SheetDetailResponse.model_validate(sheet).model_dump(mode="json"),
         message="OMR sheet retrieved",
     )
+
+
+# --- Review and correction ----------------------------------------------------
+
+
+@router.patch("/sheets/{sheet_id}", dependencies=[Depends(require_permission("omr.review"))])
+async def patch_sheet(
+    sheet_id: uuid.UUID,
+    payload: PatchSheetRequest,
+    current_user: CurrentUser = Depends(require_permission("omr.review")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    sheet = await service.patch_sheet(db, current_user, sheet_id, payload)
+    return success_response(
+        data=SheetDetailResponse.model_validate(sheet).model_dump(mode="json"),
+        message="OMR sheet updated",
+    )
+
+
+@router.post("/sheets/{sheet_id}/reprocess", dependencies=[Depends(require_permission("omr.review"))])
+async def reprocess_sheet(
+    sheet_id: uuid.UUID,
+    reset_match: bool = Query(
+        default=False,
+        description="Discard a manual student assignment and re-match from the sheet",
+    ),
+    current_user: CurrentUser = Depends(require_permission("omr.review")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    sheet = await service.reprocess_sheet(db, current_user, sheet_id, reset_match=reset_match)
+    return success_response(
+        data=SheetDetailResponse.model_validate(sheet).model_dump(mode="json"),
+        message="OMR sheet reprocessed",
+    )
+
+
+@router.get("/batches/{batch_id}/export", dependencies=[Depends(require_permission("omr.scan"))])
+async def export_batch(
+    batch_id: uuid.UUID,
+    format: Literal["csv", "excel"] = Query(default="excel"),
+    current_user: CurrentUser = Depends(require_permission("omr.scan")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    payload, filename, media_type = await service.export_batch(db, current_user, batch_id, format)
+    return StreamingResponse(
+        io.BytesIO(payload),
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.post("/batches/{batch_id}/apply", dependencies=[Depends(require_permission("omr.apply"))])
+async def apply_batch(
+    batch_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_permission("omr.apply")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    result = await service.apply_batch(db, current_user, batch_id)
+    return success_response(
+        data={
+            "batch": _batch_payload(result["batch"]),
+            "applied_count": result["applied_count"],
+            "unscanned": result["unscanned"],
+            "skipped": result["skipped"],
+        },
+        message=f"Applied {result['applied_count']} scanned result(s) to the marks roster",
+    )
+
+
+@router.delete("/sheets/{sheet_id}", dependencies=[Depends(require_permission("omr.review"))])
+async def delete_sheet(
+    sheet_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_permission("omr.review")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    await service.delete_sheet(db, current_user, sheet_id)
+    return success_response(message="OMR sheet deleted")

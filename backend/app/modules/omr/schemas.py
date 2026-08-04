@@ -124,6 +124,38 @@ class CreateBatchRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
 
 
+class PatchSheetRequest(BaseModel):
+    """A reviewer's correction to a scanned sheet. Every field is optional, but
+    at least one must be supplied — an empty PATCH is a mistake, not a no-op."""
+
+    student_id: uuid.UUID | None = None
+    answer_overrides: dict[str, str] | None = None
+    review_note: str | None = Field(default=None, max_length=2000)
+
+    @model_validator(mode="after")
+    def _validate(self) -> "PatchSheetRequest":
+        if self.student_id is None and self.answer_overrides is None and self.review_note is None:
+            raise ValueError(
+                "Supply at least one of student_id, answer_overrides, or review_note"
+            )
+
+        if self.answer_overrides is not None:
+            if not self.answer_overrides:
+                raise ValueError("answer_overrides cannot be empty")
+            normalized: dict[str, str] = {}
+            for raw_question, option in self.answer_overrides.items():
+                try:
+                    question = int(str(raw_question).strip())
+                except ValueError:
+                    raise ValueError(f"Question key '{raw_question}' is not a number") from None
+                if question < 1:
+                    raise ValueError(f"Question {question} is out of range")
+                normalized[str(question)] = normalize_option(option, field=f"question {question}")
+            self.answer_overrides = normalized
+
+        return self
+
+
 class BatchResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -193,3 +225,4 @@ class EligibilityResponse(BaseModel):
     section_name: str | None = None
     reason: str | None = None
     answer_key_set_codes: list[str] = Field(default_factory=list)
+    has_applied_batch: bool = False

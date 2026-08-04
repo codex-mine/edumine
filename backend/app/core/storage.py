@@ -18,6 +18,7 @@ ID under that provider, and the stored path relative to `upload_dir` under the
 local one.
 """
 
+import urllib.request
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -206,3 +207,28 @@ async def delete_asset(public_id: str) -> None:
         await run_in_threadpool(_cloudinary_destroy_sync, public_id)
         return
     _local_path(public_id).unlink(missing_ok=True)
+
+
+def _fetch_remote_sync(url: str) -> bytes:
+    """Blocking — always call via run_in_threadpool."""
+    if not url.lower().startswith("https://"):
+        # These URLs come back from our own uploads, but they round-trip through
+        # the database; refusing anything but https keeps a tampered row from
+        # turning this into a file:// or gopher:// read.
+        raise ValidationException(
+            "Stored asset URL is not an https URL",
+            details=[{"field": "url", "issue": "Unsupported scheme"}],
+        )
+    with urllib.request.urlopen(url, timeout=30) as response:  # noqa: S310 — scheme checked above
+        return response.read()
+
+
+async def fetch_asset(public_id: str, url: str) -> bytes:
+    """Read a stored asset back.
+
+    Needed to re-run the OMR pipeline over a sheet that was already uploaded,
+    without asking the user to re-scan it.
+    """
+    if settings.storage_provider == "cloudinary":
+        return await run_in_threadpool(_fetch_remote_sync, url)
+    return _local_path(public_id).read_bytes()

@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.enums import OmrBatchStatus, OmrMatchStatus, OmrSheetStatus
+from app.modules.academic.models import StudentEnrollment
 from app.modules.auth.models import User
 from app.modules.omr.models import OmrAnswerKey, OmrBatch, OmrSheet
 from app.modules.students.models import Student
@@ -230,14 +231,62 @@ async def list_sheets(
     return list(result.all())
 
 
-async def list_claimed_student_ids(db: AsyncSession, batch_id: uuid.UUID) -> set[uuid.UUID]:
-    """Students already matched by a sheet in this batch."""
+async def list_claimed_student_ids(
+    db: AsyncSession, batch_id: uuid.UUID, *, exclude_sheet_id: uuid.UUID | None = None
+) -> set[uuid.UUID]:
+    """Students already matched by a sheet in this batch.
+
+    `exclude_sheet_id` skips the sheet being edited, so re-saving a sheet does
+    not see itself as the duplicate.
+    """
+    query = select(OmrSheet.student_id).where(
+        OmrSheet.batch_id == batch_id, OmrSheet.student_id.is_not(None)
+    )
+    if exclude_sheet_id is not None:
+        query = query.where(OmrSheet.id != exclude_sheet_id)
+    result = await db.execute(query)
+    return {row[0] for row in result.all()}
+
+
+async def count_sheets_needing_attention(db: AsyncSession, batch_id: uuid.UUID) -> int:
+    """Sheets that still block the batch from being ready to apply."""
     result = await db.execute(
-        select(OmrSheet.student_id).where(
-            OmrSheet.batch_id == batch_id, OmrSheet.student_id.is_not(None)
+        select(func.count())
+        .select_from(OmrSheet)
+        .where(
+            OmrSheet.batch_id == batch_id,
+            OmrSheet.status.in_([OmrSheetStatus.pending, OmrSheetStatus.needs_review]),
         )
     )
-    return {row[0] for row in result.all()}
+    return result.scalar_one()
+
+
+async def delete_sheet(db: AsyncSession, entity: OmrSheet) -> None:
+    await db.delete(entity)
+    await db.flush()
+
+
+async def list_sheets_for_export(
+    db: AsyncSession, batch_id: uuid.UUID, *, academic_year_id: uuid.UUID
+) -> list[tuple[OmrSheet, Student | None, User | None, StudentEnrollment | None]]:
+    """Every sheet in the batch, with its resolved student's identifying details.
+
+    Outer joins throughout: unmatched and failed sheets belong in the export too,
+    labelled rather than dropped.
+    """
+    result = await db.execute(
+        select(OmrSheet, Student, User, StudentEnrollment)
+        .outerjoin(Student, Student.id == OmrSheet.student_id)
+        .outerjoin(User, User.id == Student.user_id)
+        .outerjoin(
+            StudentEnrollment,
+            (StudentEnrollment.student_id == Student.id)
+            & (StudentEnrollment.academic_year_id == academic_year_id),
+        )
+        .where(OmrSheet.batch_id == batch_id)
+        .order_by(OmrSheet.created_at.asc())
+    )
+    return list(result.all())
 
 
 async def list_sheet_assets(db: AsyncSession, batch_id: uuid.UUID) -> list[tuple[str, str | None]]:
