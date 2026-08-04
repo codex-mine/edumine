@@ -18,6 +18,10 @@ os.environ["DEBUG"] = "false"
 # request here comes through the same ASGITransport "client". Raised for the
 # test environment only; production's real LOGIN_RATE_LIMIT is untouched.
 os.environ["LOGIN_RATE_LIMIT"] = "1000/minute"
+# Likewise for OMR sheet upload: the OMR workflow suite posts sheets far more
+# often than a real user would, and every request shares one slowapi bucket
+# keyed by remote address. Production's real OMR_UPLOAD_RATE_LIMIT is untouched.
+os.environ["OMR_UPLOAD_RATE_LIMIT"] = "1000/minute"
 
 import subprocess
 import sys

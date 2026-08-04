@@ -108,6 +108,66 @@ async def test_rbac_boundary(guard, role_clients, role_permission_map):
             )
 
 
+# --- OMR module (Phase 10 hardening) -------------------------------------------
+#
+# The sweep above already exercises every OMR route by reflection. These add the
+# two things reflection alone cannot give: proof that no OMR route was added
+# *without* a guard (an unguarded route is invisible to the sweep, not a
+# failure of it), and an explicit, readable statement of who may scan.
+
+OMR_PREFIX = "/api/v1/omr"
+OMR_PERMISSIONS = {"omr.scan", "omr.review", "omr.apply", "omr.manage_keys"}
+OMR_GRANTED_ROLES = {"admin", "teacher"}
+OMR_DENIED_ROLES = {"accountant", "receptionist", "staff", "student", "guardian"}
+
+
+def test_every_omr_route_declares_a_guard():
+    from tests.rbac_matrix import discover_routes_under
+
+    declared = {(g.method, g.path) for g in GUARDED_ROUTES}
+    unguarded = [r for r in discover_routes_under(fastapi_app, OMR_PREFIX) if r not in declared]
+
+    assert not unguarded, f"OMR routes with no RBAC guard: {unguarded}"
+
+
+def test_omr_routes_are_guarded_only_by_omr_permissions():
+    """A stray non-OMR guard (or a role guard) on an OMR route would let the
+    wrong people scan sheets, so pin the guard codes themselves."""
+    omr_guards = [g for g in GUARDED_ROUTES if g.path.startswith(OMR_PREFIX)]
+    assert omr_guards, "no OMR routes were discovered — has the router moved?"
+
+    for guard in omr_guards:
+        assert guard.kind == "permission", f"{guard.id} is guarded by role, expected a permission"
+        assert set(guard.codes) <= OMR_PERMISSIONS, f"{guard.id} uses unexpected codes {guard.codes}"
+
+    # Every one of the four permissions is actually in use somewhere.
+    used = {code for guard in omr_guards for code in guard.codes}
+    assert used == OMR_PERMISSIONS, f"unused OMR permissions: {OMR_PERMISSIONS - used}"
+
+
+async def test_omr_permissions_are_granted_to_the_expected_roles(role_permission_map):
+    for code in OMR_PERMISSIONS:
+        holders = {role for role, codes in role_permission_map.items() if code in codes}
+        assert holders == OMR_GRANTED_ROLES, f"{code} is held by {holders}, expected {OMR_GRANTED_ROLES}"
+
+
+@pytest.mark.parametrize("role", sorted(OMR_DENIED_ROLES))
+async def test_roles_without_omr_grants_are_denied_every_omr_route(role, role_clients):
+    """Students and guardians in particular must never reach the scanning
+    surface — it writes into the marks roster."""
+    client = role_clients[role]
+    omr_guards = [g for g in GUARDED_ROUTES if g.path.startswith(OMR_PREFIX)]
+
+    for guard in omr_guards:
+        path = fill_path(guard.path)
+        resp = await client.request(
+            guard.method, path, json={} if guard.method in ("POST", "PATCH", "PUT") else None
+        )
+        assert resp.status_code == 403, (
+            f"{role} reached {guard.id} with {resp.status_code}, expected 403"
+        )
+
+
 async def test_unauthenticated_requests_are_rejected(anon_client):
     """Every guarded route must also refuse a request with no session at all."""
     sample = GUARDED_ROUTES[:40]  # representative slice across modules, not all 171, to keep this fast

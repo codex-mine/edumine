@@ -2,13 +2,15 @@ import io
 import uuid
 from typing import Literal
 
-from fastapi import APIRouter, Depends, File, Path, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Path, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.dependencies import CurrentUser, get_db_session, require_permission
 from app.common.enums import OmrBatchStatus, OmrMatchStatus, OmrSheetStatus
+from app.core.config import get_settings
 from app.core.exceptions import ValidationException
+from app.core.rate_limiter import limiter
 from app.core.response import success_response
 from app.modules.omr import service
 from app.modules.omr.models import OmrAnswerKey, OmrBatch, OmrSheet
@@ -23,6 +25,8 @@ from app.modules.omr.schemas import (
     SheetResponse,
     normalize_set_code,
 )
+
+settings = get_settings()
 
 router = APIRouter(prefix="/omr", tags=["omr"])
 
@@ -170,7 +174,9 @@ async def delete_batch(
 
 
 @router.post("/batches/{batch_id}/sheets", dependencies=[Depends(require_permission("omr.scan"))])
+@limiter.limit(settings.omr_upload_rate_limit)
 async def upload_sheets(
+    request: Request,
     batch_id: uuid.UUID,
     images: list[UploadFile] = File(...),
     current_user: CurrentUser = Depends(require_permission("omr.scan")),

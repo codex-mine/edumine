@@ -92,6 +92,10 @@ class Settings(BaseSettings):
     omr_template_name: str = "plus_coaching_template"
     omr_max_sheets_per_request: int = 20
     omr_save_annotated_images: bool = True
+    # Sheet upload is by far the most expensive route in the application: each
+    # request decodes, aligns, and reads up to `omr_max_sheets_per_request`
+    # high-resolution images, plus two Cloudinary round-trips per sheet.
+    omr_upload_rate_limit: str = "20/minute"
 
     @model_validator(mode="after")
     def _validate_storage(self) -> "Settings":

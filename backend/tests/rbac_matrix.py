@@ -65,6 +65,23 @@ def discover_guarded_routes(app) -> list[RouteGuard]:
     return guards
 
 
+def discover_routes_under(app, prefix: str) -> list[tuple[str, str]]:
+    """Every (method, path) under `prefix`, guarded or not.
+
+    `discover_guarded_routes` can only report routes that declare a guard, so a
+    route added with no guard at all would be silently skipped by the boundary
+    sweep rather than failing it. Pairing the two lets a test assert that a
+    whole module's surface is actually gated.
+    """
+    routes: list[tuple[str, str]] = []
+    for route in app.routes:
+        if not isinstance(route, APIRoute) or not route.path.startswith(prefix):
+            continue
+        for method in sorted((route.methods or set()) - {"HEAD", "OPTIONS"}):
+            routes.append((method, route.path))
+    return routes
+
+
 def fill_path(path: str) -> str:
     """Substitute every `{param}` in a route path with a fresh random UUID string.
 
