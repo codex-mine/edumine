@@ -84,6 +84,15 @@ class Settings(BaseSettings):
     upload_base_url: str = "/uploads"
     max_upload_size_mb: int = 10
 
+    # OMR sheet scanning. `omr_template_name` selects a calibrated bubble template
+    # from app/modules/omr/templates/; batches snapshot it so a second school's
+    # sheet layout can be added without a migration. Sheets are processed
+    # synchronously (~1s each), so the per-request cap bounds how long an upload
+    # can hold a request open.
+    omr_template_name: str = "plus_coaching_template"
+    omr_max_sheets_per_request: int = 20
+    omr_save_annotated_images: bool = True
+
     @model_validator(mode="after")
     def _validate_storage(self) -> "Settings":
         provider = self.storage_provider.strip().lower()
