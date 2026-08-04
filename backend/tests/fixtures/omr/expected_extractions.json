@@ -1,0 +1,2074 @@
+{
+  "blank": {
+    "alignment_method": "markers",
+    "answers": {
+      "1": {
+        "all_scores": {
+          "GA": 0.1883,
+          "GHA": 0.076,
+          "KA": 0.2113,
+          "KHA": 0.0817
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2113,
+        "status": "blank"
+      },
+      "10": {
+        "all_scores": {
+          "GA": 0.1884,
+          "GHA": 0.0823,
+          "KA": 0.2159,
+          "KHA": 0.0875
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2159,
+        "status": "blank"
+      },
+      "11": {
+        "all_scores": {
+          "GA": 0.1877,
+          "GHA": 0.0834,
+          "KA": 0.2087,
+          "KHA": 0.0743
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2087,
+        "status": "blank"
+      },
+      "12": {
+        "all_scores": {
+          "GA": 0.1929,
+          "GHA": 0.0961,
+          "KA": 0.2226,
+          "KHA": 0.0839
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2226,
+        "status": "blank"
+      },
+      "13": {
+        "all_scores": {
+          "GA": 0.1942,
+          "GHA": 0.0934,
+          "KA": 0.2199,
+          "KHA": 0.0843
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2199,
+        "status": "blank"
+      },
+      "14": {
+        "all_scores": {
+          "GA": 0.1888,
+          "GHA": 0.0816,
+          "KA": 0.2154,
+          "KHA": 0.074
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2154,
+        "status": "blank"
+      },
+      "15": {
+        "all_scores": {
+          "GA": 0.1914,
+          "GHA": 0.0901,
+          "KA": 0.2199,
+          "KHA": 0.0801
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2199,
+        "status": "blank"
+      },
+      "16": {
+        "all_scores": {
+          "GA": 0.1888,
+          "GHA": 0.0886,
+          "KA": 0.2146,
+          "KHA": 0.0736
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2146,
+        "status": "blank"
+      },
+      "17": {
+        "all_scores": {
+          "GA": 0.1839,
+          "GHA": 0.0828,
+          "KA": 0.2064,
+          "KHA": 0.0701
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2064,
+        "status": "blank"
+      },
+      "18": {
+        "all_scores": {
+          "GA": 0.1918,
+          "GHA": 0.0893,
+          "KA": 0.2163,
+          "KHA": 0.0802
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2163,
+        "status": "blank"
+      },
+      "19": {
+        "all_scores": {
+          "GA": 0.1905,
+          "GHA": 0.0849,
+          "KA": 0.216,
+          "KHA": 0.0773
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.216,
+        "status": "blank"
+      },
+      "2": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.092,
+          "KA": 0.2242,
+          "KHA": 0.0916
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2242,
+        "status": "blank"
+      },
+      "20": {
+        "all_scores": {
+          "GA": 0.1906,
+          "GHA": 0.0846,
+          "KA": 0.2129,
+          "KHA": 0.079
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2129,
+        "status": "blank"
+      },
+      "21": {
+        "all_scores": {
+          "GA": 0.1943,
+          "GHA": 0.081,
+          "KA": 0.2095,
+          "KHA": 0.0814
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2095,
+        "status": "blank"
+      },
+      "22": {
+        "all_scores": {
+          "GA": 0.2009,
+          "GHA": 0.0947,
+          "KA": 0.2224,
+          "KHA": 0.0905
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2224,
+        "status": "blank"
+      },
+      "23": {
+        "all_scores": {
+          "GA": 0.1984,
+          "GHA": 0.0912,
+          "KA": 0.2198,
+          "KHA": 0.0903
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2198,
+        "status": "blank"
+      },
+      "24": {
+        "all_scores": {
+          "GA": 0.1933,
+          "GHA": 0.0791,
+          "KA": 0.215,
+          "KHA": 0.0819
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.215,
+        "status": "blank"
+      },
+      "25": {
+        "all_scores": {
+          "GA": 0.1967,
+          "GHA": 0.0889,
+          "KA": 0.2203,
+          "KHA": 0.0855
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2203,
+        "status": "blank"
+      },
+      "26": {
+        "all_scores": {
+          "GA": 0.1929,
+          "GHA": 0.0854,
+          "KA": 0.2164,
+          "KHA": 0.0814
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2164,
+        "status": "blank"
+      },
+      "27": {
+        "all_scores": {
+          "GA": 0.1905,
+          "GHA": 0.0795,
+          "KA": 0.2089,
+          "KHA": 0.0768
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2089,
+        "status": "blank"
+      },
+      "28": {
+        "all_scores": {
+          "GA": 0.1962,
+          "GHA": 0.0866,
+          "KA": 0.2151,
+          "KHA": 0.0855
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2151,
+        "status": "blank"
+      },
+      "29": {
+        "all_scores": {
+          "GA": 0.1966,
+          "GHA": 0.0851,
+          "KA": 0.2153,
+          "KHA": 0.0854
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2153,
+        "status": "blank"
+      },
+      "3": {
+        "all_scores": {
+          "GA": 0.1921,
+          "GHA": 0.0873,
+          "KA": 0.2224,
+          "KHA": 0.0924
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2224,
+        "status": "blank"
+      },
+      "30": {
+        "all_scores": {
+          "GA": 0.1962,
+          "GHA": 0.0861,
+          "KA": 0.2135,
+          "KHA": 0.0856
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2135,
+        "status": "blank"
+      },
+      "31": {
+        "all_scores": {
+          "GA": 0.1885,
+          "GHA": 0.0813,
+          "KA": 0.2139,
+          "KHA": 0.0826
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2139,
+        "status": "blank"
+      },
+      "32": {
+        "all_scores": {
+          "GA": 0.1917,
+          "GHA": 0.0951,
+          "KA": 0.2267,
+          "KHA": 0.0886
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2267,
+        "status": "blank"
+      },
+      "33": {
+        "all_scores": {
+          "GA": 0.1932,
+          "GHA": 0.0898,
+          "KA": 0.2233,
+          "KHA": 0.0899
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2233,
+        "status": "blank"
+      },
+      "34": {
+        "all_scores": {
+          "GA": 0.1877,
+          "GHA": 0.0799,
+          "KA": 0.2201,
+          "KHA": 0.0831
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2201,
+        "status": "blank"
+      },
+      "35": {
+        "all_scores": {
+          "GA": 0.1909,
+          "GHA": 0.0867,
+          "KA": 0.2244,
+          "KHA": 0.0865
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2244,
+        "status": "blank"
+      },
+      "36": {
+        "all_scores": {
+          "GA": 0.1875,
+          "GHA": 0.0852,
+          "KA": 0.2206,
+          "KHA": 0.0808
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2206,
+        "status": "blank"
+      },
+      "37": {
+        "all_scores": {
+          "GA": 0.1828,
+          "GHA": 0.0793,
+          "KA": 0.2138,
+          "KHA": 0.0763
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2138,
+        "status": "blank"
+      },
+      "38": {
+        "all_scores": {
+          "GA": 0.1908,
+          "GHA": 0.0861,
+          "KA": 0.2209,
+          "KHA": 0.0873
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2209,
+        "status": "blank"
+      },
+      "39": {
+        "all_scores": {
+          "GA": 0.19,
+          "GHA": 0.0852,
+          "KA": 0.2203,
+          "KHA": 0.084
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2203,
+        "status": "blank"
+      },
+      "4": {
+        "all_scores": {
+          "GA": 0.1877,
+          "GHA": 0.0777,
+          "KA": 0.2179,
+          "KHA": 0.0838
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2179,
+        "status": "blank"
+      },
+      "40": {
+        "all_scores": {
+          "GA": 0.1903,
+          "GHA": 0.084,
+          "KA": 0.2178,
+          "KHA": 0.0833
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2178,
+        "status": "blank"
+      },
+      "5": {
+        "all_scores": {
+          "GA": 0.1905,
+          "GHA": 0.0828,
+          "KA": 0.2215,
+          "KHA": 0.0881
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2215,
+        "status": "blank"
+      },
+      "6": {
+        "all_scores": {
+          "GA": 0.1877,
+          "GHA": 0.0811,
+          "KA": 0.2172,
+          "KHA": 0.0837
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2172,
+        "status": "blank"
+      },
+      "7": {
+        "all_scores": {
+          "GA": 0.1827,
+          "GHA": 0.0748,
+          "KA": 0.2086,
+          "KHA": 0.0795
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2086,
+        "status": "blank"
+      },
+      "8": {
+        "all_scores": {
+          "GA": 0.1912,
+          "GHA": 0.0831,
+          "KA": 0.218,
+          "KHA": 0.0882
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.218,
+        "status": "blank"
+      },
+      "9": {
+        "all_scores": {
+          "GA": 0.1901,
+          "GHA": 0.0828,
+          "KA": 0.2185,
+          "KHA": 0.0867
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2185,
+        "status": "blank"
+      }
+    },
+    "metadata": {
+      "class_value": {
+        "fill_score": 0.2312,
+        "status": "blank",
+        "value": null
+      },
+      "roll_number": {
+        "digits": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "roll_number": "??????",
+        "status": "incomplete"
+      },
+      "set_code": {
+        "fill_score": 0.175,
+        "status": "blank",
+        "value": null
+      },
+      "subject_code": {
+        "digits": [
+          null,
+          null,
+          null
+        ],
+        "status": "incomplete",
+        "subject_code": "???"
+      }
+    }
+  },
+  "omr1": {
+    "alignment_method": "markers",
+    "answers": {
+      "1": {
+        "all_scores": {
+          "GA": 0.1892,
+          "GHA": 0.0784,
+          "KA": 0.7827,
+          "KHA": 0.0836
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.7827,
+        "status": "answered"
+      },
+      "10": {
+        "all_scores": {
+          "GA": 0.6844,
+          "GHA": 0.0837,
+          "KA": 0.2158,
+          "KHA": 0.0894
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6844,
+        "status": "answered"
+      },
+      "11": {
+        "all_scores": {
+          "GA": 0.1897,
+          "GHA": 0.0856,
+          "KA": 0.2083,
+          "KHA": 0.0759
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2083,
+        "status": "blank"
+      },
+      "12": {
+        "all_scores": {
+          "GA": 0.1935,
+          "GHA": 0.098,
+          "KA": 0.6582,
+          "KHA": 0.0849
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.6582,
+        "status": "answered"
+      },
+      "13": {
+        "all_scores": {
+          "GA": 0.1946,
+          "GHA": 0.0985,
+          "KA": 0.2201,
+          "KHA": 0.0867
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2201,
+        "status": "blank"
+      },
+      "14": {
+        "all_scores": {
+          "GA": 0.1891,
+          "GHA": 0.0839,
+          "KA": 0.2145,
+          "KHA": 0.6625
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6625,
+        "status": "answered"
+      },
+      "15": {
+        "all_scores": {
+          "GA": 0.1916,
+          "GHA": 0.0917,
+          "KA": 0.6253,
+          "KHA": 0.0818
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.6253,
+        "status": "answered"
+      },
+      "16": {
+        "all_scores": {
+          "GA": 0.1891,
+          "GHA": 0.09,
+          "KA": 0.2143,
+          "KHA": 0.0749
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2143,
+        "status": "blank"
+      },
+      "17": {
+        "all_scores": {
+          "GA": 0.1847,
+          "GHA": 0.5217,
+          "KA": 0.2065,
+          "KHA": 0.0713
+        },
+        "answer": "GHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5217,
+        "status": "answered"
+      },
+      "18": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0936,
+          "KA": 0.2164,
+          "KHA": 0.6061
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6061,
+        "status": "answered"
+      },
+      "19": {
+        "all_scores": {
+          "GA": 0.1921,
+          "GHA": 0.0893,
+          "KA": 0.2155,
+          "KHA": 0.0794
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2155,
+        "status": "blank"
+      },
+      "2": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0926,
+          "KA": 0.2244,
+          "KHA": 0.6711
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6711,
+        "status": "answered"
+      },
+      "20": {
+        "all_scores": {
+          "GA": 0.1918,
+          "GHA": 0.0874,
+          "KA": 0.2124,
+          "KHA": 0.6803
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6803,
+        "status": "answered"
+      },
+      "21": {
+        "all_scores": {
+          "GA": 0.1977,
+          "GHA": 0.4636,
+          "KA": 0.2092,
+          "KHA": 0.0824
+        },
+        "answer": "GHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4636,
+        "status": "answered"
+      },
+      "22": {
+        "all_scores": {
+          "GA": 0.4976,
+          "GHA": 0.0983,
+          "KA": 0.2219,
+          "KHA": 0.0912
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4976,
+        "status": "answered"
+      },
+      "23": {
+        "all_scores": {
+          "GA": 0.1988,
+          "GHA": 0.0967,
+          "KA": 0.5151,
+          "KHA": 0.0923
+        },
+        "answer": "KA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5151,
+        "status": "answered"
+      },
+      "24": {
+        "all_scores": {
+          "GA": 0.1972,
+          "GHA": 0.0819,
+          "KA": 0.2154,
+          "KHA": 0.4038
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4038,
+        "status": "answered"
+      },
+      "25": {
+        "all_scores": {
+          "GA": 0.1979,
+          "GHA": 0.0915,
+          "KA": 0.2201,
+          "KHA": 0.0875
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2201,
+        "status": "blank"
+      },
+      "26": {
+        "all_scores": {
+          "GA": 0.1938,
+          "GHA": 0.0866,
+          "KA": 0.2159,
+          "KHA": 0.3858
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.3858,
+        "status": "answered"
+      },
+      "27": {
+        "all_scores": {
+          "GA": 0.4561,
+          "GHA": 0.0799,
+          "KA": 0.2089,
+          "KHA": 0.0771
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4561,
+        "status": "answered"
+      },
+      "28": {
+        "all_scores": {
+          "GA": 0.2002,
+          "GHA": 0.4285,
+          "KA": 0.2149,
+          "KHA": 0.0895
+        },
+        "answer": "GHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4285,
+        "status": "answered"
+      },
+      "29": {
+        "all_scores": {
+          "GA": 0.495,
+          "GHA": 0.0896,
+          "KA": 0.2153,
+          "KHA": 0.0869
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.495,
+        "status": "answered"
+      },
+      "3": {
+        "all_scores": {
+          "GA": 0.6335,
+          "GHA": 0.0913,
+          "KA": 0.2227,
+          "KHA": 0.0928
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6335,
+        "status": "answered"
+      },
+      "30": {
+        "all_scores": {
+          "GA": 0.1987,
+          "GHA": 0.0869,
+          "KA": 0.5139,
+          "KHA": 0.0878
+        },
+        "answer": "KA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5139,
+        "status": "answered"
+      },
+      "31": {
+        "all_scores": {
+          "GA": 0.1893,
+          "GHA": 0.7488,
+          "KA": 0.2138,
+          "KHA": 0.0832
+        },
+        "answer": "GHA",
+        "confidence": "HIGH",
+        "fill_score": 0.7488,
+        "status": "answered"
+      },
+      "32": {
+        "all_scores": {
+          "GA": 0.1925,
+          "GHA": 0.0955,
+          "KA": 0.5905,
+          "KHA": 0.0924
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.5905,
+        "status": "answered"
+      },
+      "33": {
+        "all_scores": {
+          "GA": 0.1937,
+          "GHA": 0.6352,
+          "KA": 0.2238,
+          "KHA": 0.0925
+        },
+        "answer": "GHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6352,
+        "status": "answered"
+      },
+      "34": {
+        "all_scores": {
+          "GA": 0.1888,
+          "GHA": 0.0813,
+          "KA": 0.6755,
+          "KHA": 0.0848
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.6755,
+        "status": "answered"
+      },
+      "35": {
+        "all_scores": {
+          "GA": 0.1913,
+          "GHA": 0.0879,
+          "KA": 0.2242,
+          "KHA": 0.0877
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2242,
+        "status": "blank"
+      },
+      "36": {
+        "all_scores": {
+          "GA": 0.1882,
+          "GHA": 0.0847,
+          "KA": 0.2203,
+          "KHA": 0.6499
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6499,
+        "status": "answered"
+      },
+      "37": {
+        "all_scores": {
+          "GA": 0.1831,
+          "GHA": 0.0817,
+          "KA": 0.2136,
+          "KHA": 0.079
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2136,
+        "status": "blank"
+      },
+      "38": {
+        "all_scores": {
+          "GA": 0.6644,
+          "GHA": 0.0882,
+          "KA": 0.2208,
+          "KHA": 0.0893
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6644,
+        "status": "answered"
+      },
+      "39": {
+        "all_scores": {
+          "GA": 0.1902,
+          "GHA": 0.0854,
+          "KA": 0.22,
+          "KHA": 0.0856
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.22,
+        "status": "blank"
+      },
+      "4": {
+        "all_scores": {
+          "GA": 0.1885,
+          "GHA": 0.0772,
+          "KA": 0.6351,
+          "KHA": 0.0851
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.6351,
+        "status": "answered"
+      },
+      "40": {
+        "all_scores": {
+          "GA": 0.5779,
+          "GHA": 0.0862,
+          "KA": 0.2176,
+          "KHA": 0.0864
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.5779,
+        "status": "answered"
+      },
+      "5": {
+        "all_scores": {
+          "GA": 0.1906,
+          "GHA": 0.4232,
+          "KA": 0.2227,
+          "KHA": 0.0893
+        },
+        "answer": "GHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4232,
+        "status": "answered"
+      },
+      "6": {
+        "all_scores": {
+          "GA": 0.4974,
+          "GHA": 0.0843,
+          "KA": 0.2177,
+          "KHA": 0.085
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4974,
+        "status": "answered"
+      },
+      "7": {
+        "all_scores": {
+          "GA": 0.1841,
+          "GHA": 0.0758,
+          "KA": 0.2091,
+          "KHA": 0.082
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2091,
+        "status": "blank"
+      },
+      "8": {
+        "all_scores": {
+          "GA": 0.5104,
+          "GHA": 0.0851,
+          "KA": 0.2177,
+          "KHA": 0.0905
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5104,
+        "status": "answered"
+      },
+      "9": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0846,
+          "KA": 0.2184,
+          "KHA": 0.7771
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.7771,
+        "status": "answered"
+      }
+    },
+    "metadata": {
+      "class_value": {
+        "fill_score": 0.5772,
+        "status": "answered",
+        "value": 9
+      },
+      "roll_number": {
+        "digits": [
+          0,
+          1,
+          1,
+          2,
+          2,
+          3
+        ],
+        "roll_number": "011223",
+        "status": "complete"
+      },
+      "set_code": {
+        "fill_score": 0.6209,
+        "status": "answered",
+        "value": "Ga"
+      },
+      "subject_code": {
+        "digits": [
+          4,
+          5,
+          5
+        ],
+        "status": "complete",
+        "subject_code": "455"
+      }
+    }
+  },
+  "omr2": {
+    "alignment_method": "markers",
+    "answers": {
+      "1": {
+        "all_scores": {
+          "GA": 0.1894,
+          "GHA": 0.0784,
+          "KA": 0.2108,
+          "KHA": 0.658
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.658,
+        "status": "answered"
+      },
+      "10": {
+        "all_scores": {
+          "GA": 0.19,
+          "GHA": 0.0837,
+          "KA": 0.2158,
+          "KHA": 0.5737
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.5737,
+        "status": "answered"
+      },
+      "11": {
+        "all_scores": {
+          "GA": 0.1897,
+          "GHA": 0.6882,
+          "KA": 0.2081,
+          "KHA": 0.0759
+        },
+        "answer": "GHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6882,
+        "status": "answered"
+      },
+      "12": {
+        "all_scores": {
+          "GA": 0.1935,
+          "GHA": 0.098,
+          "KA": 0.6375,
+          "KHA": 0.0849
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.6375,
+        "status": "answered"
+      },
+      "13": {
+        "all_scores": {
+          "GA": 0.1946,
+          "GHA": 0.0985,
+          "KA": 0.2201,
+          "KHA": 0.0867
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2201,
+        "status": "blank"
+      },
+      "14": {
+        "all_scores": {
+          "GA": 0.7355,
+          "GHA": 0.0839,
+          "KA": 0.2145,
+          "KHA": 0.0762
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.7355,
+        "status": "answered"
+      },
+      "15": {
+        "all_scores": {
+          "GA": 0.1916,
+          "GHA": 0.0917,
+          "KA": 0.2208,
+          "KHA": 0.6643
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6643,
+        "status": "answered"
+      },
+      "16": {
+        "all_scores": {
+          "GA": 0.1891,
+          "GHA": 0.6188,
+          "KA": 0.5368,
+          "KHA": 0.0749
+        },
+        "answer": "MULTIPLE",
+        "confidence": "LOW",
+        "fill_score": 0.6188,
+        "status": "multiple"
+      },
+      "17": {
+        "all_scores": {
+          "GA": 0.5459,
+          "GHA": 0.0855,
+          "KA": 0.2065,
+          "KHA": 0.0713
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5459,
+        "status": "answered"
+      },
+      "18": {
+        "all_scores": {
+          "GA": 0.5938,
+          "GHA": 0.0936,
+          "KA": 0.2164,
+          "KHA": 0.0828
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.5938,
+        "status": "answered"
+      },
+      "19": {
+        "all_scores": {
+          "GA": 0.1921,
+          "GHA": 0.0893,
+          "KA": 0.2155,
+          "KHA": 0.4035
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4035,
+        "status": "answered"
+      },
+      "2": {
+        "all_scores": {
+          "GA": 0.6267,
+          "GHA": 0.0926,
+          "KA": 0.2244,
+          "KHA": 0.0926
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6267,
+        "status": "answered"
+      },
+      "20": {
+        "all_scores": {
+          "GA": 0.5436,
+          "GHA": 0.0874,
+          "KA": 0.2124,
+          "KHA": 0.0795
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5436,
+        "status": "answered"
+      },
+      "21": {
+        "all_scores": {
+          "GA": 0.1977,
+          "GHA": 0.0809,
+          "KA": 0.2091,
+          "KHA": 0.0824
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2091,
+        "status": "blank"
+      },
+      "22": {
+        "all_scores": {
+          "GA": 0.2016,
+          "GHA": 0.0983,
+          "KA": 0.5452,
+          "KHA": 0.0912
+        },
+        "answer": "KA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5452,
+        "status": "answered"
+      },
+      "23": {
+        "all_scores": {
+          "GA": 0.1988,
+          "GHA": 0.0967,
+          "KA": 0.2195,
+          "KHA": 0.0923
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2195,
+        "status": "blank"
+      },
+      "24": {
+        "all_scores": {
+          "GA": 0.5661,
+          "GHA": 0.0819,
+          "KA": 0.2154,
+          "KHA": 0.0839
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.5661,
+        "status": "answered"
+      },
+      "25": {
+        "all_scores": {
+          "GA": 0.1979,
+          "GHA": 0.0915,
+          "KA": 0.2201,
+          "KHA": 0.0875
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2201,
+        "status": "blank"
+      },
+      "26": {
+        "all_scores": {
+          "GA": 0.1939,
+          "GHA": 0.0866,
+          "KA": 0.2161,
+          "KHA": 0.0827
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2161,
+        "status": "blank"
+      },
+      "27": {
+        "all_scores": {
+          "GA": 0.1906,
+          "GHA": 0.0799,
+          "KA": 0.7978,
+          "KHA": 0.0771
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.7978,
+        "status": "answered"
+      },
+      "28": {
+        "all_scores": {
+          "GA": 0.1974,
+          "GHA": 0.0894,
+          "KA": 0.2149,
+          "KHA": 0.0895
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2149,
+        "status": "blank"
+      },
+      "29": {
+        "all_scores": {
+          "GA": 0.1973,
+          "GHA": 0.0896,
+          "KA": 0.2153,
+          "KHA": 0.5652
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.5652,
+        "status": "answered"
+      },
+      "3": {
+        "all_scores": {
+          "GA": 0.1948,
+          "GHA": 0.0913,
+          "KA": 0.6356,
+          "KHA": 0.0928
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.6356,
+        "status": "answered"
+      },
+      "30": {
+        "all_scores": {
+          "GA": 0.1987,
+          "GHA": 0.0869,
+          "KA": 0.2133,
+          "KHA": 0.0878
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2133,
+        "status": "blank"
+      },
+      "31": {
+        "all_scores": {
+          "GA": 0.1893,
+          "GHA": 0.0816,
+          "KA": 0.2138,
+          "KHA": 0.0832
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2138,
+        "status": "blank"
+      },
+      "32": {
+        "all_scores": {
+          "GA": 0.1925,
+          "GHA": 0.0955,
+          "KA": 0.2266,
+          "KHA": 0.0924
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2266,
+        "status": "blank"
+      },
+      "33": {
+        "all_scores": {
+          "GA": 0.1937,
+          "GHA": 0.0928,
+          "KA": 0.2238,
+          "KHA": 0.6011
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6011,
+        "status": "answered"
+      },
+      "34": {
+        "all_scores": {
+          "GA": 0.1888,
+          "GHA": 0.0813,
+          "KA": 0.22,
+          "KHA": 0.0848
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.22,
+        "status": "blank"
+      },
+      "35": {
+        "all_scores": {
+          "GA": 0.6451,
+          "GHA": 0.4855,
+          "KA": 0.2242,
+          "KHA": 0.0877
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6451,
+        "status": "answered"
+      },
+      "36": {
+        "all_scores": {
+          "GA": 0.1882,
+          "GHA": 0.0854,
+          "KA": 0.7396,
+          "KHA": 0.0833
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.7396,
+        "status": "answered"
+      },
+      "37": {
+        "all_scores": {
+          "GA": 0.1831,
+          "GHA": 0.7216,
+          "KA": 0.2136,
+          "KHA": 0.079
+        },
+        "answer": "GHA",
+        "confidence": "HIGH",
+        "fill_score": 0.7216,
+        "status": "answered"
+      },
+      "38": {
+        "all_scores": {
+          "GA": 0.1912,
+          "GHA": 0.0882,
+          "KA": 0.2208,
+          "KHA": 0.0893
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2208,
+        "status": "blank"
+      },
+      "39": {
+        "all_scores": {
+          "GA": 0.6526,
+          "GHA": 0.0854,
+          "KA": 0.22,
+          "KHA": 0.0856
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6526,
+        "status": "answered"
+      },
+      "4": {
+        "all_scores": {
+          "GA": 0.7239,
+          "GHA": 0.0771,
+          "KA": 0.2168,
+          "KHA": 0.0851
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.7239,
+        "status": "answered"
+      },
+      "40": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0862,
+          "KA": 0.7274,
+          "KHA": 0.0864
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.7274,
+        "status": "answered"
+      },
+      "5": {
+        "all_scores": {
+          "GA": 0.1906,
+          "GHA": 0.5488,
+          "KA": 0.2227,
+          "KHA": 0.0893
+        },
+        "answer": "GHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5488,
+        "status": "answered"
+      },
+      "6": {
+        "all_scores": {
+          "GA": 0.1883,
+          "GHA": 0.0843,
+          "KA": 0.2177,
+          "KHA": 0.6367
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6367,
+        "status": "answered"
+      },
+      "7": {
+        "all_scores": {
+          "GA": 0.1841,
+          "GHA": 0.0758,
+          "KA": 0.2091,
+          "KHA": 0.082
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2091,
+        "status": "blank"
+      },
+      "8": {
+        "all_scores": {
+          "GA": 0.6796,
+          "GHA": 0.0851,
+          "KA": 0.2177,
+          "KHA": 0.0905
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6796,
+        "status": "answered"
+      },
+      "9": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0846,
+          "KA": 0.636,
+          "KHA": 0.0878
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.636,
+        "status": "answered"
+      }
+    },
+    "metadata": {
+      "class_value": {
+        "fill_score": 0.6759,
+        "status": "answered",
+        "value": 10
+      },
+      "roll_number": {
+        "digits": [
+          0,
+          2,
+          8,
+          6,
+          3,
+          7
+        ],
+        "roll_number": "028637",
+        "status": "complete"
+      },
+      "set_code": {
+        "fill_score": 0.6011,
+        "status": "answered",
+        "value": "Nga"
+      },
+      "subject_code": {
+        "digits": [
+          4,
+          8,
+          5
+        ],
+        "status": "complete",
+        "subject_code": "485"
+      }
+    }
+  },
+  "omr3": {
+    "alignment_method": "markers",
+    "answers": {
+      "1": {
+        "all_scores": {
+          "GA": 0.1892,
+          "GHA": 0.0784,
+          "KA": 0.2108,
+          "KHA": 0.0836
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2108,
+        "status": "blank"
+      },
+      "10": {
+        "all_scores": {
+          "GA": 0.19,
+          "GHA": 0.0837,
+          "KA": 0.2158,
+          "KHA": 0.4956
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4956,
+        "status": "answered"
+      },
+      "11": {
+        "all_scores": {
+          "GA": 0.5214,
+          "GHA": 0.0856,
+          "KA": 0.208,
+          "KHA": 0.0759
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5214,
+        "status": "answered"
+      },
+      "12": {
+        "all_scores": {
+          "GA": 0.1935,
+          "GHA": 0.098,
+          "KA": 0.2227,
+          "KHA": 0.0849
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2227,
+        "status": "blank"
+      },
+      "13": {
+        "all_scores": {
+          "GA": 0.1946,
+          "GHA": 0.0985,
+          "KA": 0.2201,
+          "KHA": 0.0867
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2201,
+        "status": "blank"
+      },
+      "14": {
+        "all_scores": {
+          "GA": 0.5464,
+          "GHA": 0.0839,
+          "KA": 0.2145,
+          "KHA": 0.0762
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5464,
+        "status": "answered"
+      },
+      "15": {
+        "all_scores": {
+          "GA": 0.1917,
+          "GHA": 0.0917,
+          "KA": 0.2208,
+          "KHA": 0.0818
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2208,
+        "status": "blank"
+      },
+      "16": {
+        "all_scores": {
+          "GA": 0.6687,
+          "GHA": 0.0899,
+          "KA": 0.2143,
+          "KHA": 0.0749
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6687,
+        "status": "answered"
+      },
+      "17": {
+        "all_scores": {
+          "GA": 0.1847,
+          "GHA": 0.0855,
+          "KA": 0.2065,
+          "KHA": 0.0713
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2065,
+        "status": "blank"
+      },
+      "18": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0936,
+          "KA": 0.2164,
+          "KHA": 0.5714
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.5714,
+        "status": "answered"
+      },
+      "19": {
+        "all_scores": {
+          "GA": 0.1921,
+          "GHA": 0.0893,
+          "KA": 0.2155,
+          "KHA": 0.0793
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2155,
+        "status": "blank"
+      },
+      "2": {
+        "all_scores": {
+          "GA": 0.6492,
+          "GHA": 0.0926,
+          "KA": 0.2244,
+          "KHA": 0.0926
+        },
+        "answer": "GA",
+        "confidence": "HIGH",
+        "fill_score": 0.6492,
+        "status": "answered"
+      },
+      "20": {
+        "all_scores": {
+          "GA": 0.1918,
+          "GHA": 0.0874,
+          "KA": 0.2124,
+          "KHA": 0.5489
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5489,
+        "status": "answered"
+      },
+      "21": {
+        "all_scores": {
+          "GA": 0.1977,
+          "GHA": 0.4506,
+          "KA": 0.2092,
+          "KHA": 0.0824
+        },
+        "answer": "GHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4506,
+        "status": "answered"
+      },
+      "22": {
+        "all_scores": {
+          "GA": 0.2016,
+          "GHA": 0.0983,
+          "KA": 0.2219,
+          "KHA": 0.0912
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2219,
+        "status": "blank"
+      },
+      "23": {
+        "all_scores": {
+          "GA": 0.1988,
+          "GHA": 0.0967,
+          "KA": 0.2194,
+          "KHA": 0.5026
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5026,
+        "status": "answered"
+      },
+      "24": {
+        "all_scores": {
+          "GA": 0.1972,
+          "GHA": 0.0819,
+          "KA": 0.2154,
+          "KHA": 0.0839
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2154,
+        "status": "blank"
+      },
+      "25": {
+        "all_scores": {
+          "GA": 0.1979,
+          "GHA": 0.0915,
+          "KA": 0.2201,
+          "KHA": 0.0875
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2201,
+        "status": "blank"
+      },
+      "26": {
+        "all_scores": {
+          "GA": 0.1939,
+          "GHA": 0.0866,
+          "KA": 0.2159,
+          "KHA": 0.6182
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6182,
+        "status": "answered"
+      },
+      "27": {
+        "all_scores": {
+          "GA": 0.1906,
+          "GHA": 0.0799,
+          "KA": 0.2089,
+          "KHA": 0.0779
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2089,
+        "status": "blank"
+      },
+      "28": {
+        "all_scores": {
+          "GA": 0.1974,
+          "GHA": 0.0894,
+          "KA": 0.2149,
+          "KHA": 0.4711
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4711,
+        "status": "answered"
+      },
+      "29": {
+        "all_scores": {
+          "GA": 0.5468,
+          "GHA": 0.0896,
+          "KA": 0.2153,
+          "KHA": 0.0869
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5468,
+        "status": "answered"
+      },
+      "3": {
+        "all_scores": {
+          "GA": 0.1948,
+          "GHA": 0.0913,
+          "KA": 0.2227,
+          "KHA": 0.0928
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2227,
+        "status": "blank"
+      },
+      "30": {
+        "all_scores": {
+          "GA": 0.1987,
+          "GHA": 0.0869,
+          "KA": 0.2133,
+          "KHA": 0.0878
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2133,
+        "status": "blank"
+      },
+      "31": {
+        "all_scores": {
+          "GA": 0.1893,
+          "GHA": 0.0816,
+          "KA": 0.2138,
+          "KHA": 0.0832
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2138,
+        "status": "blank"
+      },
+      "32": {
+        "all_scores": {
+          "GA": 0.1925,
+          "GHA": 0.0955,
+          "KA": 0.2266,
+          "KHA": 0.0924
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2266,
+        "status": "blank"
+      },
+      "33": {
+        "all_scores": {
+          "GA": 0.5315,
+          "GHA": 0.0928,
+          "KA": 0.2238,
+          "KHA": 0.0925
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5315,
+        "status": "answered"
+      },
+      "34": {
+        "all_scores": {
+          "GA": 0.1888,
+          "GHA": 0.0813,
+          "KA": 0.22,
+          "KHA": 0.0848
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.22,
+        "status": "blank"
+      },
+      "35": {
+        "all_scores": {
+          "GA": 0.1913,
+          "GHA": 0.0879,
+          "KA": 0.5892,
+          "KHA": 0.0877
+        },
+        "answer": "KA",
+        "confidence": "HIGH",
+        "fill_score": 0.5892,
+        "status": "answered"
+      },
+      "36": {
+        "all_scores": {
+          "GA": 0.1882,
+          "GHA": 0.0847,
+          "KA": 0.2203,
+          "KHA": 0.0833
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2203,
+        "status": "blank"
+      },
+      "37": {
+        "all_scores": {
+          "GA": 0.5434,
+          "GHA": 0.0817,
+          "KA": 0.2136,
+          "KHA": 0.079
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5434,
+        "status": "answered"
+      },
+      "38": {
+        "all_scores": {
+          "GA": 0.1912,
+          "GHA": 0.0882,
+          "KA": 0.2208,
+          "KHA": 0.0893
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2208,
+        "status": "blank"
+      },
+      "39": {
+        "all_scores": {
+          "GA": 0.1902,
+          "GHA": 0.0854,
+          "KA": 0.22,
+          "KHA": 0.5028
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5028,
+        "status": "answered"
+      },
+      "4": {
+        "all_scores": {
+          "GA": 0.1885,
+          "GHA": 0.0771,
+          "KA": 0.2169,
+          "KHA": 0.0851
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2169,
+        "status": "blank"
+      },
+      "40": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0862,
+          "KA": 0.2176,
+          "KHA": 0.0864
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2176,
+        "status": "blank"
+      },
+      "5": {
+        "all_scores": {
+          "GA": 0.5161,
+          "GHA": 0.0864,
+          "KA": 0.2227,
+          "KHA": 0.0893
+        },
+        "answer": "GA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.5161,
+        "status": "answered"
+      },
+      "6": {
+        "all_scores": {
+          "GA": 0.1883,
+          "GHA": 0.0843,
+          "KA": 0.2177,
+          "KHA": 0.085
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2177,
+        "status": "blank"
+      },
+      "7": {
+        "all_scores": {
+          "GA": 0.1839,
+          "GHA": 0.0758,
+          "KA": 0.2091,
+          "KHA": 0.6184
+        },
+        "answer": "KHA",
+        "confidence": "HIGH",
+        "fill_score": 0.6184,
+        "status": "answered"
+      },
+      "8": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0851,
+          "KA": 0.2177,
+          "KHA": 0.4212
+        },
+        "answer": "KHA",
+        "confidence": "MEDIUM",
+        "fill_score": 0.4212,
+        "status": "answered"
+      },
+      "9": {
+        "all_scores": {
+          "GA": 0.1911,
+          "GHA": 0.0846,
+          "KA": 0.2184,
+          "KHA": 0.0878
+        },
+        "answer": "BLANK",
+        "confidence": "LOW",
+        "fill_score": 0.2184,
+        "status": "blank"
+      }
+    },
+    "metadata": {
+      "class_value": {
+        "fill_score": 0.7118,
+        "status": "answered",
+        "value": 10
+      },
+      "roll_number": {
+        "digits": [
+          3,
+          7,
+          4,
+          7,
+          8,
+          9
+        ],
+        "roll_number": "374789",
+        "status": "complete"
+      },
+      "set_code": {
+        "fill_score": 0.6461,
+        "status": "answered",
+        "value": "Gha"
+      },
+      "subject_code": {
+        "digits": [
+          4,
+          7,
+          9
+        ],
+        "status": "complete",
+        "subject_code": "479"
+      }
+    }
+  }
+}

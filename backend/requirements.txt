@@ -11,6 +11,15 @@ bcrypt==4.2.1
 pyjwt==2.10.1
 anthropic==0.69.0
 python-multipart==0.0.20
+cloudinary==1.45.0
+
+# OMR sheet scanning. opencv is deliberately held on the 4.x line: the bubble
+# detection thresholds are calibrated against it, and OpenCV 5 changes enough of
+# the imaging stack that a major bump must be re-validated against
+# tests/fixtures/omr rather than taken silently.
+opencv-python-headless==4.11.0.86
+numpy==2.2.1
+openpyxl==3.1.5
 
 pytest==9.1.1
 pytest-asyncio==1.4.0

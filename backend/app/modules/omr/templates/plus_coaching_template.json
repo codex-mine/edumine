@@ -1,0 +1,224 @@
+{
+  "name": "PLUS_COACHING_OMR_40Q",
+  "description": "Plus Coaching Center - 40Q OMR Sheet (2550x3300 reference)",
+  "reference_width": 2550,
+  "reference_height": 3300,
+  "bubble_radius": 24,
+  "options_english": [
+    "Ka",
+    "Kha",
+    "Ga",
+    "Gha"
+  ],
+  "options_bengali": [
+    "ক",
+    "খ",
+    "গ",
+    "ঘ"
+  ],
+  "alignment_markers": {
+    "description": "4 black square corner markers for perspective correction",
+    "top_left": {
+      "x": 233,
+      "y": 118,
+      "size": 118
+    },
+    "top_right": {
+      "x": 2323,
+      "y": 118,
+      "size": 118
+    },
+    "bottom_left": {
+      "x": 233,
+      "y": 2013,
+      "size": 118
+    },
+    "bottom_right": {
+      "x": 2323,
+      "y": 2013,
+      "size": 118
+    }
+  },
+  "class_box": {
+    "description": "শ্রেণি (Class) - 1 column, 7 bubbles for classes 6-12",
+    "col_x": 429,
+    "row_ys": [
+      606,
+      676,
+      746,
+      818,
+      888,
+      960,
+      1030
+    ],
+    "values": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "radius": 24
+  },
+  "roll_number_box": {
+    "description": "রোল নম্বর (Roll Number) - 6 digit columns, 10 rows (digits 0-9)",
+    "digits": 6,
+    "col_xs": [
+      637,
+      727,
+      817,
+      903,
+      991,
+      1085
+    ],
+    "row_ys": [
+      602,
+      662,
+      724,
+      788,
+      848,
+      912,
+      972,
+      1034,
+      1096,
+      1158
+    ],
+    "digit_values": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "radius": 24
+  },
+  "subject_code_box": {
+    "description": "বিষয় কোড (Subject Code) - 3 digit columns, 10 rows (digits 0-9)",
+    "digits": 3,
+    "col_xs": [
+      1203,
+      1291,
+      1385
+    ],
+    "row_ys": [
+      602,
+      662,
+      724,
+      788,
+      848,
+      914,
+      972,
+      1034,
+      1096,
+      1160
+    ],
+    "digit_values": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "radius": 24
+  },
+  "set_code_box": {
+    "description": "সেট কোড (Set Code) - 1 column, 6 bubbles (ক=Ka, খ=Kha, গ=Ga, ঘ=Gha, ঙ=Nga, চ=Cha)",
+    "col_x": 1589,
+    "row_ys": [
+      605,
+      677,
+      747,
+      817,
+      889,
+      959
+    ],
+    "values": [
+      "Ka",
+      "Kha",
+      "Ga",
+      "Gha",
+      "Nga",
+      "Cha"
+    ],
+    "radius": 22
+  },
+  "answer_section": {
+    "description": "Answer bubbles - 40 questions x 4 options (ক/খ/গ/ঘ = Ka/Kha/Ga/Gha)",
+    "questions": 40,
+    "options": [
+      "Ka",
+      "Kha",
+      "Ga",
+      "Gha"
+    ],
+    "answer_area_origin_x": 281,
+    "answer_area_origin_y": 1310,
+    "sub_columns": [
+      {
+        "questions_start": 1,
+        "questions_end": 10,
+        "option_local_xs": [
+          176,
+          262,
+          352,
+          444
+        ]
+      },
+      {
+        "questions_start": 11,
+        "questions_end": 20,
+        "option_local_xs": [
+          670,
+          758,
+          846,
+          938
+        ]
+      },
+      {
+        "questions_start": 21,
+        "questions_end": 30,
+        "option_local_xs": [
+          1164,
+          1252,
+          1340,
+          1432
+        ]
+      },
+      {
+        "questions_start": 31,
+        "questions_end": 40,
+        "option_local_xs": [
+          1658,
+          1748,
+          1836,
+          1926
+        ]
+      }
+    ],
+    "row_local_ys": [
+      120,
+      186,
+      254,
+      322,
+      390,
+      458,
+      526,
+      594,
+      662,
+      728
+    ],
+    "bubble_radius": 24
+  }
+}
