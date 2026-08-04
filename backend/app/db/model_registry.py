@@ -15,6 +15,7 @@ from app.modules.communication import models as communication_models  # noqa: F4
 from app.modules.exams import models as exams_models  # noqa: F401
 from app.modules.expenses import models as expenses_models  # noqa: F401
 from app.modules.guardians import models as guardians_models  # noqa: F401
+from app.modules.omr import models as omr_models  # noqa: F401
 from app.modules.payroll import models as payroll_models  # noqa: F401
 from app.modules.results import models as results_models  # noqa: F401
 from app.modules.routine import models as routine_models  # noqa: F401

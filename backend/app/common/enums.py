@@ -155,3 +155,37 @@ class SmsStatus(str, enum.Enum):
     queued = "queued"
     sent = "sent"
     failed = "failed"
+
+
+class OmrBatchStatus(str, enum.Enum):
+    draft = "draft"
+    processing = "processing"
+    ready = "ready"
+    applied = "applied"
+    failed = "failed"
+
+
+class OmrSheetStatus(str, enum.Enum):
+    pending = "pending"
+    processed = "processed"
+    needs_review = "needs_review"
+    failed = "failed"
+    applied = "applied"
+
+
+class OmrMatchStatus(str, enum.Enum):
+    """How a scanned sheet was tied back to a student.
+
+    `unreadable` means the roll number itself could not be read; `unmatched`
+    means it was read but matched no enrollment; `ambiguous` means it matched
+    more than one (roll numbers are unique per section, not per class);
+    `duplicate` means another sheet in the same batch already claimed that
+    student; `manual` means a reviewer assigned the student by hand.
+    """
+
+    matched = "matched"
+    unmatched = "unmatched"
+    ambiguous = "ambiguous"
+    duplicate = "duplicate"
+    unreadable = "unreadable"
+    manual = "manual"
