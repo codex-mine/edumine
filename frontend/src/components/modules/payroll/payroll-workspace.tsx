@@ -21,8 +21,8 @@ export function PayrollWorkspace({ runListPath }: { runListPath: string }) {
         <GeneratePayrollRunDialog
           runBasePath={runListPath}
           trigger={
-            <Button size="sm">
-              <Plus className="size-4" aria-hidden="true" />
+            <Button >
+              <Plus className="size-8" aria-hidden="true" />
               Generate payroll run
             </Button>
           }

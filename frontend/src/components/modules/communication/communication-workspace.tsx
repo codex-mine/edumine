@@ -32,8 +32,8 @@ export function CommunicationWorkspace({
           <ComposeAnnouncementDialog
             canDraftWithAI={canDraftWithAI}
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button >
+                <Plus className="size-8" aria-hidden="true" />
                 New announcement
               </Button>
             }

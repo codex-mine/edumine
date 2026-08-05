@@ -46,8 +46,8 @@ export function AssetWorkspace({ basePath, canManage }: { basePath: string; canM
         <div className="flex flex-wrap items-center gap-2">
           <RegisterAssetDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button  >
+                <Plus className="size-8" aria-hidden="true" />
                 Register asset
               </Button>
             }
@@ -76,8 +76,8 @@ export function AssetWorkspace({ basePath, canManage }: { basePath: string; canM
           canManage ? (
             <AssetCategoryFormDialog
               trigger={
-                <Button size="sm">
-                  <Plus className="size-4" aria-hidden="true" />
+                <Button >
+                  <Plus className="size-8" aria-hidden="true" />
                   Add category
                 </Button>
               }

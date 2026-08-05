@@ -153,7 +153,7 @@ export function FeeStructurePanel({ defaultAcademicYearId }: { defaultAcademicYe
                           type="number"
                           min={0}
                           step="0.01"
-                          className="w-32"
+                          className="w-48"
                           value={amounts[feeType.id] ?? ""}
                           onChange={(e) => setAmounts((prev) => ({ ...prev, [feeType.id]: e.target.value }))}
                         />
@@ -167,7 +167,7 @@ export function FeeStructurePanel({ defaultAcademicYearId }: { defaultAcademicYe
                             disabled={deleteMutation.isPending}
                             onClick={() => handleRemove(structure.id)}
                           >
-                            <Trash2 className="size-4" aria-hidden="true" />
+                            <Trash2 className="size-8 text-red-400" aria-hidden="true" />
                           </Button>
                         )}
                       </td>
@@ -188,7 +188,7 @@ export function FeeStructurePanel({ defaultAcademicYearId }: { defaultAcademicYe
             onClick={handleSave}
             disabled={setMutation.isPending || !academicYearId || !classId}
           >
-            <Save className="size-4" aria-hidden="true" />
+            <Save className="size-8" aria-hidden="true" />
             Save fee structure
           </Button>
         </div>

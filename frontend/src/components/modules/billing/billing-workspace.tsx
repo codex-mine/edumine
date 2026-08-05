@@ -60,8 +60,8 @@ export function BillingWorkspace({ invoiceListPath }: { invoiceListPath: string 
         <GenerateInvoiceDialog
           academicYearId={activeYearQuery.data?.id}
           trigger={
-            <Button size="sm">
-              <Receipt className="size-4" aria-hidden="true" />
+            <Button  >
+              <Receipt className="size-8" aria-hidden="true" />
               Generate invoice
             </Button>
           }
@@ -69,13 +69,13 @@ export function BillingWorkspace({ invoiceListPath }: { invoiceListPath: string 
         <GenerateClassInvoicesDialog
           academicYearId={activeYearQuery.data?.id}
           trigger={
-            <Button size="sm" variant="outline">
-              <Receipt className="size-4" aria-hidden="true" />
+            <Button   variant="outline">
+              <Receipt className="size-8" aria-hidden="true" />
               Generate for a class
             </Button>
           }
         />
-        <Button asChild size="sm" variant="outline">
+        <Button asChild   variant="outline">
           <Link href={invoiceListPath}>View all invoices</Link>
         </Button>
       </div>
@@ -111,8 +111,8 @@ export function BillingWorkspace({ invoiceListPath }: { invoiceListPath: string 
         toolbarActions={
           <FeeTypeFormDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button  >
+                <Plus className="size-8" aria-hidden="true" />
                 Add fee type
               </Button>
             }

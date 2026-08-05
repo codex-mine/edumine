@@ -45,7 +45,7 @@ export default function ExtensionRequestsPage() {
                     examSubjectId={req.exam_subject_id}
                     currentDeadline={req.requested_deadline ?? req.current_deadline}
                     subjectLabel={`${req.subject_name} — ${req.class_name}`}
-                    trigger={<Button size="sm">Extend deadline</Button>}
+                    trigger={<Button >Extend deadline</Button>}
                   />
                 </div>
               </CardHeader>

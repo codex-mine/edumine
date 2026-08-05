@@ -22,6 +22,11 @@ interface DraftSection extends ExamSubjectSectionInput {
   isCustomName: boolean;
 }
 
+function clampMarks(value: number, max: number) {
+  if (!Number.isFinite(value) || value < 0) return 0;
+  return Math.min(Math.round(value), max);
+}
+
 function toDraft(sections: ExamSubjectSectionInput[]): DraftSection[] {
   return sections.map((section) => ({
     ...section,
@@ -136,8 +141,15 @@ export function ExamSectionsDialog({
                     id={`section_full_${index}`}
                     type="number"
                     min={1}
+                    max={fullMarks}
                     value={entry.full_marks}
-                    onChange={(e) => updateEntry(index, { full_marks: Number(e.target.value) || 0 })}
+                    onChange={(e) => {
+                      const sectionFull = clampMarks(Number(e.target.value), fullMarks);
+                      updateEntry(index, {
+                        full_marks: sectionFull,
+                        pass_marks: Math.min(entry.pass_marks, sectionFull),
+                      });
+                    }}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -146,8 +158,9 @@ export function ExamSectionsDialog({
                     id={`section_pass_${index}`}
                     type="number"
                     min={0}
+                    max={entry.full_marks}
                     value={entry.pass_marks}
-                    onChange={(e) => updateEntry(index, { pass_marks: Number(e.target.value) || 0 })}
+                    onChange={(e) => updateEntry(index, { pass_marks: clampMarks(Number(e.target.value), entry.full_marks) })}
                   />
                 </div>
               </div>

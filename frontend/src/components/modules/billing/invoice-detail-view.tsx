@@ -48,8 +48,8 @@ export function InvoiceDetailView({
               invoice={invoice}
               onRecorded={onPaymentRecorded}
               trigger={
-                <Button size="sm">
-                  <ReceiptIcon className="size-4" aria-hidden="true" />
+                <Button  >
+                  <ReceiptIcon className="size-8" aria-hidden="true" />
                   Record payment
                 </Button>
               }
@@ -59,8 +59,8 @@ export function InvoiceDetailView({
             <AddDiscountDialog
               invoice={invoice}
               trigger={
-                <Button size="sm" variant="outline">
-                  <Percent className="size-4" aria-hidden="true" />
+                <Button   variant="outline">
+                  <Percent className="size-8" aria-hidden="true" />
                   Add discount
                 </Button>
               }
@@ -82,8 +82,8 @@ export function InvoiceDetailView({
             />
           )}
         </div>
-        <Button size="sm" variant="outline" onClick={() => window.print()}>
-          <Printer className="size-4" aria-hidden="true" />
+        <Button  variant="default" onClick={() => window.print()}>
+          <Printer className="size-8" aria-hidden="true" />
           Print
         </Button>
       </div>
