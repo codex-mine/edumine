@@ -123,6 +123,7 @@ export function SectionFormDialog({
               <Input
                 id="sec_capacity"
                 type="number"
+                placeholder="50"
                 min={0}
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}

@@ -128,12 +128,12 @@ export default function AcademicStructurePage() {
         page={1}
         limit={Math.max(classRows.length, 1)}
         total={classRows.length}
-        onPageChange={() => {}}
+        onPageChange={() => { }}
         toolbarActions={
           <ClassFormDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button >
+                <Plus className="size-8" aria-hidden="true" />
                 Add class
               </Button>
             }
@@ -162,12 +162,12 @@ export default function AcademicStructurePage() {
         page={1}
         limit={Math.max(subjectRows.length, 1)}
         total={subjectRows.length}
-        onPageChange={() => {}}
+        onPageChange={() => { }}
         toolbarActions={
           <SubjectFormDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button >
+                <Plus className="size-8" aria-hidden="true" />
                 Add subject
               </Button>
             }
@@ -196,12 +196,12 @@ export default function AcademicStructurePage() {
         page={1}
         limit={Math.max(roomRows.length, 1)}
         total={roomRows.length}
-        onPageChange={() => {}}
+        onPageChange={() => { }}
         toolbarActions={
           <RoomFormDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button  >
+                <Plus className="size-8" aria-hidden="true" />
                 Add room
               </Button>
             }

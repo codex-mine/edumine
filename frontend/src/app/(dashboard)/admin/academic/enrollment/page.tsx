@@ -78,8 +78,8 @@ export default function AcademicEnrollmentPage() {
             <EnrollStudentDialog
               academicYearId={selectedYearId}
               trigger={
-                <Button size="sm">
-                  <Plus className="size-4" aria-hidden="true" />
+                <Button  >
+                  <Plus className="size-8" aria-hidden="true" />
                   Enroll student
                 </Button>
               }

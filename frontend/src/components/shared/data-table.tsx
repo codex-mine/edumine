@@ -35,6 +35,7 @@ export interface DataTableProps {
   total: number;
   onPageChange: (page: number) => void;
   onRowClick?: (rowIndex: number) => void;
+  icon?: React.ReactNode;
 }
 
 export function DataTable({
@@ -50,19 +51,25 @@ export function DataTable({
   toolbarActions,
   searchValue,
   onSearchChange,
-    searchPlaceholder = "Search...",
+  searchPlaceholder = "Search...",
   page,
   limit,
   total,
   onPageChange,
   onRowClick,
+  icon: Icon,
 }: DataTableProps) {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
     <Card >
       <CardHeader className="p-4">
-        <CardTitle>{title}</CardTitle>
+        <div className="mb-1 flex items-center gap-2">
+          {Icon && <div className="mr-2">{Icon}</div>}
+
+          <CardTitle>{title}</CardTitle>
+
+        </div>
         {description && <CardDescription>{description}</CardDescription>}
         {toolbarActions && <CardAction>{toolbarActions}</CardAction>}
       </CardHeader>
@@ -116,11 +123,11 @@ export function DataTable({
                     onClick={
                       onRowClick
                         ? (event) => {
-                            if ((event.target as HTMLElement).closest("button, a, input, select, [role='menuitem']")) {
-                              return;
-                            }
-                            onRowClick(index);
+                          if ((event.target as HTMLElement).closest("button, a, input, select, [role='menuitem']")) {
+                            return;
                           }
+                          onRowClick(index);
+                        }
                         : undefined
                     }
                   >
@@ -140,11 +147,11 @@ export function DataTable({
               Page {page} of {totalPages} &middot; {total} total
             </span>
             <div className="flex gap-2">
-              <Button    disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+              <Button disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
                 Previous
               </Button>
               <Button
-                 
+
                 disabled={page >= totalPages}
                 onClick={() => onPageChange(page + 1)}
               >

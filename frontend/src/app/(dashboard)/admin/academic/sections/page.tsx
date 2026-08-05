@@ -170,8 +170,8 @@ export default function AcademicSectionsPage() {
               <SectionFormDialog
                 academicYearId={selectedYearId}
                 trigger={
-                  <Button size="sm">
-                    <Plus className="size-4" aria-hidden="true" />
+                  <Button  >
+                    <Plus className="size-8" aria-hidden="true" />
                     Add section
                   </Button>
                 }
@@ -208,8 +208,8 @@ export default function AcademicSectionsPage() {
                 academicYearId={selectedYearId}
                 defaultClassId={classFilter === ALL_CLASSES ? undefined : classFilter}
                 trigger={
-                  <Button size="sm">
-                    <Plus className="size-4" aria-hidden="true" />
+                  <Button  >
+                    <Plus className="size-8" aria-hidden="true" />
                     Assign subject
                   </Button>
                 }

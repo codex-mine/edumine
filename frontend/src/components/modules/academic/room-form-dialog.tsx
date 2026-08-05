@@ -65,7 +65,7 @@ export function RoomFormDialog({ trigger, room }: { trigger: React.ReactNode; ro
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="r_capacity">Capacity (optional)</Label>
-            <Input id="r_capacity" type="number" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+            <Input id="r_capacity" placeholder="50" type="number" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}

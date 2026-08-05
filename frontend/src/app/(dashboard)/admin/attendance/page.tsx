@@ -91,8 +91,8 @@ export default function AdminAttendancePage() {
         toolbarActions={
           <DeviceFormDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button >
+                <Plus className="size-8" aria-hidden="true" />
                 Register device
               </Button>
             }

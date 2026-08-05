@@ -28,22 +28,23 @@ export default function AcademicYearsPage() {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All academic years</CardTitle>
-          <CardDescription>Create a new year fresh, or carry forward structure from a prior year.</CardDescription>
-        </CardHeader>
+      <Card >
+        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>All academic years</CardTitle>
+            <CardDescription>Create a new year fresh, or carry forward structure from a prior year.</CardDescription>
 
-        <div className="flex justify-end px-4">
+          </div>
           <AcademicYearFormDialog
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button  >
+                <Plus className="size-8" aria-hidden="true" />
                 Create academic year
               </Button>
             }
           />
-        </div>
+        </CardHeader>
+
 
         {yearsQuery.isLoading ? (
           <LoadingState label="Loading academic years..." />
@@ -56,18 +57,18 @@ export default function AcademicYearsPage() {
             <EmptyState message="No academic years created yet." />
           </div>
         ) : (
-          <div className="flex flex-col gap-2 px-4 pb-2">
+          <div className="flex flex-col gap-2 px-4 pb-2 ">
             {years.map((year) => (
               <div
                 key={year.id}
-                className="flex flex-col gap-2 rounded border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                className={`flex flex-col gap-2 rounded border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${year.is_active ? "bg-green-100" : "bg-background"}`}
               >
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">{year.name}</span>
+                    <span className="font-medium text-foreground text-lg">{year.name}</span>
                     <ActiveBadge isActive={year.is_active} />
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-md text-muted-foreground ">
                     {year.start_date} &rarr; {year.end_date}
                     {year.cloned_from_year_id && " · carried forward from a prior year"}
                   </span>

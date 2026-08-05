@@ -143,15 +143,15 @@ export default function AdminRoutinePage() {
                         classId={section.class_id}
                         slot={slot}
                         trigger={
-                          <Button variant="ghost" size="sm" className="h-7 flex-1 px-2 text-xs">
+                          <Button variant="ghost"  className="h-7 flex-1 px-2 text-sm">
                             Edit
                           </Button>
                         }
                       />
                       <ConfirmDialog
                         trigger={
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-destructive">
-                            <Trash2 className="size-3.5" aria-hidden="true" />
+                          <Button variant="ghost"  className="h-7 px-2 text-sm text-destructive">
+                            <Trash2 className="size-6" aria-hidden="true" />
                           </Button>
                         }
                         title="Remove this routine slot?"
