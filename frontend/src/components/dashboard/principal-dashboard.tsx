@@ -19,7 +19,7 @@ export function PrincipalDashboard() {
   if (!data) return null;
 
   return (
-    <div className="flex w-full flex-col gap-5">
+    <div className="flex w-full flex-col gap-10">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold text-foreground">Principal dashboard</h1>
         <p className="text-sm text-muted-foreground">Institution-wide overview across academics, finance, and staff.</p>
@@ -31,14 +31,23 @@ export function PrincipalDashboard() {
           value={data.stats.total_income_month.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           icon={Wallet}
           accent="success"
+          className="bg-green-200/10 border-l-green-500/50"
         />
-        <StatCard label="Total students" value={data.stats.total_students} icon={Users} accent="primary" />
-        <StatCard label="Total staff" value={data.stats.total_staff} icon={UserCog} accent="info" />
+        <StatCard label="Total students" value={data.stats.total_students} icon={Users} accent="primary"
+          className="bg-yellow-200/10 border-l-yellow-500/50"
+
+        />
+        <StatCard label="Total staff" value={data.stats.total_staff} icon={UserCog} accent="info"
+          className="bg-blue-200/10 border-l-blue-500/50"
+
+        />
         <StatCard
           label="Dues outstanding"
           value={data.stats.dues_outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           icon={Receipt}
           accent="warning"
+          className="bg-red-200/10 border-l-red-500/50"
+
         />
       </div>
 
@@ -48,11 +57,13 @@ export function PrincipalDashboard() {
         <ChartCard
           title="Fee collection trend"
           subtitle="Monthly collections, last 6 months"
-          type="line"
+          icon={Wallet}
+          type="bar"
           data={data.fee_trend}
           xKey="label"
           yKey="collections"
           emptyMessage="No payment history yet."
+          
         />
         <TableCard
           title="Recent invoices"

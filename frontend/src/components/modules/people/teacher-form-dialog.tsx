@@ -191,17 +191,17 @@ export function TeacherFormDialog({ trigger, teacher }: { trigger: React.ReactNo
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="t_full_name">Full name</Label>
-                <Input id="t_full_name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                <Input id="t_full_name" placeholder="Steve Smith" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="t_email">Email</Label>
-                  <Input id="t_email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input id="t_email" placeholder="steve@mail.com" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="t_phone">Phone</Label>
-                  <Input id="t_phone" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                  <Input id="t_phone" placeholder="123-456-7890" value={phone} onChange={(e) => setPhone(e.target.value)} required />
                 </div>
               </div>
 
@@ -288,15 +288,15 @@ export function TeacherFormDialog({ trigger, teacher }: { trigger: React.ReactNo
 
               <QualificationsEditor qualifications={qualifications} onChange={setQualifications} />
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 mt-8">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="t_nid_number">NID number</Label>
-                  <Input id="t_nid_number" value={nidNumber} onChange={(e) => setNidNumber(e.target.value)} />
+                  <Input id="t_nid_number" placeholder="1234567890" value={nidNumber} onChange={(e) => setNidNumber(e.target.value)} />
                 </div>
                 <FileUploadField label="NID card upload" value={nidDocumentUrl} onChange={setNidDocumentUrl} />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1.5 mt-8">
                 <Label htmlFor="t_previous_employment">Previous employment (optional)</Label>
                 <Textarea
                   id="t_previous_employment"

@@ -94,21 +94,20 @@ export default function AdminAccountsPage() {
         </p>
       </div>
 
-      <div className="flex gap-1 rounded bg-muted p-1 w-fit">
+      <div className="flex gap-1 rounded bg-muted p-1 w-fit border ">
         {visibleTabs.map((t) => (
-          <button
+          <Button
+            variant={tab === t.value ? "default" : "ghost"}
+
             key={t.value}
             onClick={() => {
               setTab(t.value);
               setPage(1);
             }}
-            className={cn(
-              "rounded px-3 py-1.5 text-sm font-medium transition-colors",
-              tab === t.value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            )}
+         
           >
             {t.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -147,8 +146,8 @@ export default function AdminAccountsPage() {
           <UserAccountFormDialog
             currentUserRole={user?.role ?? "admin"}
             trigger={
-              <Button size="sm">
-                <Plus className="size-4" aria-hidden="true" />
+              <Button  >
+                <Plus className="size-8" aria-hidden="true" />
                 Add account
               </Button>
             }

@@ -1,6 +1,14 @@
+"use client"
+
+// Slot creates a React context at module scope, so this module can only be
+// evaluated in the client graph — without the directive, importing `Button`
+// from a Server Component crashes with "createContext is not a function".
+// The `slot` subpath is used instead of the `radix-ui` barrel so that a single
+// primitive doesn't pull every other Radix primitive into the bundle.
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
+import * as Slot from "radix-ui/slot"
 
 import { cn } from "@/lib/utils"
 

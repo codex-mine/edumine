@@ -29,11 +29,11 @@ export function QualificationsEditor({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 mt-4">
       <div className="flex items-center justify-between">
         <Label>Qualifications</Label>
-        <Button type="button" variant="outline" size="sm" onClick={addEntry}>
-          <Plus className="size-4" aria-hidden="true" />
+        <Button type="button" variant="secondary"   onClick={addEntry}>
+          <Plus className="size-6" aria-hidden="true" />
           Add qualification
         </Button>
       </div>
@@ -52,7 +52,7 @@ export function QualificationsEditor({
               aria-label="Remove qualification"
               className="text-muted-foreground hover:text-destructive"
             >
-              <Trash2 className="size-4" aria-hidden="true" />
+              <Trash2 className="size-8 text-red-400"  aria-hidden="true" />
             </button>
           </div>
 

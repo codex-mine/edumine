@@ -31,11 +31,11 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={cn(className)}>
+    <Card className={` px-2 py-6 border-l-4  ${cn(className)}`} >
       <CardContent className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <span className="  font-medium text-muted-foreground">{label}</span>
-          <span className=" text-2xl font-bold leading-none text-foreground">{value}</span>
+          <span className=" text-3xl font-bold leading-none text-foreground">{value}</span>
           {(delta || caption) && (
             <div className="mt-1 flex items-center gap-1.5 text-xs">
               {delta && (
@@ -57,8 +57,8 @@ export function StatCard({
             </div>
           )}
         </div>
-        <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg", ACCENT_CLASSES[accent])}>
-          <Icon className="size-10" aria-hidden="true" />
+        <div className={cn("flex  shrink-0 items-center justify-center rounded-lg", ACCENT_CLASSES[accent])}>
+          <Icon className="size-20" aria-hidden="true" />
         </div>
       </CardContent>
     </Card>

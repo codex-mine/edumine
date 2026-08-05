@@ -1,14 +1,151 @@
 "use client";
 
-import { GraduationCap, X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { NAV_GROUPS } from "@/lib/auth/nav-config";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { NAV_GROUPS, containsActive, isNodeActive, type NavNode } from "@/lib/auth/nav-config";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/auth/roles";
-import Image from "next/image";
+
+/** Shared geometry for every row in the tree, so leaves and branch triggers
+ * line up regardless of nesting depth. */
+const ROW =
+  "flex w-full items-center gap-4 rounded-md px-6 py-5 text-left text-sm font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-sidebar-ring/60";
+const ROW_IDLE =
+  "text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
+
+function NavLeaf({
+  node,
+  depth,
+  pathname,
+  onNavigate,
+}: {
+  node: NavNode & { href: string };
+  depth: number;
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  const isActive = isNodeActive(node, pathname);
+  const Icon = node.icon;
+
+  return (
+    <Link
+      href={node.href}
+      onClick={onNavigate}
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        ROW,
+        isActive
+          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[0_2px_6px_rgba(0,0,0,0.28)]"
+          : ROW_IDLE
+      )}
+    >
+      <Icon className={cn("shrink-0", depth === 0 ? "size-8" : "size-7")} aria-hidden="true" />
+      <span className="truncate">{node.label}</span>
+    </Link>
+  );
+}
+
+function NavBranch({
+  node,
+  depth,
+  pathname,
+  onNavigate,
+}: {
+  node: NavNode;
+  depth: number;
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  const holdsActive = containsActive(node, pathname);
+  // A branch defaults to open while it holds the current route. A manual toggle
+  // overrides that until the route changes, at which point the default wins
+  // again — so navigating never leaves the active item buried in a closed branch.
+  const [toggled, setToggled] = useState<{ pathname: string; open: boolean } | null>(null);
+  const open = toggled?.pathname === pathname ? toggled.open : holdsActive;
+  const Icon = node.icon;
+
+  return (
+    <Collapsible
+      open={open}
+      onOpenChange={(next) => setToggled({ pathname, open: next })}
+      className="flex flex-col"
+    >
+      <CollapsibleTrigger
+        className={cn(
+          ROW,
+          "cursor-pointer",
+          holdsActive && !open
+            ? "bg-sidebar-accent/60 text-sidebar-foreground"
+            : open
+              ? "text-sidebar-foreground hover:bg-sidebar-accent"
+              : ROW_IDLE
+        )}
+      >
+        <Icon className={cn("shrink-0", depth === 0 ? "size-8" : "size-7")} aria-hidden="true" />
+        <span className="flex-1 truncate">{node.label}</span>
+        {holdsActive && !open ? (
+          <span className="size-3 shrink-0 rounded-full bg-sidebar-primary" aria-hidden="true" />
+        ) : null}
+        <ChevronRight
+          className={cn(
+            "size-7 shrink-0 opacity-60 transition-transform duration-200",
+            open && "rotate-90"
+          )}
+          aria-hidden="true"
+        />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+        <div
+          className={cn(
+            "mt-1 ml-7 flex flex-col gap-1 border-l pl-3",
+            holdsActive ? "border-sidebar-primary/40" : "border-sidebar-border"
+          )}
+        >
+          {node.children?.map((child) => (
+            <NavTreeNode
+              key={child.href ?? child.label}
+              node={child}
+              depth={depth + 1}
+              pathname={pathname}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function NavTreeNode({
+  node,
+  depth,
+  pathname,
+  onNavigate,
+}: {
+  node: NavNode;
+  depth: number;
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  if (node.children?.length) {
+    return <NavBranch node={node} depth={depth} pathname={pathname} onNavigate={onNavigate} />;
+  }
+  if (!node.href) return null;
+  return (
+    <NavLeaf
+      node={node as NavNode & { href: string }}
+      depth={depth}
+      pathname={pathname}
+      onNavigate={onNavigate}
+    />
+  );
+}
 
 function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -16,42 +153,31 @@ function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => v
 
   return (
     <>
-      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4 text-xl font-medium whitespace-nowrap text-sidebar-foreground my-4">
+      <div className="flex h-16 shrink-0 items-center gap-4 border-b border-sidebar-border px-6 text-base font-semibold whitespace-nowrap text-sidebar-foreground">
         <Image
           src="/logo.png"
           alt="Codex Edumine Logo"
           width={32}
           height={32}
-          className="rounded"
+          className="size-16 rounded-md"
         />
-        <span>Codex Edumine</span>
+        <span className="truncate">Codex Edumine</span>
       </div>
-      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+      <nav className="scrollbar-slim [--scrollbar-thumb:var(--sidebar-accent)] [--scrollbar-thumb-hover:#4a516a] flex flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-4 py-4">
         {groups.map((group) => (
           <div key={group.label} className="flex flex-col gap-1">
-            <span className="px-2.5 text-sm font-semibold text-sidebar-foreground/50 ">
+            <span className="px-6 pt-4 pb-1 text-[0.6875rem] font-semibold tracking-[0.09em] text-sidebar-foreground/40 uppercase">
               {group.label}
             </span>
-            {group.items.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onNavigate}
-                  className={cn(
-                    "flex items-center gap-2 rounded px-2.5 py-3 my-2  font-medium transition-colors",
-                    isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  )}
-                >
-                  <Icon className="size-8 shrink-0" aria-hidden="true" />
-                  {item.label}
-                </Link>
-              );
-            })}
+            {group.items.map((item) => (
+              <NavTreeNode
+                key={item.href ?? item.label}
+                node={item}
+                depth={0}
+                pathname={pathname}
+                onNavigate={onNavigate}
+              />
+            ))}
           </div>
         ))}
       </nav>
@@ -61,7 +187,7 @@ function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => v
 
 export function DashboardSidebar({ role }: { role: Role }) {
   return (
-    <aside className="hidden w-[14rem] shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
+    <aside className="hidden h-dvh w-[16rem] shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:sticky md:top-0 md:flex">
       <SidebarContent role={role} />
     </aside>
   );
@@ -93,7 +219,7 @@ export function MobileSidebarDrawer({
       />
       <aside
         className={cn(
-          "absolute inset-y-0 left-0 flex w-[16rem] max-w-[85vw] flex-col bg-sidebar text-sidebar-foreground shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-transform",
+          "absolute inset-y-0 left-0 flex w-[17rem] max-w-[85vw] flex-col bg-sidebar text-sidebar-foreground shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-transform",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >

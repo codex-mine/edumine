@@ -16,7 +16,7 @@ export function FinancialNarrativeCard({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="size-4 text-primary" aria-hidden="true" />
+          <Sparkles className="size-8 text-primary" aria-hidden="true" />
           Financial narrative summary
         </CardTitle>
         <CardDescription>An AI-generated summary of this month&apos;s figures — factual only, no projections.</CardDescription>

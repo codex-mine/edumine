@@ -1,6 +1,11 @@
+"use client"
+
+// See the note in `button.tsx` — Slot creates a context at module scope, so
+// this module belongs to the client graph and imports the narrow subpath.
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
+import * as Slot from "radix-ui/slot"
 
 import { cn } from "@/lib/utils"
 

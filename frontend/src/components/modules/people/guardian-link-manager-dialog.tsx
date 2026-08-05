@@ -118,7 +118,7 @@ export function GuardianLinkManagerDialog({ trigger, studentId }: { trigger: Rea
                       <ConfirmDialog
                         trigger={
                           <Button variant="destructive" size="icon-sm" aria-label="Unlink guardian">
-                            <Trash2 className="size-6" aria-hidden="true" />
+                            <Trash2 className="size-8" aria-hidden="true" />
                           </Button>
                         }
                         title="Unlink this guardian?"

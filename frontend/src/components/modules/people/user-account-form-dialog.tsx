@@ -238,17 +238,17 @@ export function UserAccountFormDialog({
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="full_name">Full name</Label>
-                <Input id="full_name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                <Input id="full_name" placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input id="email" type="email" placeholder="john.doe@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                  <Input id="phone" placeholder="123-456-7890" value={phone} onChange={(e) => setPhone(e.target.value)} required />
                 </div>
               </div>
 
@@ -258,6 +258,7 @@ export function UserAccountFormDialog({
                   <Input
                     id="password"
                     type="password"
+                    placeholder="Enter a temporary password for the account"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     minLength={8}
@@ -330,7 +331,7 @@ export function UserAccountFormDialog({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="nid_number">NID number</Label>
-                      <Input id="nid_number" value={nidNumber} onChange={(e) => setNidNumber(e.target.value)} />
+                      <Input id="nid_number" placeholder="23456789" value={nidNumber} onChange={(e) => setNidNumber(e.target.value)} />
                     </div>
                     <FileUploadField label="NID card upload" value={nidDocumentUrl} onChange={setNidDocumentUrl} />
                   </div>

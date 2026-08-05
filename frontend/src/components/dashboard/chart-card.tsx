@@ -26,6 +26,7 @@ export interface ChartCardProps {
   caption?: string
   emptyMessage?: string
   className?: string
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 
 export function ChartCard({
@@ -38,13 +39,19 @@ export function ChartCard({
   caption,
   emptyMessage = "No data to chart yet.",
   className,
+  icon: Icon,
 }: ChartCardProps) {
   const hasData = Boolean(data && data.length > 0)
 
   return (
     <Card className={cn(className)}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
+      <CardHeader >
+
+        <CardTitle className="flex items-center gap-2">
+          {Icon && (
+            <Icon className="h-8 w-8 text-primary" />
+          )} {title}
+        </CardTitle>
         {subtitle && <CardDescription>{subtitle}</CardDescription>}
       </CardHeader>
       <CardContent>

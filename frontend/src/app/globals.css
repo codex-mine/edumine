@@ -53,6 +53,30 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Ambient drift for decorative background shapes (landing page). */
+  --animate-drift: drift 22s ease-in-out infinite;
+  --animate-drift-slow: drift 34s ease-in-out -8s infinite;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, -6%, 0) scale(1.08);
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.5rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 :root {
@@ -96,6 +120,8 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #2a2e3a;
   --sidebar-ring: #6366f1;
+  --scrollbar-thumb: #cfd5df;
+  --scrollbar-thumb-hover: #b3bccb;
 }
 
 .dark {
@@ -136,6 +162,8 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #2a2e3a;
   --sidebar-ring: #6366f1;
+  --scrollbar-thumb: #2f3442;
+  --scrollbar-thumb-hover: #414861;
 }
 
 @layer base {
@@ -147,6 +175,80 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Design-system scrollbar everywhere; `scrollbar-slim` narrows it further for
+     dense surfaces like the sidebar. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 0.625rem;
+    height: 0.625rem;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+  /* In-page anchor navigation (landing page nav) glides instead of jumping. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+@utility scrollbar-slim {
+  /* Narrow, track-less scrollbar for dense panels. Override
+     `--scrollbar-thumb` / `--scrollbar-thumb-hover` on the element to retint it
+     for surfaces that don't follow the page theme (e.g. the dark sidebar). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+
+  &::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+  &::-webkit-scrollbar-track,
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+}
+
+@utility reveal {
+  /* Scroll-linked entrance, zero JS. Browsers without scroll-driven animation
+     support simply render the content in its final state. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 26%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-drift,
+  .animate-drift-slow {
+    animation: none;
   }
 }
 

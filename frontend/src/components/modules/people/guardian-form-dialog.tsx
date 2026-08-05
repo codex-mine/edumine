@@ -68,17 +68,17 @@ export function GuardianFormDialog({ trigger, guardian }: { trigger: React.React
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="g_full_name">Full name</Label>
-            <Input id="g_full_name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+            <Input id="g_full_name" placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="g_email">Email</Label>
-              <Input id="g_email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input id="g_email" type="email" placeholder="john.doe@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="g_phone">Phone</Label>
-              <Input id="g_phone" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+              <Input id="g_phone" placeholder="123-456-7890" value={phone} onChange={(e) => setPhone(e.target.value)} required />
             </div>
           </div>
 
@@ -88,6 +88,7 @@ export function GuardianFormDialog({ trigger, guardian }: { trigger: React.React
               <Input
                 id="g_password"
                 type="password"
+                placeholder="Enter a temporary password for the guardian"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 minLength={8}
@@ -98,12 +99,12 @@ export function GuardianFormDialog({ trigger, guardian }: { trigger: React.React
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="g_occupation">Occupation</Label>
-            <Input id="g_occupation" value={occupation} onChange={(e) => setOccupation(e.target.value)} />
+            <Input id="g_occupation" placeholder="e.g., Engineer, Teacher" value={occupation} onChange={(e) => setOccupation(e.target.value)} />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="g_address">Address</Label>
-            <Textarea id="g_address" value={address} onChange={(e) => setAddress(e.target.value)} rows={2} />
+            <Textarea id="g_address" placeholder="Enter the guardian's address" value={address} onChange={(e) => setAddress(e.target.value)} rows={2} />
           </div>
 
           {isEdit && (
