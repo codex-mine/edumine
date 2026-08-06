@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 
@@ -27,6 +28,7 @@ const TABS: { value: UserAccountRole | "all"; label: string }[] = [
 
 export default function AdminAccountsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<UserAccountRole | "all">("all");
@@ -70,6 +72,7 @@ export default function AdminAccountsPage() {
     ),
     actions: (
       <RowActionsMenu
+        onView={() => router.push(`/admin/accounts/${account.id}`)}
         onSoftDelete={
           account.role === "admin" && user?.role !== "principal"
             ? undefined

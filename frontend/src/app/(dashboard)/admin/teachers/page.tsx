@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 
@@ -17,6 +18,7 @@ const LIMIT = 20;
 
 export default function AdminTeachersPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [detailTeacherId, setDetailTeacherId] = useState<string | null>(null);
@@ -48,6 +50,7 @@ export default function AdminTeachersPage() {
     ),
     actions: (
       <RowActionsMenu
+        onView={() => router.push(`/admin/teachers/${teacher.id}`)}
         onSoftDelete={() => softDeleteMutation.mutate(teacher.id)}
         onHardDelete={user?.role === "principal" ? () => hardDeleteMutation.mutate(teacher.id) : undefined}
         softDeleteDescription="The teacher's account is deactivated and hidden from active lists."

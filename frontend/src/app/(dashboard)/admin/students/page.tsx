@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Plus, UserCog } from "lucide-react";
 
@@ -22,6 +23,7 @@ const LIMIT = 5;
 
 export default function AdminStudentsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [detailStudentId, setDetailStudentId] = useState<string | null>(null);
@@ -63,6 +65,7 @@ export default function AdminStudentsPage() {
     ),
     actions: (
       <RowActionsMenu
+        onView={() => router.push(`/admin/students/${student.id}`)}
         onEdit={undefined}
         onSoftDelete={() => softDeleteMutation.mutate(student.id)}
         onHardDelete={user?.role === "principal" ? () => hardDeleteMutation.mutate(student.id) : undefined}
