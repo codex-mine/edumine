@@ -19,7 +19,16 @@ import {
   useSubjectsQuery,
 } from "@/hooks/use-academic";
 
+const TABS = [
+  { value: "classes", label: "Classes" },
+  { value: "rooms", label: "Rooms" },
+  { value: "subjects", label: "Subjects" },
+] as const;
+
+type StructureTab = (typeof TABS)[number]["value"];
+
 export default function AcademicStructurePage() {
+  const [tab, setTab] = useState<StructureTab>("classes");
   const [classSearch, setClassSearch] = useState("");
   const [roomSearch, setRoomSearch] = useState("");
   const [subjectSearch, setSubjectSearch] = useState("");
@@ -107,107 +116,121 @@ export default function AcademicStructurePage() {
         </p>
       </div>
 
-      <DataTable
-        title="Classes"
-        description="Grade-level definitions, reusable across years."
-        columns={[
-          { key: "name", label: "Class" },
-          { key: "order", label: "Order" },
-          { key: "edit", label: "" },
-          { key: "actions", label: "" },
-        ]}
-        rows={classRows}
-        isLoading={classesQuery.isLoading}
-        isError={classesQuery.isError}
-        errorMessage={classesQuery.error ? loginErrorMessage(classesQuery.error) : undefined}
-        onRetry={() => classesQuery.refetch()}
-        emptyMessage="No classes defined yet."
-        searchValue={classSearch}
-        onSearchChange={setClassSearch}
-        searchPlaceholder="Search classes"
-        page={1}
-        limit={Math.max(classRows.length, 1)}
-        total={classRows.length}
-        onPageChange={() => { }}
-        toolbarActions={
-          <ClassFormDialog
-            trigger={
-              <Button >
-                <Plus className="size-8" aria-hidden="true" />
-                Add class
-              </Button>
-            }
-          />
-        }
-      />
+      <div className="flex w-fit gap-1 rounded border bg-muted p-1">
+        {TABS.map((t) => (
+          <Button key={t.value} variant={tab === t.value ? "default" : "ghost"} onClick={() => setTab(t.value)}>
+            {t.label}
+          </Button>
+        ))}
+      </div>
 
-      <DataTable
-        title="Subjects"
-        description="Master subject list, reusable across years and classes."
-        columns={[
-          { key: "name", label: "Subject" },
-          { key: "code", label: "Code" },
-          { key: "edit", label: "" },
-          { key: "actions", label: "" },
-        ]}
-        rows={subjectRows}
-        isLoading={subjectsQuery.isLoading}
-        isError={subjectsQuery.isError}
-        errorMessage={subjectsQuery.error ? loginErrorMessage(subjectsQuery.error) : undefined}
-        onRetry={() => subjectsQuery.refetch()}
-        emptyMessage="No subjects defined yet."
-        searchValue={subjectSearch}
-        onSearchChange={setSubjectSearch}
-        searchPlaceholder="Search subjects"
-        page={1}
-        limit={Math.max(subjectRows.length, 1)}
-        total={subjectRows.length}
-        onPageChange={() => { }}
-        toolbarActions={
-          <SubjectFormDialog
-            trigger={
-              <Button >
-                <Plus className="size-8" aria-hidden="true" />
-                Add subject
-              </Button>
-            }
-          />
-        }
-      />
+      {tab === "classes" && (
+        <DataTable
+          title="Classes"
+          description="Grade-level definitions, reusable across years."
+          columns={[
+            { key: "name", label: "Class" },
+            { key: "order", label: "Order" },
+            { key: "edit", label: "" },
+            { key: "actions", label: "" },
+          ]}
+          rows={classRows}
+          isLoading={classesQuery.isLoading}
+          isError={classesQuery.isError}
+          errorMessage={classesQuery.error ? loginErrorMessage(classesQuery.error) : undefined}
+          onRetry={() => classesQuery.refetch()}
+          emptyMessage="No classes defined yet."
+          searchValue={classSearch}
+          onSearchChange={setClassSearch}
+          searchPlaceholder="Search classes"
+          page={1}
+          limit={Math.max(classRows.length, 1)}
+          total={classRows.length}
+          onPageChange={() => { }}
+          toolbarActions={
+            <ClassFormDialog
+              trigger={
+                <Button >
+                  <Plus className="size-8" aria-hidden="true" />
+                  Add class
+                </Button>
+              }
+            />
+          }
+        />
+      )}
 
-      <DataTable
-        title="Rooms"
-        description="Physical room registry, reusable across years."
-        columns={[
-          { key: "name", label: "Room" },
-          { key: "capacity", label: "Capacity" },
-          { key: "edit", label: "" },
-          { key: "actions", label: "" },
-        ]}
-        rows={roomRows}
-        isLoading={roomsQuery.isLoading}
-        isError={roomsQuery.isError}
-        errorMessage={roomsQuery.error ? loginErrorMessage(roomsQuery.error) : undefined}
-        onRetry={() => roomsQuery.refetch()}
-        emptyMessage="No rooms defined yet."
-        searchValue={roomSearch}
-        onSearchChange={setRoomSearch}
-        searchPlaceholder="Search rooms"
-        page={1}
-        limit={Math.max(roomRows.length, 1)}
-        total={roomRows.length}
-        onPageChange={() => { }}
-        toolbarActions={
-          <RoomFormDialog
-            trigger={
-              <Button  >
-                <Plus className="size-8" aria-hidden="true" />
-                Add room
-              </Button>
-            }
-          />
-        }
-      />
+      {tab === "subjects" && (
+        <DataTable
+          title="Subjects"
+          description="Master subject list, reusable across years and classes."
+          columns={[
+            { key: "name", label: "Subject" },
+            { key: "code", label: "Code" },
+            { key: "edit", label: "" },
+            { key: "actions", label: "" },
+          ]}
+          rows={subjectRows}
+          isLoading={subjectsQuery.isLoading}
+          isError={subjectsQuery.isError}
+          errorMessage={subjectsQuery.error ? loginErrorMessage(subjectsQuery.error) : undefined}
+          onRetry={() => subjectsQuery.refetch()}
+          emptyMessage="No subjects defined yet."
+          searchValue={subjectSearch}
+          onSearchChange={setSubjectSearch}
+          searchPlaceholder="Search subjects"
+          page={1}
+          limit={Math.max(subjectRows.length, 1)}
+          total={subjectRows.length}
+          onPageChange={() => { }}
+          toolbarActions={
+            <SubjectFormDialog
+              trigger={
+                <Button >
+                  <Plus className="size-8" aria-hidden="true" />
+                  Add subject
+                </Button>
+              }
+            />
+          }
+        />
+      )}
+
+      {tab === "rooms" && (
+        <DataTable
+          title="Rooms"
+          description="Physical room registry, reusable across years."
+          columns={[
+            { key: "name", label: "Room" },
+            { key: "capacity", label: "Capacity" },
+            { key: "edit", label: "" },
+            { key: "actions", label: "" },
+          ]}
+          rows={roomRows}
+          isLoading={roomsQuery.isLoading}
+          isError={roomsQuery.isError}
+          errorMessage={roomsQuery.error ? loginErrorMessage(roomsQuery.error) : undefined}
+          onRetry={() => roomsQuery.refetch()}
+          emptyMessage="No rooms defined yet."
+          searchValue={roomSearch}
+          onSearchChange={setRoomSearch}
+          searchPlaceholder="Search rooms"
+          page={1}
+          limit={Math.max(roomRows.length, 1)}
+          total={roomRows.length}
+          onPageChange={() => { }}
+          toolbarActions={
+            <RoomFormDialog
+              trigger={
+                <Button  >
+                  <Plus className="size-8" aria-hidden="true" />
+                  Add room
+                </Button>
+              }
+            />
+          }
+        />
+      )}
     </div>
   );
 }

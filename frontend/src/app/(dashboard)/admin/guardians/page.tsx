@@ -73,7 +73,11 @@ export default function AdminGuardiansPage() {
           { key: "actions", label: "" },
         ]}
         rows={rows}
-        isLoading={query.isLoading}
+        // `isPending`, not `isLoading`: a query that has no data *and* is not
+        // fetching (paused while the browser is offline, for instance) leaves
+        // `isLoading` false, which would render "No guardians yet." over a list
+        // that was never actually loaded.
+        isLoading={query.isPending}
         isError={query.isError}
         errorMessage={query.error ? loginErrorMessage(query.error) : undefined}
         onRetry={() => query.refetch()}

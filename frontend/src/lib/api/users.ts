@@ -4,6 +4,19 @@ import type { EmploymentStatus } from "@/lib/api/teachers";
 
 export type UserAccountRole = "admin" | "staff" | "accountant" | "receptionist";
 
+export const STAFF_DEPARTMENTS = [
+  "Administration",
+  "Accounts & Finance",
+  "Front Desk",
+  "Academics",
+  "Library",
+  "Laboratory",
+  "IT & Systems",
+  "Transport",
+  "Security",
+  "Housekeeping",
+] as const;
+
 export const STAFF_DESIGNATIONS = [
   "Accountant",
   "Receptionist",

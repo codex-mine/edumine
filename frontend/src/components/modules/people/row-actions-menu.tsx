@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, ShieldAlert } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash2, ShieldAlert } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function RowActionsMenu({
+  onView,
   onEdit,
   onSoftDelete,
   onHardDelete,
@@ -21,6 +22,7 @@ export function RowActionsMenu({
   hardDeleteDescription = "This permanently removes the record and all identity data. This action cannot be undone.",
   isDeleting,
 }: {
+  onView?: () => void;
   onEdit?: () => void;
   onSoftDelete?: () => void;
   onHardDelete?: () => void;
@@ -37,6 +39,12 @@ export function RowActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-40">
+        {onView && (
+          <DropdownMenuItem onSelect={onView}>
+            <Eye className="size-4" aria-hidden="true" />
+            View
+          </DropdownMenuItem>
+        )}
         {onEdit && (
           <DropdownMenuItem onSelect={onEdit}>
             <Pencil className="size-4" aria-hidden="true" />

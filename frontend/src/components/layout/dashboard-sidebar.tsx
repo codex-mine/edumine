@@ -8,7 +8,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { NAV_GROUPS, containsActive, isNodeActive, type NavNode } from "@/lib/auth/nav-config";
+import { NAV_GROUPS, containsActive, isNodeActive, resolveActiveHref, type NavNode } from "@/lib/auth/nav-config";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/auth/roles";
 
@@ -22,15 +22,15 @@ const ROW_IDLE =
 function NavLeaf({
   node,
   depth,
-  pathname,
+  activeHref,
   onNavigate,
 }: {
   node: NavNode & { href: string };
   depth: number;
-  pathname: string;
+  activeHref: string | null;
   onNavigate?: () => void;
 }) {
-  const isActive = isNodeActive(node, pathname);
+  const isActive = isNodeActive(node, activeHref);
   const Icon = node.icon;
 
   return (
@@ -55,27 +55,32 @@ function NavBranch({
   node,
   depth,
   pathname,
+  activeHref,
   onNavigate,
 }: {
   node: NavNode;
   depth: number;
   pathname: string;
+  activeHref: string | null;
   onNavigate?: () => void;
 }) {
-  const holdsActive = containsActive(node, pathname);
+  const holdsActive = containsActive(node, activeHref);
   // A branch defaults to open while it holds the current route. A manual toggle
-  // overrides that until the route changes, at which point the default wins
-  // again — so navigating never leaves the active item buried in a closed branch.
-  const [toggled, setToggled] = useState<{ pathname: string; open: boolean } | null>(null);
-  const open = toggled?.pathname === pathname ? toggled.open : holdsActive;
+  // overrides that default, but only until the route changes — so navigating
+  // never leaves the active item buried in a closed branch, and an unrelated
+  // branch the user once peeked into does not spring back open on arrival
+  // (e.g. Academics reopening every time you land on /admin/teachers).
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
+  const [toggledAt, setToggledAt] = useState(pathname);
+  if (toggledAt !== pathname) {
+    setToggledAt(pathname);
+    setManualOpen(null);
+  }
+  const open = manualOpen ?? holdsActive;
   const Icon = node.icon;
 
   return (
-    <Collapsible
-      open={open}
-      onOpenChange={(next) => setToggled({ pathname, open: next })}
-      className="flex flex-col"
-    >
+    <Collapsible open={open} onOpenChange={setManualOpen} className="flex flex-col">
       <CollapsibleTrigger
         className={cn(
           ROW,
@@ -113,6 +118,7 @@ function NavBranch({
               node={child}
               depth={depth + 1}
               pathname={pathname}
+              activeHref={activeHref}
               onNavigate={onNavigate}
             />
           ))}
@@ -126,22 +132,26 @@ function NavTreeNode({
   node,
   depth,
   pathname,
+  activeHref,
   onNavigate,
 }: {
   node: NavNode;
   depth: number;
   pathname: string;
+  activeHref: string | null;
   onNavigate?: () => void;
 }) {
   if (node.children?.length) {
-    return <NavBranch node={node} depth={depth} pathname={pathname} onNavigate={onNavigate} />;
+    return (
+      <NavBranch node={node} depth={depth} pathname={pathname} activeHref={activeHref} onNavigate={onNavigate} />
+    );
   }
   if (!node.href) return null;
   return (
     <NavLeaf
       node={node as NavNode & { href: string }}
       depth={depth}
-      pathname={pathname}
+      activeHref={activeHref}
       onNavigate={onNavigate}
     />
   );
@@ -150,6 +160,10 @@ function NavTreeNode({
 function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
   const pathname = usePathname();
   const groups = NAV_GROUPS[role];
+  // Resolved once per render for the whole tree: highlighting a node is a
+  // question about the tree as a whole (which href is the most specific match),
+  // not one a node can answer on its own.
+  const activeHref = resolveActiveHref(groups, pathname);
 
   return (
     <>
@@ -175,6 +189,7 @@ function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => v
                 node={item}
                 depth={0}
                 pathname={pathname}
+                activeHref={activeHref}
                 onNavigate={onNavigate}
               />
             ))}

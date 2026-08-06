@@ -23,7 +23,13 @@ import { QualificationsEditor } from "@/components/modules/people/qualifications
 import { useCreateUserAccountMutation, useUpdateUserAccountMutation, useUserAccountQuery } from "@/hooks/use-users";
 import { loginErrorMessage } from "@/hooks/use-auth";
 import type { QualificationInput } from "@/lib/api/qualifications";
-import { STAFF_DESIGNATIONS, type CreateUserAccountResult, type UserAccount, type UserAccountRole } from "@/lib/api/users";
+import {
+  STAFF_DEPARTMENTS,
+  STAFF_DESIGNATIONS,
+  type CreateUserAccountResult,
+  type UserAccount,
+  type UserAccountRole,
+} from "@/lib/api/users";
 import type { Role } from "@/lib/auth/roles";
 
 const STAFF_LIKE: UserAccountRole[] = ["staff", "accountant", "receptionist"];
@@ -45,7 +51,18 @@ export function UserAccountFormDialog({
   const [phone, setPhone] = useState(account?.phone ?? "");
   const [password, setPassword] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState(account?.date_of_birth ?? "");
-  const [department, setDepartment] = useState(account?.department ?? "");
+  // Department and designation follow the same shape: a preset list plus an
+  // "Other" escape hatch, so values typed in before either became a dropdown
+  // still round-trip through the edit form instead of being silently dropped.
+  const initialDepartmentIsPreset =
+    !account?.department || (STAFF_DEPARTMENTS as readonly string[]).includes(account.department);
+  const [departmentPreset, setDepartmentPreset] = useState(
+    initialDepartmentIsPreset ? account?.department ?? "" : "Other"
+  );
+  const [departmentCustom, setDepartmentCustom] = useState(
+    initialDepartmentIsPreset ? "" : account?.department ?? ""
+  );
+  const department = departmentPreset === "Other" ? departmentCustom : departmentPreset;
   const initialDesignationIsPreset =
     !account?.designation || (STAFF_DESIGNATIONS as readonly string[]).includes(account.designation);
   const [designationPreset, setDesignationPreset] = useState(
@@ -113,7 +130,7 @@ export function UserAccountFormDialog({
             is_active: isActive,
             ...(editIsStaffLike
               ? {
-                  department,
+                  department: department || null,
                   designation,
                   nid_number: nidNumber || null,
                   nid_document_url: nidDocumentUrl,
@@ -133,7 +150,7 @@ export function UserAccountFormDialog({
           ...(role === "admin" ? { password } : { date_of_birth: dateOfBirth }),
           ...(isStaffLike
             ? {
-                department,
+                department: department || null,
                 designation,
                 joining_date: joiningDate,
                 nid_number: nidNumber || null,
@@ -280,7 +297,32 @@ export function UserAccountFormDialog({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="department">Department</Label>
-                      <Input id="department" value={department} onChange={(e) => setDepartment(e.target.value)} />
+                      <Select
+                        value={departmentPreset || undefined}
+                        onValueChange={(value) => {
+                          setDepartmentPreset(value);
+                          if (value !== "Other") setDepartmentCustom("");
+                        }}
+                      >
+                        <SelectTrigger id="department">
+                          <SelectValue placeholder="Select department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {STAFF_DEPARTMENTS.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {departmentPreset === "Other" && (
+                        <Input
+                          value={departmentCustom}
+                          onChange={(e) => setDepartmentCustom(e.target.value)}
+                          placeholder="Specify department"
+                        />
+                      )}
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="designation">Designation</Label>

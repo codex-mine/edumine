@@ -8,9 +8,10 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { DataTable } from "@/components/shared/data-table";
 import { RowActionsMenu } from "@/components/modules/people/row-actions-menu";
 import { AcademicYearSelect } from "@/components/modules/academic/academic-year-select";
+import { SectionDetailDialog } from "@/components/modules/academic/section-detail-dialog";
 import { SectionFormDialog } from "@/components/modules/academic/section-form-dialog";
 import { ClassSubjectFormDialog } from "@/components/modules/academic/class-subject-form-dialog";
-import { formatSectionOccupancy } from "@/lib/api/academic";
+import { formatSectionOccupancy, type ClassSubject, type Section } from "@/lib/api/academic";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { loginErrorMessage } from "@/hooks/use-auth";
@@ -25,11 +26,22 @@ import {
 
 const ALL_CLASSES = "__all__";
 
+/** These endpoints return the whole scoped list rather than a page, so search is
+ * a filter over what is already in hand — no round trip, no `search` param. */
+function matchesSearch(term: string, ...fields: (string | number | null | undefined)[]): boolean {
+  const needle = term.trim().toLowerCase();
+  if (!needle) return true;
+  return fields.some((field) => field != null && String(field).toLowerCase().includes(needle));
+}
+
 export default function AcademicSectionsPage() {
   const activeYearQuery = useActiveAcademicYearQuery();
   const [selectedYearOverride, setSelectedYearOverride] = useState("");
   const selectedYearId = selectedYearOverride || activeYearQuery.data?.id || "";
   const [classFilter, setClassFilter] = useState(ALL_CLASSES);
+  const [sectionSearch, setSectionSearch] = useState("");
+  const [classSubjectSearch, setClassSubjectSearch] = useState("");
+  const [detailSection, setDetailSection] = useState<Section | null>(null);
 
   const classesQuery = useClassesQuery();
   const classIdParam = classFilter === ALL_CLASSES ? undefined : classFilter;
@@ -43,7 +55,14 @@ export default function AcademicSectionsPage() {
   const deleteSectionMutation = useDeleteSectionMutation();
   const deleteClassSubjectMutation = useDeleteClassSubjectMutation();
 
-  const sectionRows = (sectionsQuery.data ?? []).map((section) => ({
+  const visibleSections = (sectionsQuery.data ?? []).filter((section: Section) =>
+    matchesSearch(sectionSearch, section.name, section.class_name, section.room_name, section.class_teacher_name)
+  );
+  const visibleClassSubjects = (classSubjectsQuery.data ?? []).filter((row: ClassSubject) =>
+    matchesSearch(classSubjectSearch, row.class_name, row.subject_name, row.subject_code, row.teacher_name)
+  );
+
+  const sectionRows = visibleSections.map((section) => ({
     class_name: section.class_name,
     name: <span className="font-medium text-foreground">{section.name}</span>,
     room: section.room_name ?? "—",
@@ -62,6 +81,7 @@ export default function AcademicSectionsPage() {
     ),
     actions: (
       <RowActionsMenu
+        onView={() => setDetailSection(section)}
         onSoftDelete={() => deleteSectionMutation.mutate(section.id)}
         softDeleteDescription="This section is hidden from active lists. Enrollment and routine history are preserved."
         isDeleting={deleteSectionMutation.isPending}
@@ -69,7 +89,7 @@ export default function AcademicSectionsPage() {
     ),
   }));
 
-  const classSubjectRows = (classSubjectsQuery.data ?? []).map((row) => ({
+  const classSubjectRows = visibleClassSubjects.map((row) => ({
     class_name: row.class_name,
     subject: `${row.subject_name} (${row.subject_code})`,
     teacher: row.teacher_name ?? "Unassigned",
@@ -158,14 +178,20 @@ export default function AcademicSectionsPage() {
             isError={sectionsQuery.isError}
             errorMessage={sectionsQuery.error ? loginErrorMessage(sectionsQuery.error) : undefined}
             onRetry={() => sectionsQuery.refetch()}
-            emptyMessage="No sections created for this scope yet."
-            searchValue=""
-            onSearchChange={() => {}}
-            searchPlaceholder="Search"
+            emptyMessage={
+              sectionSearch ? "No sections match your search." : "No sections created for this scope yet."
+            }
+            searchValue={sectionSearch}
+            onSearchChange={setSectionSearch}
+            searchPlaceholder="Search by section, class, room, or teacher"
             page={1}
             limit={Math.max(sectionRows.length, 1)}
             total={sectionRows.length}
             onPageChange={() => {}}
+            onRowClick={(index) => {
+              const row = visibleSections[index];
+              if (row) setDetailSection(row);
+            }}
             toolbarActions={
               <SectionFormDialog
                 academicYearId={selectedYearId}
@@ -195,10 +221,14 @@ export default function AcademicSectionsPage() {
             isError={classSubjectsQuery.isError}
             errorMessage={classSubjectsQuery.error ? loginErrorMessage(classSubjectsQuery.error) : undefined}
             onRetry={() => classSubjectsQuery.refetch()}
-            emptyMessage="No subjects assigned for this scope yet."
-            searchValue=""
-            onSearchChange={() => {}}
-            searchPlaceholder="Search"
+            emptyMessage={
+              classSubjectSearch
+                ? "No assignments match your search."
+                : "No subjects assigned for this scope yet."
+            }
+            searchValue={classSubjectSearch}
+            onSearchChange={setClassSubjectSearch}
+            searchPlaceholder="Search by class, subject, code, or teacher"
             page={1}
             limit={Math.max(classSubjectRows.length, 1)}
             total={classSubjectRows.length}
@@ -218,6 +248,14 @@ export default function AcademicSectionsPage() {
           />
         </>
       )}
+
+      <SectionDetailDialog
+        section={detailSection}
+        open={detailSection !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetailSection(null);
+        }}
+      />
     </div>
   );
 }

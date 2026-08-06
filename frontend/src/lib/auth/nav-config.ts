@@ -39,8 +39,9 @@ export interface NavNode {
   icon: LucideIcon;
   /** Leaf destination. Omitted on branch nodes. */
   href?: string;
-  /** Highlight only on an exact pathname match. Use for section landing pages
-   * whose href is a prefix of their siblings' (e.g. `/admin/omr`). */
+  /** Highlight only on an exact pathname match. Reserved for the role dashboards
+   * (`/admin`, `/teacher`, …), whose href prefixes every other route in the tree
+   * — everywhere else the longest-match rule in `resolveActiveHref` is enough. */
   exact?: boolean;
   children?: NavNode[];
 }
@@ -87,7 +88,7 @@ const EXAMS_BRANCH: NavNode = {
   label: "Exams",
   icon: ClipboardList,
   children: [
-    { label: "All Exams", href: "/admin/exams", icon: ClipboardList, exact: true },
+    { label: "All Exams", href: "/admin/exams", icon: ClipboardList },
     { label: "Extension Requests", href: "/admin/exams/extension-requests", icon: Hourglass },
   ],
 };
@@ -96,7 +97,7 @@ const OMR_BRANCH: NavNode = {
   label: "OMR Scanning",
   icon: ScanLine,
   children: [
-    { label: "Scan Batches", href: "/admin/omr", icon: Layers, exact: true },
+    { label: "Scan Batches", href: "/admin/omr", icon: Layers },
     { label: "Answer Keys", href: "/admin/omr/answer-keys", icon: KeyRound },
   ],
 };
@@ -109,7 +110,7 @@ const FINANCE_BRANCH: NavNode = {
       label: "Billing & Fees",
       icon: Wallet,
       children: [
-        { label: "Overview", href: "/admin/billing", icon: Wallet, exact: true },
+        { label: "Overview", href: "/admin/billing", icon: Wallet },
         { label: "Invoices", href: "/admin/billing/invoices", icon: FileText },
       ],
     },
@@ -117,7 +118,7 @@ const FINANCE_BRANCH: NavNode = {
       label: "HR & Payroll",
       icon: Banknote,
       children: [
-        { label: "Overview", href: "/admin/payroll", icon: Banknote, exact: true },
+        { label: "Overview", href: "/admin/payroll", icon: Banknote },
         { label: "Payroll Runs", href: "/admin/payroll/runs", icon: ScrollText },
       ],
     },
@@ -207,7 +208,7 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
               label: "OMR Scanning",
               icon: ScanLine,
               children: [
-                { label: "Scan Batches", href: "/teacher/omr", icon: Layers, exact: true },
+                { label: "Scan Batches", href: "/teacher/omr", icon: Layers },
                 { label: "Answer Keys", href: "/teacher/omr/answer-keys", icon: KeyRound },
               ],
             },
@@ -235,7 +236,7 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
           label: "Billing & Fees",
           icon: Wallet,
           children: [
-            { label: "Overview", href: "/accountant/billing", icon: Wallet, exact: true },
+            { label: "Overview", href: "/accountant/billing", icon: Wallet },
             { label: "Invoices", href: "/accountant/billing/invoices", icon: FileText },
           ],
         },
@@ -243,7 +244,7 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
           label: "HR & Payroll",
           icon: Banknote,
           children: [
-            { label: "Overview", href: "/accountant/payroll", icon: Banknote, exact: true },
+            { label: "Overview", href: "/accountant/payroll", icon: Banknote },
             { label: "Payroll Runs", href: "/accountant/payroll/runs", icon: ScrollText },
           ],
         },
@@ -336,17 +337,42 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
   ],
 };
 
-/** True when `pathname` is the node's own page (or, for non-exact nodes, a page
- * nested beneath it). Shared by the sidebar's leaf highlighting and its
- * auto-expansion of ancestor branches. */
-export function isNodeActive(node: NavNode, pathname: string): boolean {
-  if (!node.href) return false;
-  if (node.exact) return pathname === node.href;
-  return pathname === node.href || pathname.startsWith(`${node.href}/`);
+/** True when `pathname` is `href` itself or a page nested beneath it. */
+function coversPathname(href: string, pathname: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** True when the node or anything below it matches `pathname`. */
-export function containsActive(node: NavNode, pathname: string): boolean {
-  if (isNodeActive(node, pathname)) return true;
-  return (node.children ?? []).some((child) => containsActive(child, pathname));
+/** The one `href` in `groups` that best describes `pathname`: of every node the
+ * path sits under, the most specific (longest) one wins.
+ *
+ * Longest-match is what keeps section landing pages honest in both directions —
+ * `/admin/exams/<id>` highlights "All Exams" (its only match) while
+ * `/admin/exams/extension-requests` still goes to the deeper sibling rather than
+ * being stolen by the shorter prefix. Returns null for routes outside the tree. */
+export function resolveActiveHref(groups: NavGroup[], pathname: string): string | null {
+  let best: string | null = null;
+
+  const visit = (node: NavNode) => {
+    if (node.href) {
+      const matches = node.exact ? pathname === node.href : coversPathname(node.href, pathname);
+      if (matches && (best === null || node.href.length > best.length)) {
+        best = node.href;
+      }
+    }
+    node.children?.forEach(visit);
+  };
+  groups.forEach((group) => group.items.forEach(visit));
+
+  return best;
+}
+
+/** True when this node is the resolved destination for the current route. */
+export function isNodeActive(node: NavNode, activeHref: string | null): boolean {
+  return activeHref !== null && node.href === activeHref;
+}
+
+/** True when the node or anything below it is the active destination. */
+export function containsActive(node: NavNode, activeHref: string | null): boolean {
+  if (isNodeActive(node, activeHref)) return true;
+  return (node.children ?? []).some((child) => containsActive(child, activeHref));
 }

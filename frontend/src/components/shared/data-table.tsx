@@ -93,9 +93,24 @@ export function DataTable({
           <ErrorState message={errorMessage} onRetry={onRetry} />
         </div>
       ) : rows.length === 0 ? (
-        <div className="px-4 pb-1">
-          <EmptyState message={emptyMessage} />
-        </div>
+        <>
+          <div className="px-4 pb-1">
+            <EmptyState message={emptyMessage} />
+          </div>
+          {/* A page index past the end of a shrunken result set renders empty.
+              Without the pager the only way back to page 1 is a full reload, so
+              the records read as missing rather than merely off-screen. */}
+          {total > 0 && (
+            <div className="flex items-center justify-between px-4 pt-1 text-muted-foreground">
+              <span>
+                Page {page} of {totalPages} &middot; {total} total
+              </span>
+              <Button disabled={page <= 1} onClick={() => onPageChange(1)}>
+                Back to first page
+              </Button>
+            </div>
+          )}
+        </>
       ) : (
         <>
           <div className="overflow-x-auto">
