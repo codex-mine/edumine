@@ -84,7 +84,7 @@ function CreateBatchDialog({ examSubjects }: { examSubjects: ExamSubjectOption[]
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="size-4" aria-hidden="true" />
+          <Plus className="size-8" aria-hidden="true" />
           New scan batch
         </Button>
       </DialogTrigger>
@@ -189,7 +189,7 @@ function CreateBatchDialog({ examSubjects }: { examSubjects: ExamSubjectOption[]
             Cancel
           </Button>
           <Button onClick={handleCreate} disabled={!canSubmit || createMutation.isPending}>
-            <ScanLine className="size-4" aria-hidden="true" />
+            <ScanLine className="size-8" aria-hidden="true" />
             Create batch
           </Button>
         </DialogFooter>

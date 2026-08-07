@@ -59,7 +59,7 @@ export function AtRiskStudentsWidget() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="size-4 text-primary" aria-hidden="true" />
+          <Sparkles className="size-8 text-primary" aria-hidden="true" />
           At-risk student recommendation
         </CardTitle>
         <CardDescription>A follow-up worklist against thresholds you set — never a label on the student.</CardDescription>
@@ -140,7 +140,7 @@ export function AtRiskStudentsWidget() {
           )}
         </div>
 
-        <Button size="sm" className="w-fit" disabled={!canGenerate || mutation.isPending} onClick={handleGenerate}>
+        <Button  className="w-fit" disabled={!canGenerate || mutation.isPending} onClick={handleGenerate}>
           {mutation.isPending ? "Evaluating..." : "Generate worklist"}
         </Button>
 

@@ -37,13 +37,13 @@ export default function AdminExamsPage() {
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/admin/exams/extension-requests">
-              <CalendarClock className="size-4" /> Extension requests
+              <CalendarClock className="size-8" /> Extension requests
             </Link>
           </Button>
           <CreateExamDialog
             trigger={
               <Button>
-                <Plus className="size-4" /> Create exam
+                <Plus className="size-8" /> Create exam
               </Button>
             }
           />

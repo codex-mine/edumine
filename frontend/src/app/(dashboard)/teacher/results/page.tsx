@@ -52,7 +52,7 @@ export default function TeacherResultsPage() {
                 </p>
               </CardHeader>
               <div className="flex flex-wrap gap-2 px-4 pb-4">
-                <Button asChild size="sm">
+                <Button asChild  >
                   <Link href={`/teacher/results/${item.exam_subject_id}`}>
                     {item.marks_submitted_at ? "View marks" : "Enter marks"}
                   </Link>

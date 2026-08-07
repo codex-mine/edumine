@@ -49,9 +49,7 @@ export function PendingActivationsCard() {
     ),
     admission_number: student.admission_number,
     action: (
-      <Button
-        size="sm"
-        variant="outline"
+      <Button  
         disabled={activateMutation.isPending}
         onClick={() => activateMutation.mutate(student.id)}
       >

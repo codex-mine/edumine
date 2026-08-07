@@ -51,7 +51,7 @@ export function AttendanceInsightWidget() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="size-4 text-primary" aria-hidden="true" />
+          <Sparkles className="size-8 text-primary" aria-hidden="true" />
           Attendance pattern insight
         </CardTitle>
         <CardDescription>Neutral statistical observations only — never a conclusion about the student.</CardDescription>
@@ -125,7 +125,7 @@ export function AttendanceInsightWidget() {
           </div>
         </div>
 
-        <Button size="sm" className="w-fit" disabled={!canGenerate || mutation.isPending} onClick={handleGenerate}>
+        <Button className="w-fit" disabled={!canGenerate || mutation.isPending} onClick={handleGenerate}>
           {mutation.isPending ? "Analyzing..." : "Generate insight"}
         </Button>
 

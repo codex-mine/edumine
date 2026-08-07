@@ -70,15 +70,15 @@ export function AnswerKeySubjectPicker({
                       and still navigates, so an ineligible subject gets a real
                       disabled button instead of a link. */}
                   {eligible ? (
-                    <Button asChild size="sm">
+                    <Button asChild  >
                       <Link href={`${basePath}/${subject.id}`}>
-                        <KeyRound className="size-4" aria-hidden="true" />
+                        <KeyRound className="size-8" aria-hidden="true" />
                         {setCodes.length ? "Edit keys" : "Define keys"}
                       </Link>
                     </Button>
                   ) : (
-                    <Button size="sm" disabled>
-                      <KeyRound className="size-4" aria-hidden="true" />
+                    <Button disabled>
+                      <KeyRound className="size-8" aria-hidden="true" />
                       Define keys
                     </Button>
                   )}

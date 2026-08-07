@@ -42,12 +42,12 @@ export function FileUploadField({
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={inputId}>{label}</Label>
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" variant="outline" size="sm" disabled={isUploading} asChild>
+        <Button type="button" variant="outline"   disabled={isUploading} asChild>
           <label htmlFor={inputId} className="cursor-pointer">
             {isUploading ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              <Loader2 className="size-8 animate-spin" aria-hidden="true" />
             ) : (
-              <Paperclip className="size-4" aria-hidden="true" />
+              <Paperclip className="size-8" aria-hidden="true" />
             )}
             {value ? "Replace file" : "Upload file"}
           </label>

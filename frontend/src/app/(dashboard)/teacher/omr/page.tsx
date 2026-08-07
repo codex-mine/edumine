@@ -20,9 +20,9 @@ export default function TeacherOmrPage() {
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex justify-end">
-        <Button asChild variant="outline" size="sm">
+        <Button asChild variant="outline"  >
           <Link href="/teacher/omr/answer-keys">
-            <KeyRound className="size-4" aria-hidden="true" />
+            <KeyRound className="size-8" aria-hidden="true" />
             Manage answer keys
           </Link>
         </Button>

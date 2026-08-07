@@ -41,7 +41,7 @@ export function RowActionsMenu({
       <DropdownMenuContent className="min-w-40">
         {onView && (
           <DropdownMenuItem onSelect={onView}>
-            <Eye className="size-4" aria-hidden="true" />
+            <Eye className="!size-8" aria-hidden="true" />
             View
           </DropdownMenuItem>
         )}

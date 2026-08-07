@@ -65,7 +65,7 @@ export default function TeacherExamsPage() {
                 )}
               </CardHeader>
               <div className="flex flex-wrap gap-2 px-4 pb-4">
-                <Button asChild size="sm">
+                <Button asChild  >
                   <Link href={`/teacher/exams/${item.id}`}>
                     {item.question_status === "revision_requested"
                       ? "Revise questions"
