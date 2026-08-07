@@ -22,6 +22,7 @@ import {
   Receipt,
   ScanLine,
   ScrollText,
+  Settings,
   UserCircle,
   UserCog,
   Users,
@@ -136,6 +137,16 @@ const OPERATIONS_BRANCH: NavNode = {
   ],
 };
 
+/** Pinned to the foot of the sidebar for every role, outside the scrolling tree:
+ * both pages are role-agnostic (`/profile`, `/settings` serve whoever is signed
+ * in), and account actions belong within reach rather than at the end of a long
+ * scroll. `resolveActiveHref` still has to see them — the sidebar folds them in
+ * as an extra group when it resolves the active route. */
+export const ACCOUNT_NAV_ITEMS: NavItem[] = [
+  { label: "My Profile", href: "/profile", icon: UserCircle },
+  { label: "Settings", href: "/settings", icon: Settings },
+];
+
 /** Each role's permitted navigation tree, grouped into sidebar sections.
  * Groups are the top-level captions; branches inside them expand into nested
  * submenus. Later phases append here per-role without touching the gating
@@ -219,10 +230,7 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
     },
     {
       label: "Account",
-      items: [
-        { label: "Communication", href: "/teacher/communication", icon: Megaphone },
-        { label: "My Profile", href: "/teacher/profile", icon: UserCircle },
-      ],
+      items: [{ label: "Communication", href: "/teacher/communication", icon: Megaphone }],
     },
   ],
   accountant: [
@@ -252,10 +260,6 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
         { label: "Expenses", href: "/accountant/expenses", icon: Receipt },
       ],
     },
-    {
-      label: "Account",
-      items: [{ label: "My Profile", href: "/accountant/profile", icon: UserCircle }],
-    },
   ],
   receptionist: [
     {
@@ -268,10 +272,6 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
         { label: "Billing & Fees", href: "/receptionist/billing", icon: Wallet },
         { label: "Communication", href: "/receptionist/communication", icon: Megaphone },
       ],
-    },
-    {
-      label: "Account",
-      items: [{ label: "My Profile", href: "/receptionist/profile", icon: UserCircle }],
     },
   ],
   staff: [
@@ -286,10 +286,6 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
         { label: "Assets", href: "/staff/assets", icon: Archive },
         { label: "Communication", href: "/staff/communication", icon: Megaphone },
       ],
-    },
-    {
-      label: "Account",
-      items: [{ label: "My Profile", href: "/staff/profile", icon: UserCircle }],
     },
   ],
   student: [
@@ -310,7 +306,6 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
       items: [
         { label: "My Billing", href: "/student/billing", icon: Wallet },
         { label: "Communication", href: "/student/communication", icon: Megaphone },
-        { label: "My Profile", href: "/student/profile", icon: UserCircle },
       ],
     },
   ],
@@ -330,10 +325,7 @@ export const NAV_GROUPS: Record<Role, NavGroup[]> = {
     },
     {
       label: "Account",
-      items: [
-        { label: "Communication", href: "/guardian/communication", icon: Megaphone },
-        { label: "My Profile", href: "/guardian/profile", icon: UserCircle },
-      ],
+      items: [{ label: "Communication", href: "/guardian/communication", icon: Megaphone }],
     },
   ],
 };

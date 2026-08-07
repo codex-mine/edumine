@@ -34,6 +34,7 @@ def _to_response(record) -> dict:
         phone=user.phone,
         gender=user.gender,
         date_of_birth=user.date_of_birth,
+        profile_photo_url=user.profile_photo_url,
         is_active=user.is_active,
         occupation=guardian.occupation,
         address=guardian.address,

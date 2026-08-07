@@ -9,6 +9,20 @@ from app.common.validators import normalize_email
 StaffLikeRole = Literal["staff", "accountant", "receptionist"]
 UserAccountRole = Literal["admin", "staff", "accountant", "receptionist"]
 
+# The account endpoints only *manage* UserAccountRole, but `GET /users/me` serves
+# whoever is signed in — a teacher or student reading their own profile included —
+# so the response side has to admit every seeded role name.
+AnyRole = Literal[
+    "principal",
+    "admin",
+    "teacher",
+    "accountant",
+    "receptionist",
+    "staff",
+    "student",
+    "guardian",
+]
+
 
 class QualificationInput(BaseModel):
     education_title: str = Field(..., min_length=1, max_length=150)
@@ -90,12 +104,13 @@ class UpdateUserAccountRequest(BaseModel):
 
 class UserAccountResponse(BaseModel):
     id: str
-    role: UserAccountRole
+    role: AnyRole
     full_name: str
     email: str | None
     phone: str
     gender: GenderType | None
     date_of_birth: date | None
+    profile_photo_url: str | None = None
     is_active: bool
     created_at: datetime
 

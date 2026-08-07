@@ -1,13 +1,8 @@
 import { apiClient } from "@/lib/api/client";
+import type { PeriodInfo } from "@/lib/api/overview";
+import { periodParams, type DashboardPeriod } from "@/lib/dashboard-period";
 
 // --- Principal -----------------------------------------------------------------------
-
-export interface FeeTrendPoint {
-  [key: string]: string | number;
-  label: string;
-  collections: number;
-  expenses: number;
-}
 
 export interface RecentInvoiceRow {
   [key: string]: React.ReactNode;
@@ -18,45 +13,48 @@ export interface RecentInvoiceRow {
 }
 
 export interface PrincipalDashboard {
+  period: PeriodInfo;
+  comparison_label: string;
   stats: {
     total_income_month: number;
+    total_income_change_percent: number | null;
     total_students: number;
+    new_admissions: number;
+    new_admissions_change_percent: number | null;
     total_staff: number;
     dues_outstanding: number;
   };
-  fee_trend: FeeTrendPoint[];
   recent_invoices: RecentInvoiceRow[];
   financial_narrative: string | null;
   financial_narrative_error: string | null;
 }
 
-export async function getPrincipalDashboard(): Promise<PrincipalDashboard> {
-  const { data } = await apiClient.get<PrincipalDashboard>("/dashboard/principal");
+export async function getPrincipalDashboard(period: DashboardPeriod): Promise<PrincipalDashboard> {
+  const { data } = await apiClient.get<PrincipalDashboard>("/dashboard/principal", {
+    params: periodParams(period),
+  });
   return data;
 }
 
 // --- Admin -----------------------------------------------------------------------------
 
-export interface AdminAttendanceRow {
-  [key: string]: React.ReactNode;
-  name: string;
-  role: string;
-  status: string;
-}
-
 export interface AdminDashboard {
+  period: PeriodInfo;
+  comparison_label: string;
   stats: {
-    new_admissions_month: number;
-    todays_attendance_percent: number | null;
+    total_students: number;
+    new_admissions: number;
+    new_admissions_change_percent: number | null;
+    attendance_percent: number | null;
+    attendance_change_percent: number | null;
     pending_approvals: number;
-    todays_collections: number;
+    collections: number;
+    collections_change_percent: number | null;
   };
-  attendance_week: { label: string; value: number }[];
-  todays_attendance_rows: AdminAttendanceRow[];
 }
 
-export async function getAdminDashboard(): Promise<AdminDashboard> {
-  const { data } = await apiClient.get<AdminDashboard>("/dashboard/admin");
+export async function getAdminDashboard(period: DashboardPeriod): Promise<AdminDashboard> {
+  const { data } = await apiClient.get<AdminDashboard>("/dashboard/admin", { params: periodParams(period) });
   return data;
 }
 

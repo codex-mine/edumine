@@ -58,11 +58,14 @@ export function useStudentQuery(studentId: string | null) {
   });
 }
 
-export function useOwnStudentProfileQuery() {
+/** See the note on `useOwnTeacherProfileQuery` — `enabled` keeps the shared
+ * My-profile view from calling this for non-students. */
+export function useOwnStudentProfileQuery({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ownStudentQueryKey,
     queryFn: getOwnStudentProfile,
     retry: false,
+    enabled,
   });
 }
 

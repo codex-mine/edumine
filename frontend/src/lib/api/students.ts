@@ -22,6 +22,7 @@ export interface Student {
   phone: string;
   gender: "male" | "female" | "other" | null;
   date_of_birth: string | null;
+  profile_photo_url: string | null;
   is_active: boolean;
   admission_number: string;
   admission_date: string;

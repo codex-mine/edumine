@@ -16,13 +16,22 @@ import {
   type AttendanceInsightPayload,
   type GuardianAssistantPayload,
 } from "@/lib/api/dashboard";
+import { isCompletePeriod, periodCacheKey, type DashboardPeriod } from "@/lib/dashboard-period";
 
-export function usePrincipalDashboardQuery() {
-  return useQuery({ queryKey: ["dashboard", "principal"], queryFn: getPrincipalDashboard });
+export function usePrincipalDashboardQuery(period: DashboardPeriod) {
+  return useQuery({
+    queryKey: ["dashboard", "principal", periodCacheKey(period)],
+    queryFn: () => getPrincipalDashboard(period),
+    enabled: isCompletePeriod(period),
+  });
 }
 
-export function useAdminDashboardQuery() {
-  return useQuery({ queryKey: ["dashboard", "admin"], queryFn: getAdminDashboard });
+export function useAdminDashboardQuery(period: DashboardPeriod) {
+  return useQuery({
+    queryKey: ["dashboard", "admin", periodCacheKey(period)],
+    queryFn: () => getAdminDashboard(period),
+    enabled: isCompletePeriod(period),
+  });
 }
 
 export function useTeacherDashboardQuery() {

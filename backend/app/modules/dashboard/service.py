@@ -12,7 +12,9 @@ from app.modules.attendance import repository as attendance_repository
 from app.modules.billing import repository as billing_repository
 from app.modules.communication import service as communication_service
 from app.modules.dashboard import ai_service
+from app.modules.dashboard import periods
 from app.modules.dashboard import repository as dashboard_repository
+from app.modules.dashboard.periods import Bucket, Period
 from app.modules.dashboard.schemas import AtRiskStudentsRequest, AttendanceInsightRequest, GuardianAssistantRequest
 from app.modules.exams import repository as exams_repository
 from app.modules.guardians import repository as guardians_repository
@@ -47,23 +49,21 @@ def _last_day_of_month(year: int, month: int) -> date:
     return date(year, month + 1, 1) - timedelta(days=1)
 
 
-def _last_n_months(today: date, n: int) -> list[tuple[int, int]]:
-    months: list[tuple[int, int]] = []
-    year, month = today.year, today.month
-    for _ in range(n):
-        months.append((year, month))
-        month -= 1
-        if month == 0:
-            month = 12
-            year -= 1
-    return list(reversed(months))
-
-
 def _attendance_percent(rows: list) -> float | None:
     if not rows:
         return None
     present = sum(1 for daily, _u, _r in rows if daily.status in (AttendanceStatus.present, AttendanceStatus.late))
     return round((present / len(rows)) * 100, 2)
+
+
+async def _attendance_percent_between(db: AsyncSession, date_from: date, date_to: date) -> float | None:
+    """Institution-wide attendance rate across a date range, or None when nothing is marked."""
+    rows = await dashboard_repository.daily_attendance_rates(db, date_from=date_from, date_to=date_to)
+    marked = sum(total for _day, _present, total in rows)
+    if not marked:
+        return None
+    present = sum(present for _day, present, _total in rows)
+    return round((present / marked) * 100, 2)
 
 
 def _latest_exam_summary(rows: list) -> dict | None:
@@ -146,13 +146,17 @@ async def _student_dashboard_summary(db: AsyncSession, *, student, user) -> dict
 # --- Principal ---------------------------------------------------------------
 
 
-async def get_principal_dashboard(db: AsyncSession, actor: CurrentUser) -> dict:
+async def get_principal_dashboard(db: AsyncSession, actor: CurrentUser, period: Period | None = None) -> dict:
     today = _today()
+    period = period or periods.resolve_period(today=today)
+    previous = periods.previous_period(period)
     month_start = _month_start(today)
-    _today_start_dt, tomorrow_dt = _day_bounds_utc(today)
-    month_start_dt = datetime(month_start.year, month_start.month, month_start.day, tzinfo=timezone.utc)
 
-    total_income_month = await dashboard_repository.sum_payments_between(db, month_start_dt, tomorrow_dt)
+    period_from_dt, period_to_dt = period.datetime_bounds
+    previous_from_dt, previous_to_dt = previous.datetime_bounds
+
+    total_income = await dashboard_repository.sum_payments_between(db, period_from_dt, period_to_dt)
+    previous_income = await dashboard_repository.sum_payments_between(db, previous_from_dt, previous_to_dt)
     total_students = await dashboard_repository.count_active_students(db)
     total_staff = sum(
         [
@@ -162,22 +166,16 @@ async def get_principal_dashboard(db: AsyncSession, actor: CurrentUser) -> dict:
     )
     dues_outstanding = await dashboard_repository.sum_outstanding_dues(db)
 
-    months = _last_n_months(today, 6)
-    payment_totals = await dashboard_repository.monthly_payment_totals(db, months=months)
-    expense_totals: dict[tuple[int, int], float] = {}
-    for year, month in months:
-        d_from = date(year, month, 1)
-        d_to = _last_day_of_month(year, month)
-        expense_totals[(year, month)] = await dashboard_repository.sum_approved_expenses_between(db, d_from, d_to)
+    admissions_in_period = len(
+        await dashboard_repository.list_admission_dates(db, date_from=period.date_from, date_to=period.date_to)
+    )
+    admissions_previous = len(
+        await dashboard_repository.list_admission_dates(db, date_from=previous.date_from, date_to=previous.date_to)
+    )
 
-    fee_trend = [
-        {
-            "label": date(year, month, 1).strftime("%b %Y"),
-            "collections": round(payment_totals[(year, month)], 2),
-            "expenses": round(expense_totals[(year, month)], 2),
-        }
-        for year, month in months
-    ]
+    expenses_month = await dashboard_repository.sum_approved_expenses_between(
+        db, month_start, _last_day_of_month(today.year, today.month)
+    )
 
     recent_invoice_rows = await dashboard_repository.list_recent_invoices(db, limit=8)
     recent_invoices = [
@@ -194,8 +192,8 @@ async def get_principal_dashboard(db: AsyncSession, actor: CurrentUser) -> dict:
     financial_narrative: str | None = None
     financial_narrative_error: str | None = None
     financial_context = {
-        "total_income_month": round(total_income_month, 2),
-        "total_expenses_month": round(expense_totals.get((today.year, today.month), 0.0), 2),
+        "total_income_month": round(total_income, 2),
+        "total_expenses_month": round(expenses_month, 2),
         "dues_outstanding": round(dues_outstanding, 2),
         "category_breakdown": [{"category": name, "amount": round(amount, 2)} for name, amount in breakdown],
     }
@@ -209,13 +207,17 @@ async def get_principal_dashboard(db: AsyncSession, actor: CurrentUser) -> dict:
         financial_narrative_error = exc.message
 
     return {
+        "period": period.as_dict(),
+        "comparison_label": previous.label,
         "stats": {
-            "total_income_month": round(total_income_month, 2),
+            "total_income_month": round(total_income, 2),
+            "total_income_change_percent": periods.percent_change(total_income, previous_income),
             "total_students": total_students,
+            "new_admissions": admissions_in_period,
+            "new_admissions_change_percent": periods.percent_change(admissions_in_period, admissions_previous),
             "total_staff": total_staff,
             "dues_outstanding": round(dues_outstanding, 2),
         },
-        "fee_trend": fee_trend,
         "recent_invoices": recent_invoices,
         "financial_narrative": financial_narrative,
         "financial_narrative_error": financial_narrative_error,
@@ -225,42 +227,357 @@ async def get_principal_dashboard(db: AsyncSession, actor: CurrentUser) -> dict:
 # --- Admin ---------------------------------------------------------------------
 
 
-async def get_admin_dashboard(db: AsyncSession, actor: CurrentUser) -> dict:
+async def get_admin_dashboard(db: AsyncSession, actor: CurrentUser, period: Period | None = None) -> dict:
     today = _today()
-    month_start = _month_start(today)
-    today_from, today_to = _day_bounds_utc(today)
+    period = period or periods.resolve_period(today=today)
+    previous = periods.previous_period(period)
+    period_from_dt, period_to_dt = period.datetime_bounds
+    previous_from_dt, previous_to_dt = previous.datetime_bounds
 
-    new_admissions = await dashboard_repository.count_new_admissions_since(db, month_start)
-    todays_collections = await dashboard_repository.sum_payments_between(db, today_from, today_to)
+    new_admissions = len(
+        await dashboard_repository.list_admission_dates(db, date_from=period.date_from, date_to=period.date_to)
+    )
+    previous_admissions = len(
+        await dashboard_repository.list_admission_dates(db, date_from=previous.date_from, date_to=previous.date_to)
+    )
 
-    daily_rows_today = await attendance_repository.list_daily_attendance(db, user_id=None, date_from=today, date_to=today)
-    todays_attendance_percent = _attendance_percent(daily_rows_today)
+    collections = await dashboard_repository.sum_payments_between(db, period_from_dt, period_to_dt)
+    previous_collections = await dashboard_repository.sum_payments_between(db, previous_from_dt, previous_to_dt)
+
+    attendance_percent = await _attendance_percent_between(db, period.date_from, period.date_to)
+    previous_attendance_percent = await _attendance_percent_between(db, previous.date_from, previous.date_to)
 
     pending_activations = len(await students_repository.list_pending_students(db))
     pending_expenses = await dashboard_repository.count_pending_expenses(db)
 
-    week_start = today - timedelta(days=6)
-    attendance_week = []
-    day_cursor = week_start
-    while day_cursor <= today:
-        rows = await attendance_repository.list_daily_attendance(db, user_id=None, date_from=day_cursor, date_to=day_cursor)
-        attendance_week.append({"label": day_cursor.strftime("%a"), "value": _attendance_percent(rows) or 0})
-        day_cursor += timedelta(days=1)
-
-    todays_attendance_rows = [
-        {"name": user.full_name, "role": role_name.title(), "status": daily.status.value.replace("_", " ").title()}
-        for daily, user, role_name in daily_rows_today[:15]
-    ]
+    total_students = await dashboard_repository.count_active_students(db)
 
     return {
+        "period": period.as_dict(),
+        "comparison_label": previous.label,
         "stats": {
-            "new_admissions_month": new_admissions,
-            "todays_attendance_percent": todays_attendance_percent,
+            "total_students": total_students,
+            "new_admissions": new_admissions,
+            "new_admissions_change_percent": periods.percent_change(new_admissions, previous_admissions),
+            "attendance_percent": attendance_percent,
+            "attendance_change_percent": (
+                periods.percent_change(attendance_percent, previous_attendance_percent)
+                if attendance_percent is not None and previous_attendance_percent is not None
+                else None
+            ),
             "pending_approvals": pending_activations + pending_expenses,
-            "todays_collections": round(todays_collections, 2),
+            "collections": round(collections, 2),
+            "collections_change_percent": periods.percent_change(collections, previous_collections),
         },
-        "attendance_week": attendance_week,
-        "todays_attendance_rows": todays_attendance_rows,
+    }
+
+
+# --- Institution overview sections (Admin / Principal) ---------------------------
+#
+# One function per card on the overview dashboard. Every one takes the same
+# resolved `Period`, so the page-level filter and a single card's own filter are
+# the same code path — the card just passes a different range.
+
+ACTION_LABELS = {
+    "create": "created",
+    "update": "updated",
+    "delete": "deleted",
+    "hard_delete": "permanently deleted",
+    "soft_delete": "archived",
+    "approve": "approved",
+    "reject": "rejected",
+    "publish": "published",
+    "promote": "promoted",
+    "mark": "attendance marked",
+    "mark_paid": "marked paid",
+    "record_payment": "payment recorded",
+    "add_discount": "discount added",
+    "cancel": "cancelled",
+    "submit_marks": "marks submitted",
+    "save_marks": "marks saved",
+    "submit_questions": "questions submitted",
+    "approve_questions": "questions approved",
+    "request_question_revision": "revision requested",
+    "generate_invoice": "invoice generated",
+    "generate_invoices_batch": "invoices generated",
+    "generate_payroll_run": "payroll run generated",
+    "link_guardian": "guardian linked",
+    "unlink_guardian": "guardian unlinked",
+    "configure_subjects": "subjects configured",
+    "set_fee_structure": "fee structure set",
+}
+
+
+def _humanize(value: str) -> str:
+    return value.replace("_", " ").replace(".", " ").strip()
+
+
+def _bucket_counts(buckets: list[Bucket], days: list[date]) -> list[int]:
+    counts = [0] * len(buckets)
+    for day in days:
+        index = periods.bucket_index(buckets, day)
+        if index is not None:
+            counts[index] += 1
+    return counts
+
+
+def _section_envelope(period: Period, previous: Period | None = None) -> dict:
+    envelope = {"period": period.as_dict()}
+    if previous is not None:
+        envelope["comparison_label"] = previous.label
+    return envelope
+
+
+async def get_admissions_overview(db: AsyncSession, period: Period) -> dict:
+    """New admissions over the period, plotted against the equivalent window before it."""
+    previous = periods.previous_period(period)
+    granularity = periods.granularity_for(period)
+    current_buckets = periods.build_buckets(period, granularity)
+    previous_buckets = periods.build_buckets(previous, granularity)
+
+    current_counts = _bucket_counts(
+        current_buckets,
+        await dashboard_repository.list_admission_dates(db, date_from=period.date_from, date_to=period.date_to),
+    )
+    previous_counts = _bucket_counts(
+        previous_buckets,
+        await dashboard_repository.list_admission_dates(db, date_from=previous.date_from, date_to=previous.date_to),
+    )
+
+    today = _today()
+    points = [
+        {
+            "label": bucket.label,
+            # A bucket that hasn't happened yet is a gap in the line, not a zero —
+            # otherwise the rest of an in-progress month reads as "no admissions".
+            "current": current_counts[index] if bucket.start <= today else None,
+            # Buckets are zipped by position, not by date — that is what lines up
+            # "Jan" of this year with "Jan" of last year on a single axis.
+            "previous": previous_counts[index] if index < len(previous_counts) else 0,
+        }
+        for index, bucket in enumerate(current_buckets)
+    ]
+
+    total = sum(current_counts)
+    previous_total = sum(previous_counts)
+    return {
+        **_section_envelope(period, previous),
+        "points": points,
+        "total": total,
+        "previous_total": previous_total,
+        "change_percent": periods.percent_change(total, previous_total),
+    }
+
+
+async def get_fee_collection_overview(db: AsyncSession, period: Period) -> dict:
+    """Collected vs still-owed money: collections land inside the period, dues are as-of-now."""
+    today = _today()
+    period_from_dt, period_to_dt = period.datetime_bounds
+    previous = periods.previous_period(period)
+    previous_from_dt, previous_to_dt = previous.datetime_bounds
+
+    collected = await dashboard_repository.sum_payments_between(db, period_from_dt, period_to_dt)
+    previous_collected = await dashboard_repository.sum_payments_between(db, previous_from_dt, previous_to_dt)
+    pending, overdue = await dashboard_repository.outstanding_split(db, today=today)
+
+    total = collected + pending + overdue
+
+    def share(amount: float) -> float:
+        return round((amount / total) * 100, 1) if total else 0.0
+
+    return {
+        **_section_envelope(period, previous),
+        "total": round(total, 2),
+        "collected": round(collected, 2),
+        "change_percent": periods.percent_change(collected, previous_collected),
+        "segments": [
+            {"key": "collected", "label": "Collected", "amount": round(collected, 2), "percent": share(collected)},
+            {"key": "pending", "label": "Pending", "amount": round(pending, 2), "percent": share(pending)},
+            {"key": "overdue", "label": "Overdue", "amount": round(overdue, 2), "percent": share(overdue)},
+        ],
+    }
+
+
+async def get_attendance_overview(db: AsyncSession, period: Period) -> dict:
+    """Institution-wide attendance rate per bucket across the period."""
+    previous = periods.previous_period(period)
+    buckets = periods.build_buckets(period)
+    rates = await dashboard_repository.daily_attendance_rates(db, date_from=period.date_from, date_to=period.date_to)
+
+    present_by_bucket = [0] * len(buckets)
+    marked_by_bucket = [0] * len(buckets)
+    for day, present, marked in rates:
+        index = periods.bucket_index(buckets, day)
+        if index is not None:
+            present_by_bucket[index] += present
+            marked_by_bucket[index] += marked
+
+    points = [
+        {
+            "label": bucket.label,
+            # Nothing marked (a holiday, a weekend, a day still to come) is a gap
+            # on the axis — plotting it as 0% would read as "nobody turned up".
+            "value": round((present_by_bucket[index] / marked_by_bucket[index]) * 100, 1)
+            if marked_by_bucket[index]
+            else None,
+            "present": present_by_bucket[index],
+            "marked": marked_by_bucket[index],
+        }
+        for index, bucket in enumerate(buckets)
+    ]
+
+    average = await _attendance_percent_between(db, period.date_from, period.date_to)
+    previous_average = await _attendance_percent_between(db, previous.date_from, previous.date_to)
+
+    return {
+        **_section_envelope(period, previous),
+        "points": points,
+        "average_percent": average,
+        "change_percent": (
+            periods.percent_change(average, previous_average)
+            if average is not None and previous_average is not None
+            else None
+        ),
+    }
+
+
+async def _academic_year_for_period(db: AsyncSession, period: Period):
+    """The academic year the period sits in — the one it overlaps most.
+
+    Enrollment is a standing figure per year rather than something that accrues
+    day by day, so a period filter selects *which year* is shown rather than
+    slicing days out of one.
+    """
+    years = await academic_repository.list_academic_years(db)
+    best = None
+    best_overlap = 0
+    for year in years:
+        overlap_start = max(year.start_date, period.date_from)
+        overlap_end = min(year.end_date, period.date_to)
+        overlap = (overlap_end - overlap_start).days + 1
+        if overlap > best_overlap:
+            best, best_overlap = year, overlap
+    return best or await academic_repository.get_active_academic_year(db)
+
+
+async def get_students_by_class_overview(db: AsyncSession, period: Period) -> dict:
+    """Active-enrollment headcount per class, for the academic year the period falls in."""
+    year = await _academic_year_for_period(db, period)
+    rows = (
+        await dashboard_repository.enrollment_counts_by_class(db, academic_year_id=year.id)
+        if year is not None
+        else []
+    )
+    total = sum(count for _name, count in rows)
+
+    return {
+        **_section_envelope(period),
+        "academic_year": year.name if year is not None else None,
+        "total": total,
+        "segments": [
+            {
+                "label": name,
+                "value": count,
+                "percent": round((count / total) * 100, 1) if total else 0.0,
+            }
+            for name, count in rows
+        ],
+    }
+
+
+async def get_upcoming_events(db: AsyncSession, period: Period, limit: int = 6) -> dict:
+    """Scheduled exams falling inside the period, nearest first."""
+    exams = await dashboard_repository.list_exams_between(
+        db, date_from=period.date_from, date_to=period.date_to, limit=limit
+    )
+    events = [
+        {
+            "id": str(exam.id),
+            "title": exam.name,
+            "date": exam.start_date.isoformat(),
+            "end_date": exam.end_date.isoformat(),
+            "timing": "All day"
+            if exam.start_date == exam.end_date
+            else f"{exam.start_date.strftime('%b %d')} – {exam.end_date.strftime('%b %d')}",
+            "category": exam.term or "Examination",
+            "status": _humanize(exam.status.value).title(),
+        }
+        for exam in exams
+    ]
+    return {**_section_envelope(period), "events": events}
+
+
+async def get_recent_activities(db: AsyncSession, period: Period, limit: int = 8) -> dict:
+    """The audit trail for the period, phrased for a dashboard reader."""
+    period_from_dt, period_to_dt = period.datetime_bounds
+    entries = await dashboard_repository.list_recent_audit_entries(
+        db, date_from=period_from_dt, date_to=period_to_dt, limit=limit
+    )
+
+    activities = [
+        {
+            "id": str(log.id),
+            "activity": f"{_humanize(log.entity_type).title()} {ACTION_LABELS.get(log.action, _humanize(log.action))}",
+            "entity_type": log.entity_type,
+            "action": log.action,
+            "actor": actor_name or "System",
+            "at": log.created_at.isoformat(),
+        }
+        for log, actor_name in entries
+    ]
+    return {**_section_envelope(period), "activities": activities}
+
+
+async def get_top_performing_students(db: AsyncSession, period: Period, limit: int = 5) -> dict:
+    """Highest scoring students across exams published within the period."""
+    rows = await dashboard_repository.top_student_result_totals(
+        db, date_from=period.date_from, date_to=period.date_to, limit=limit
+    )
+
+    year = await academic_repository.get_active_academic_year(db)
+    class_labels = (
+        await dashboard_repository.class_labels_for_students(
+            db, academic_year_id=year.id, student_ids=[student_id for student_id, *_rest in rows]
+        )
+        if year is not None
+        else {}
+    )
+
+    students = []
+    for rank, (student_id, name, obtained, available) in enumerate(rows, start=1):
+        percentage = round((obtained / available) * 100, 2) if available else 0.0
+        students.append(
+            {
+                "rank": rank,
+                "student_id": str(student_id),
+                "name": name,
+                "class_label": class_labels.get(student_id),
+                "percentage": percentage,
+                # A 4.0-scale figure alongside the percentage, since report cards
+                # here are read in GPA terms.
+                "gpa": round(min(percentage / 20, 5.0), 2),
+            }
+        )
+    return {**_section_envelope(period), "students": students}
+
+
+async def get_recent_notifications(db: AsyncSession, period: Period, limit: int = 6) -> dict:
+    """Announcements published inside the period, newest first."""
+    period_from_dt, period_to_dt = period.datetime_bounds
+    announcements = await dashboard_repository.list_recent_announcements(
+        db, date_from=period_from_dt, date_to=period_to_dt, limit=limit
+    )
+    return {
+        **_section_envelope(period),
+        "notifications": [
+            {
+                "id": str(announcement.id),
+                "title": announcement.title,
+                "audience": _humanize(announcement.audience_type.value).title(),
+                "at": announcement.published_at.isoformat() if announcement.published_at else None,
+            }
+            for announcement in announcements
+        ]
     }
 
 

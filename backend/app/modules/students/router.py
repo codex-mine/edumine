@@ -38,6 +38,7 @@ def _student_fields(student, user, enrollment=None, section=None, class_entity=N
         phone=user.phone,
         gender=user.gender,
         date_of_birth=user.date_of_birth,
+        profile_photo_url=user.profile_photo_url,
         is_active=user.is_active,
         admission_number=student.admission_number,
         admission_date=student.admission_date,

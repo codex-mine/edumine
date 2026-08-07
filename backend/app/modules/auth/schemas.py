@@ -52,3 +52,11 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str = Field(..., min_length=1)
     new_password: str = Field(..., min_length=8, max_length=255)
+
+
+class ChangePasswordRequest(BaseModel):
+    """Self-service password change for a signed-in user — unlike the reset flow
+    it proves ownership with the current password instead of an emailed token."""
+
+    current_password: str = Field(..., min_length=1, max_length=255)
+    new_password: str = Field(..., min_length=8, max_length=255)

@@ -33,11 +33,14 @@ export function useGuardianQuery(guardianId: string | null) {
   });
 }
 
-export function useOwnGuardianProfileQuery() {
+/** See the note on `useOwnTeacherProfileQuery` — `enabled` keeps the shared
+ * My-profile view from calling this for non-guardians. */
+export function useOwnGuardianProfileQuery({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ownGuardianQueryKey,
     queryFn: getOwnGuardianProfile,
     retry: false,
+    enabled,
   });
 }
 

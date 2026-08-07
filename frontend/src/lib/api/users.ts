@@ -1,6 +1,7 @@
 import { apiClient, getPaginated, type PageMeta } from "@/lib/api/client";
 import type { Qualification, QualificationInput } from "@/lib/api/qualifications";
 import type { EmploymentStatus } from "@/lib/api/teachers";
+import type { Role } from "@/lib/auth/roles";
 
 export type UserAccountRole = "admin" | "staff" | "accountant" | "receptionist";
 
@@ -36,6 +37,7 @@ export interface UserAccount {
   phone: string;
   gender: "male" | "female" | "other" | null;
   date_of_birth: string | null;
+  profile_photo_url: string | null;
   is_active: boolean;
   created_at: string;
   employee_code: string | null;
@@ -50,6 +52,13 @@ export interface UserAccount {
 
 export interface UserAccountDetail extends UserAccount {
   qualifications: Qualification[];
+}
+
+/** `/users/me` answers for whoever is signed in, so its `role` spans every role
+ * — a teacher or student reading their own account included. The managed-account
+ * endpoints stay narrowed to the four roles this module creates and edits. */
+export interface OwnUserAccount extends Omit<UserAccountDetail, "role"> {
+  role: Role;
 }
 
 export interface CreateUserAccountPayload {
@@ -104,8 +113,8 @@ export async function getUserAccount(userId: string): Promise<UserAccountDetail>
   return data;
 }
 
-export async function getOwnUserAccount(): Promise<UserAccountDetail> {
-  const { data } = await apiClient.get<UserAccountDetail>("/users/me");
+export async function getOwnUserAccount(): Promise<OwnUserAccount> {
+  const { data } = await apiClient.get<OwnUserAccount>("/users/me");
   return data;
 }
 

@@ -8,7 +8,14 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { NAV_GROUPS, containsActive, isNodeActive, resolveActiveHref, type NavNode } from "@/lib/auth/nav-config";
+import {
+  ACCOUNT_NAV_ITEMS,
+  NAV_GROUPS,
+  containsActive,
+  isNodeActive,
+  resolveActiveHref,
+  type NavNode,
+} from "@/lib/auth/nav-config";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/auth/roles";
 
@@ -162,25 +169,29 @@ function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => v
   const groups = NAV_GROUPS[role];
   // Resolved once per render for the whole tree: highlighting a node is a
   // question about the tree as a whole (which href is the most specific match),
-  // not one a node can answer on its own.
-  const activeHref = resolveActiveHref(groups, pathname);
+  // not one a node can answer on its own. The pinned footer sits outside
+  // `groups` but is part of the same tree for this purpose.
+  const activeHref = resolveActiveHref(
+    [...groups, { label: "Account", items: ACCOUNT_NAV_ITEMS }],
+    pathname
+  );
 
   return (
     <>
-      <div className="flex h-16 shrink-0 items-center gap-4 border-b border-sidebar-border px-6 text-base font-semibold whitespace-nowrap text-sidebar-foreground">
+      <div className="flex   shrink-0 items-center gap-4 border-b border-sidebar-border px-6 text-base font-semibold whitespace-nowrap text-sidebar-foreground ">
         <Image
           src="/logo.png"
           alt="Codex Edumine Logo"
-          width={32}
-          height={32}
-          className="size-16 rounded-md"
+          width={100}
+          height={100}
+          className="  rounded-md"
         />
-        <span className="truncate">Codex Edumine</span>
+        <span className="truncate text-xl">Edumine</span>
       </div>
       <nav className="scrollbar-slim [--scrollbar-thumb:var(--sidebar-accent)] [--scrollbar-thumb-hover:#4a516a] flex flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-4 py-4">
         {groups.map((group) => (
           <div key={group.label} className="flex flex-col gap-1">
-            <span className="px-6 pt-4 pb-1 text-[0.6875rem] font-semibold tracking-[0.09em] text-sidebar-foreground/40 uppercase">
+            <span className="px-6 pt-4 pb-1 text-sm font-semibold   text-sidebar-foreground/40 ">
               {group.label}
             </span>
             {group.items.map((item) => (
@@ -196,6 +207,20 @@ function SidebarContent({ role, onNavigate }: { role: Role; onNavigate?: () => v
           </div>
         ))}
       </nav>
+
+      {/* Pinned below the scroll area so My Profile and Settings stay reachable
+          no matter how long the role's tree is. */}
+      <div className="flex shrink-0 flex-col gap-1 border-t border-sidebar-border px-4 py-3">
+        {ACCOUNT_NAV_ITEMS.map((item) => (
+          <NavLeaf
+            key={item.href}
+            node={item}
+            depth={0}
+            activeHref={activeHref}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </div>
     </>
   );
 }

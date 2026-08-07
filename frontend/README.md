@@ -40,3 +40,14 @@ Principal
 
 Phone: 01700000001 or email principal@codexedumine.test
 Password: Passw0rd!123
+
+
+
+Role	Emails
+Students (250)	student1@gmail.com … student250@gmail.com
+Teachers (23)	teacher1@gmail.com … teacher23@gmail.com
+Staff (5)	staff1@gmail.com … staff5@gmail.com
+Receptionists (2)	receptionist1@gmail.com, receptionist2@gmail.com
+Accountant (1)	accountant1@gmail.com
+Admins (2)	admin1@gmail.com, admin2@gmail.com
+Guardians (150)	guardian1@gmail.com … guardian150@gmail.com

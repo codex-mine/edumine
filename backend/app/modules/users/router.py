@@ -51,6 +51,7 @@ def _account_fields(record) -> dict:
         phone=user.phone,
         gender=user.gender,
         date_of_birth=user.date_of_birth,
+        profile_photo_url=user.profile_photo_url,
         is_active=user.is_active,
         created_at=user.created_at,
         employee_code=staff.employee_code if staff else None,

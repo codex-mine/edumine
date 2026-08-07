@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.email import send_password_reset_email
-from app.core.exceptions import AuthException, ConflictException, NotFoundException
+from app.core.exceptions import AuthException, ConflictException, NotFoundException, ValidationException
 from app.core.security import (
     create_access_token,
     generate_password_reset_token,
@@ -159,4 +159,23 @@ async def reset_password(db: AsyncSession, raw_token: str, new_password: str) ->
     await repository.update_user_password(db, token.user_id, hash_password(new_password))
     await repository.mark_password_reset_token_used(db, token)
     await repository.revoke_all_refresh_tokens_for_user(db, token.user_id)
+    await db.commit()
+
+
+async def change_password(
+    db: AsyncSession, user_id: uuid.UUID, current_password: str, new_password: str
+) -> None:
+    user = await repository.get_user_by_id(db, user_id)
+    if user is None:
+        raise NotFoundException("Account not found")
+    if not verify_password(current_password, user.password_hash):
+        raise AuthException("Your current password is incorrect")
+    if verify_password(new_password, user.password_hash):
+        raise ValidationException("The new password must differ from your current one")
+
+    await repository.update_user_password(db, user.id, hash_password(new_password))
+    # Every existing session is invalidated, including the caller's — the client
+    # signs out and logs back in, so a stolen refresh token cannot outlive the
+    # password it was issued against.
+    await repository.revoke_all_refresh_tokens_for_user(db, user.id)
     await db.commit()

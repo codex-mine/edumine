@@ -19,7 +19,7 @@ import {
 } from "@/hooks/use-students";
 import { useAuth } from "@/providers/auth-provider";
 
-const LIMIT = 5;
+const LIMIT = 20;
 
 export default function AdminStudentsPage() {
   const { user } = useAuth();

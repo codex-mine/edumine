@@ -49,6 +49,7 @@ def _teacher_fields(teacher, user) -> dict:
         phone=user.phone,
         gender=user.gender,
         date_of_birth=user.date_of_birth,
+        profile_photo_url=user.profile_photo_url,
         is_active=user.is_active,
         employee_code=teacher.employee_code,
         joining_date=teacher.joining_date,

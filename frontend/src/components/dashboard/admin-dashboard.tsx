@@ -1,77 +1,89 @@
 "use client";
 
+import { useState } from "react";
 import { CalendarCheck, Clock, UserPlus, Wallet } from "lucide-react";
 
 import { AtRiskStudentsWidget } from "@/components/dashboard/at-risk-students-widget";
 import { AttendanceInsightWidget } from "@/components/dashboard/attendance-insight-widget";
-import { ChartCard } from "@/components/dashboard/chart-card";
+import { InstitutionOverview } from "@/components/dashboard/institution-overview";
 import { PendingActivationsCard } from "@/components/dashboard/pending-activations-card";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { TableCard } from "@/components/dashboard/table-card";
 import { ErrorState } from "@/components/shared/error-state";
-import { LoadingState } from "@/components/shared/loading-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { loginErrorMessage } from "@/hooks/use-auth";
 import { useAdminDashboardQuery } from "@/hooks/use-dashboard";
+import { DEFAULT_PERIOD, type DashboardPeriod } from "@/lib/dashboard-period";
+import { deltaFrom, formatCurrency, formatNumber, formatPercent } from "@/lib/format";
 
 export function AdminDashboard() {
-  const { data, isLoading, isError, error, refetch } = useAdminDashboardQuery();
+  const [period, setPeriod] = useState<DashboardPeriod>(DEFAULT_PERIOD);
+  const { data, isLoading, isError, error, refetch } = useAdminDashboardQuery(period);
 
-  if (isLoading) return <LoadingState label="Loading admin overview..." />;
-  if (isError) return <ErrorState message={loginErrorMessage(error)} onRetry={() => refetch()} />;
-  if (!data) return null;
+  const comparison = data?.comparison_label ? `vs ${data.comparison_label.toLowerCase()}` : undefined;
+  const stats = data?.stats;
+
+  const statCards = isError ? (
+    <ErrorState message={loginErrorMessage(error)} onRetry={() => refetch()} />
+  ) : isLoading || !stats ? (
+    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      {[0, 1, 2, 3].map((index) => (
+        <Skeleton key={index} className="h-[104px] w-full rounded" />
+      ))}
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        label="New admissions"
+        value={formatNumber(stats.new_admissions)}
+        icon={UserPlus}
+        accent="primary"
+        delta={deltaFrom(stats.new_admissions_change_percent)}
+        caption={comparison}
+        className="border-l-primary/60"
+      />
+      <StatCard
+        label="Attendance rate"
+        value={formatPercent(stats.attendance_percent)}
+        icon={CalendarCheck}
+        accent="success"
+        delta={deltaFrom(stats.attendance_change_percent)}
+        caption={stats.attendance_percent === null ? "Nothing marked yet" : comparison}
+        className="border-l-success/60"
+      />
+      <StatCard
+        label="Pending approvals"
+        value={formatNumber(stats.pending_approvals)}
+        icon={Clock}
+        accent="warning"
+        caption="Activations & expenses"
+        className="border-l-warning/60"
+      />
+      <StatCard
+        label="Fees collected"
+        value={formatCurrency(stats.collections)}
+        icon={Wallet}
+        accent="info"
+        delta={deltaFrom(stats.collections_change_percent)}
+        caption={comparison}
+        className="border-l-info/60"
+      />
+    </div>
+  );
 
   return (
-    <div className="flex w-full flex-col gap-5">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">Admin dashboard</h1>
-        <p className="text-sm text-muted-foreground">Admissions, attendance, and billing at a glance.</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="New admissions (month)" value={data.stats.new_admissions_month} icon={UserPlus} accent="primary" />
-        <StatCard
-          label="Today's attendance"
-          value={data.stats.todays_attendance_percent !== null ? `${data.stats.todays_attendance_percent}%` : "—"}
-          icon={CalendarCheck}
-          accent="success"
-          caption={data.stats.todays_attendance_percent === null ? "No records yet today" : undefined}
-        />
-        <StatCard label="Pending approvals" value={data.stats.pending_approvals} icon={Clock} accent="warning" />
-        <StatCard
-          label="Today's collections"
-          value={data.stats.todays_collections.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          icon={Wallet}
-          accent="info"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard
-          title="Attendance this week"
-          subtitle="Institution-wide attendance rate"
-          type="bar"
-          data={data.attendance_week}
-          xKey="label"
-          yKey="value"
-        />
-        <TableCard
-          title="Today's attendance"
-          meta="Live roll call across the institution"
-          columns={[
-            { key: "name", label: "Name" },
-            { key: "role", label: "Role" },
-            { key: "status", label: "Status" },
-          ]}
-          rows={data.todays_attendance_rows}
-        />
-      </div>
-
+    <InstitutionOverview
+      role="admin"
+      title="Admin dashboard"
+      subtitle="Admissions, attendance, and billing at a glance."
+      period={period}
+      onPeriodChange={setPeriod}
+      statCards={statCards}
+    >
       <PendingActivationsCard />
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <AttendanceInsightWidget />
         <AtRiskStudentsWidget />
       </div>
-    </div>
+    </InstitutionOverview>
   );
 }

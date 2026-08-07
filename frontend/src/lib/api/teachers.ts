@@ -22,6 +22,7 @@ export interface Teacher {
   phone: string;
   gender: "male" | "female" | "other" | null;
   date_of_birth: string | null;
+  profile_photo_url: string | null;
   is_active: boolean;
   employee_code: string;
   joining_date: string;

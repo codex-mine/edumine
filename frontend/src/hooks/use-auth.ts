@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  changePassword,
   forgotPassword,
   getCurrentUser,
   login,
@@ -60,6 +61,19 @@ export function useResetPasswordMutation() {
   return useMutation({
     mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
       resetPassword(token, newPassword),
+  });
+}
+
+/** The change wipes every server-side session, so the cached identity goes with
+ * it — the caller redirects to /login once this settles. */
+export function useChangePasswordMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) =>
+      changePassword(currentPassword, newPassword),
+    onSuccess: () => {
+      queryClient.setQueryData(authQueryKey, null);
+    },
   });
 }
 

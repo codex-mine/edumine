@@ -5,10 +5,17 @@ import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 const ACCENT_CLASSES = {
-  primary: "bg-primary/10 text-primary",
-  success: "bg-success/10 text-success",
-  warning: "bg-warning/10 text-warning",
-  info: "bg-info/10 text-info",
+  primary: "bg-primary text-primary-foreground",
+  success: "bg-success text-success-foreground",
+  warning: "bg-warning text-warning-foreground",
+  info: "bg-info text-info-foreground",
+} as const
+
+const WATERMARK_CLASSES = {
+  primary: "text-primary/10",
+  success: "text-success/10",
+  warning: "text-warning/10",
+  info: "text-info/10",
 } as const
 
 export interface StatCardProps {
@@ -31,24 +38,39 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={` px-2 py-6 border-l-4  ${cn(className)}`} >
-      <CardContent className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="  font-medium text-muted-foreground">{label}</span>
-          <span className=" text-3xl font-bold leading-none text-foreground">{value}</span>
+    <Card className={cn("relative rounded px-5 pt-t pb-10 border-l-4", className)}>
+      <Icon
+        className={cn(
+          "pointer-events-none absolute right-2 bottom-1 size-32",
+          WATERMARK_CLASSES[accent]
+        )}
+        aria-hidden="true"
+      />
+      <CardContent className="relative flex items-start gap-4 p-0">
+        <div
+          className={cn(
+            "flex   shrink-0 items-center justify-center rounded p-4",
+            ACCENT_CLASSES[accent]
+          )}
+        >
+          <Icon className="size-16" aria-hidden="true" />
+        </div>
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="text-sm font-medium text-muted-foreground">{label}</span>
+          <span className="text-3xl font-bold leading-none text-foreground">{value}</span>
           {(delta || caption) && (
-            <div className="mt-1 flex items-center gap-1.5 text-xs">
+            <div className="mt-4 flex items-center gap-1.5 text-sm">
               {delta && (
                 <span
                   className={cn(
-                    "inline-flex items-center gap-0.5 font-medium",
+                    "inline-flex items-center gap-0.5 font-semibold",
                     delta.direction === "up" ? "text-success" : "text-destructive"
                   )}
                 >
                   {delta.direction === "up" ? (
-                    <TrendingUp className="size-20" aria-hidden="true" />
+                    <TrendingUp className="size-4" aria-hidden="true" />
                   ) : (
-                    <TrendingDown className="size-20" aria-hidden="true" />
+                    <TrendingDown className="size-4" aria-hidden="true" />
                   )}
                   {delta.value}
                 </span>
@@ -56,9 +78,6 @@ export function StatCard({
               {caption && <span className="text-muted-foreground">{caption}</span>}
             </div>
           )}
-        </div>
-        <div className={cn("flex  shrink-0 items-center justify-center rounded-lg", ACCENT_CLASSES[accent])}>
-          <Icon className="size-20" aria-hidden="true" />
         </div>
       </CardContent>
     </Card>

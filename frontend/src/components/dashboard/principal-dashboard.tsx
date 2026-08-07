@@ -1,83 +1,99 @@
 "use client";
 
+import { useState } from "react";
 import { Receipt, UserCog, Users, Wallet } from "lucide-react";
 
-import { ChartCard } from "@/components/dashboard/chart-card";
 import { FinancialNarrativeCard } from "@/components/dashboard/financial-narrative-card";
+import { InstitutionOverview } from "@/components/dashboard/institution-overview";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TableCard } from "@/components/dashboard/table-card";
 import { ErrorState } from "@/components/shared/error-state";
-import { LoadingState } from "@/components/shared/loading-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { loginErrorMessage } from "@/hooks/use-auth";
 import { usePrincipalDashboardQuery } from "@/hooks/use-dashboard";
+import { DEFAULT_PERIOD, type DashboardPeriod } from "@/lib/dashboard-period";
+import { deltaFrom, formatCurrency, formatNumber } from "@/lib/format";
 
 export function PrincipalDashboard() {
-  const { data, isLoading, isError, error, refetch } = usePrincipalDashboardQuery();
+  const [period, setPeriod] = useState<DashboardPeriod>(DEFAULT_PERIOD);
+  const { data, isLoading, isError, error, refetch } = usePrincipalDashboardQuery(period);
 
-  if (isLoading) return <LoadingState label="Loading institution overview..." />;
-  if (isError) return <ErrorState message={loginErrorMessage(error)} onRetry={() => refetch()} />;
-  if (!data) return null;
+  const comparison = data?.comparison_label ? `vs ${data.comparison_label.toLowerCase()}` : undefined;
+  const stats = data?.stats;
+
+  const statCards = isError ? (
+    <ErrorState message={loginErrorMessage(error)} onRetry={() => refetch()} />
+  ) : isLoading || !stats ? (
+    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      {[0, 1, 2, 3].map((index) => (
+        <Skeleton key={index} className="h-[104px] w-full rounded" />
+      ))}
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        label="Total income"
+        value={formatCurrency(stats.total_income_month)}
+        icon={Wallet}
+        accent="success"
+        delta={deltaFrom(stats.total_income_change_percent)}
+        caption={comparison}
+        className="border-l-success/60"
+      />
+      <StatCard
+        label="Total students"
+        value={formatNumber(stats.total_students)}
+        icon={Users}
+        accent="primary"
+        delta={deltaFrom(stats.new_admissions_change_percent)}
+        caption={`${formatNumber(stats.new_admissions)} new admissions`}
+        className="border-l-primary/60"
+      />
+      <StatCard
+        label="Total staff"
+        value={formatNumber(stats.total_staff)}
+        icon={UserCog}
+        accent="info"
+        className="border-l-info/60"
+      />
+      <StatCard
+        label="Dues outstanding"
+        value={formatCurrency(stats.dues_outstanding)}
+        icon={Receipt}
+        accent="warning"
+        caption="Across all unpaid invoices"
+        className="border-l-warning/60"
+      />
+    </div>
+  );
 
   return (
-    <div className="flex w-full flex-col gap-10">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">Principal dashboard</h1>
-        <p className="text-sm text-muted-foreground">Institution-wide overview across academics, finance, and staff.</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Total income (month)"
-          value={data.stats.total_income_month.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          icon={Wallet}
-          accent="success"
-          className="bg-green-200/10 border-l-green-500/50"
+    <InstitutionOverview
+      role="principal"
+      title="Principal dashboard"
+      subtitle="Institution-wide overview across academics, finance, and staff."
+      period={period}
+      onPeriodChange={setPeriod}
+      statCards={statCards}
+    >
+      {data && (
+        <FinancialNarrativeCard
+          narrative={data.financial_narrative}
+          narrativeError={data.financial_narrative_error}
         />
-        <StatCard label="Total students" value={data.stats.total_students} icon={Users} accent="primary"
-          className="bg-yellow-200/10 border-l-yellow-500/50"
-
-        />
-        <StatCard label="Total staff" value={data.stats.total_staff} icon={UserCog} accent="info"
-          className="bg-blue-200/10 border-l-blue-500/50"
-
-        />
-        <StatCard
-          label="Dues outstanding"
-          value={data.stats.dues_outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          icon={Receipt}
-          accent="warning"
-          className="bg-red-200/10 border-l-red-500/50"
-
-        />
-      </div>
-
-      <FinancialNarrativeCard narrative={data.financial_narrative} narrativeError={data.financial_narrative_error} />
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard
-          title="Fee collection trend"
-          subtitle="Monthly collections, last 6 months"
-          icon={Wallet}
-          type="bar"
-          data={data.fee_trend}
-          xKey="label"
-          yKey="collections"
-          emptyMessage="No payment history yet."
-          
-        />
-        <TableCard
-          title="Recent invoices"
-          meta="Latest billing activity across the institution"
-          columns={[
-            { key: "student", label: "Student" },
-            { key: "amount", label: "Amount", align: "right" },
-            { key: "status", label: "Status" },
-            { key: "due", label: "Due date", align: "right" },
-          ]}
-          rows={data.recent_invoices}
-          emptyMessage="No invoices yet."
-        />
-      </div>
-    </div>
+      )}
+      <TableCard
+        title="Recent invoices"
+        meta="Latest billing activity across the institution"
+        columns={[
+          { key: "student", label: "Student" },
+          { key: "amount", label: "Amount", align: "right" },
+          { key: "status", label: "Status" },
+          { key: "due", label: "Due date", align: "right" },
+        ]}
+        rows={data?.recent_invoices}
+        emptyMessage="No invoices yet."
+      />
+    </InstitutionOverview>
   );
 }

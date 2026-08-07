@@ -52,3 +52,12 @@ export async function forgotPassword(email: string): Promise<void> {
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
   await apiClient.post("/auth/reset-password", { token, new_password: newPassword });
 }
+
+/** Signed-in password change. The server revokes every session it finds,
+ * this one included, so the caller has to log in again afterwards. */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  await apiClient.post("/auth/change-password", {
+    current_password: currentPassword,
+    new_password: newPassword,
+  });
+}

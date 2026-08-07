@@ -71,6 +71,7 @@ class StudentResponse(BaseModel):
     phone: str
     gender: GenderType | None
     date_of_birth: date | None
+    profile_photo_url: str | None = None
     is_active: bool
     admission_number: str
     admission_date: date

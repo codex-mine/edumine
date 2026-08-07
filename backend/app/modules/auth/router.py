@@ -10,6 +10,7 @@ from app.core.security import apply_auth_cookies, clear_auth_cookies
 from app.modules.auth import service
 from app.modules.auth.schemas import (
     AuthenticatedUser,
+    ChangePasswordRequest,
     ForgotPasswordRequest,
     LoginRequest,
     RegisterStudentRequest,
@@ -150,3 +151,19 @@ async def reset_password(
 ):
     await service.reset_password(db, payload.token, payload.new_password)
     return success_response(data=None, message="Password reset successfully. Please log in with your new password.")
+
+
+@router.post("/change-password")
+async def change_password(
+    payload: ChangePasswordRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+):
+    await service.change_password(db, current_user.id, payload.current_password, payload.new_password)
+    response = success_response(
+        data=None, message="Password changed successfully. Please log in with your new password."
+    )
+    # The change revoked every refresh token, this session's included, so the
+    # cookies are cleared here rather than left to fail on the next refresh.
+    clear_auth_cookies(response)
+    return response

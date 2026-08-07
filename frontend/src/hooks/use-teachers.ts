@@ -33,11 +33,14 @@ export function useTeacherQuery(teacherId: string | null) {
   });
 }
 
-export function useOwnTeacherProfileQuery() {
+/** `enabled` lets a shared view (e.g. My profile) hold this back for roles that
+ * have no teacher record, since the endpoint would only 404 for them. */
+export function useOwnTeacherProfileQuery({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ownTeacherQueryKey,
     queryFn: getOwnTeacherProfile,
     retry: false,
+    enabled,
   });
 }
 
