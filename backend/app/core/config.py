@@ -1,8 +1,10 @@
+import json
 from functools import lru_cache
+from typing import Annotated
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from pydantic import model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator, model_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 STORAGE_PROVIDERS = frozenset({"local", "cloudinary"})
 
@@ -83,7 +85,12 @@ class Settings(BaseSettings):
     # leaves pooling to the provider's proxy. Keep false for a long-running server.
     database_null_pool: bool = False
 
-    frontend_origins: list[str] = ["http://localhost:3000"]
+    # NoDecode turns off pydantic-settings' automatic JSON decoding of complex
+    # fields, which raises SettingsError at import time for anything that is not
+    # valid JSON. Dashboards (Vercel, Render) are typed by hand, where
+    # `https://a.com,https://b.com` is the natural thing to enter — so accept
+    # that alongside a JSON array in `_parse_frontend_origins`.
+    frontend_origins: Annotated[list[str], NoDecode] = ["http://localhost:3000"]
 
     rate_limit_default: str = "100/minute"
     login_rate_limit: str = "10/minute"
@@ -151,6 +158,28 @@ class Settings(BaseSettings):
     # request decodes, aligns, and reads up to `omr_max_sheets_per_request`
     # high-resolution images, plus two Cloudinary round-trips per sheet.
     omr_upload_rate_limit: str = "20/minute"
+
+    @field_validator("frontend_origins", mode="before")
+    @classmethod
+    def _parse_frontend_origins(cls, value: object) -> object:
+        """Accept FRONTEND_ORIGINS as a JSON array or a comma-separated list."""
+        if not isinstance(value, str):
+            return value
+
+        raw = value.strip()
+        if not raw:
+            return []
+
+        if raw.startswith("["):
+            # Still honour the JSON form documented in .env.example. A malformed
+            # array falls through to the comma split rather than crashing, which
+            # at worst produces an origin that simply never matches.
+            try:
+                return json.loads(raw)
+            except json.JSONDecodeError:
+                pass
+
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
     @model_validator(mode="after")
     def _normalize_database_url(self) -> "Settings":

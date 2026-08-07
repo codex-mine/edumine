@@ -332,7 +332,7 @@ export async function downloadBatchExport(
   batchId: string,
   format: "csv" | "excel"
 ): Promise<{ blob: Blob; filename: string }> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api/v1";
   const response = await fetch(`${baseUrl}/omr/batches/${batchId}/export?format=${format}`, {
     credentials: "include",
   });

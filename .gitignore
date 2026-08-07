@@ -51,3 +51,4 @@ backend/uploads/
 
 edumine_deploy_key.pub/
 edumine_deploy_key/
+.vercel

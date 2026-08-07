@@ -40,7 +40,11 @@ export interface PageMeta {
 }
 
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1",
+  // Relative by default: requests go to this app's own origin and are forwarded
+  // to the API by the rewrite in next.config.ts, so the auth cookies stay
+  // first-party. Point NEXT_PUBLIC_API_BASE_URL at an absolute URL only if you
+  // accept that cross-origin cookies will not reach proxy.ts.
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api/v1",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
