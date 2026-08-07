@@ -154,7 +154,7 @@ function PersonalTab({ data }: { data: ProfileData }) {
             description="How you sign in to Codex Edumine."
             fields={accountFields}
           >
-            <Button variant="outline" size="sm" asChild className="w-fit">
+            <Button variant="outline"   asChild className="w-fit">
               <Link href="/settings">Change password</Link>
             </Button>
           </ProfileInfoCard>

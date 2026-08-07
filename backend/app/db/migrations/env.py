@@ -47,6 +47,9 @@ async def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        # Same TLS / prepared-statement handling the app engine gets; without it
+        # migrations against a managed provider fail where the app succeeds.
+        connect_args=settings.database_connect_args,
     )
 
     async with connectable.connect() as connection:
