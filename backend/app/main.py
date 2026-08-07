@@ -52,8 +52,14 @@ async def rate_limit_handler(request, exc: RateLimitExceeded):
     )
 
 
-Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
-app.mount(settings.upload_base_url, StaticFiles(directory=settings.upload_dir), name="uploads")
+if settings.storage_provider == "local":
+    # Only the local provider has anything on disk to create or serve — with
+    # cloudinary the files live behind its own CDN URLs, so this mount would
+    # expose an empty directory. Guarding it also keeps the app importable on
+    # serverless hosts, where the bundle is mounted read-only and this mkdir is
+    # the first thing to fail.
+    Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
+    app.mount(settings.upload_base_url, StaticFiles(directory=settings.upload_dir), name="uploads")
 
 app.add_middleware(SecureHeadersMiddleware)
 app.add_middleware(SlowAPIMiddleware)

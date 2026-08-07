@@ -15,8 +15,19 @@ Run from the backend/ directory:
 
 import asyncio
 import random
+import sys
 import uuid
 from datetime import date, datetime, time, timedelta, timezone
+from pathlib import Path
+
+# Running a file inside scripts/ puts scripts/ on sys.path, not backend/, and the
+# `app` package is not pip-installed into the venv — so `import app` would fail.
+# Prepending the backend root keeps the documented invocation above working from
+# any current directory. Everything below is therefore an import after code,
+# which is exactly what E402 flags; the ordering is deliberate here.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+# ruff: noqa: E402
 
 from sqlalchemy import select, text
 
