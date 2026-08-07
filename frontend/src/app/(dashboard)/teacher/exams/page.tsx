@@ -11,6 +11,7 @@ import { LoadingState } from "@/components/shared/loading-state";
 import { RequestExtensionDialog } from "@/components/modules/exams/request-extension-dialog";
 import { loginErrorMessage } from "@/hooks/use-auth";
 import { useMySubmissionsQuery } from "@/hooks/use-exams";
+import { QUESTION_STATUS_LABELS, QUESTION_STATUS_VARIANT } from "@/lib/api/exams";
 
 export default function TeacherExamsPage() {
   const submissionsQuery = useMySubmissionsQuery();
@@ -37,8 +38,10 @@ export default function TeacherExamsPage() {
               <CardHeader>
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle>{item.subject_name}</CardTitle>
-                  {item.question_submitted_at ? (
-                    <Badge variant="success">Submitted</Badge>
+                  {item.question_status !== "draft" ? (
+                    <Badge variant={QUESTION_STATUS_VARIANT[item.question_status]}>
+                      {QUESTION_STATUS_LABELS[item.question_status]}
+                    </Badge>
                   ) : item.is_overdue ? (
                     <Badge variant="destructive">Overdue</Badge>
                   ) : (
@@ -54,11 +57,21 @@ export default function TeacherExamsPage() {
                     <span className="ml-2 text-info">Extension requested</span>
                   )}
                 </p>
+                {item.question_status === "revision_requested" && item.question_review_note && (
+                  <p className="rounded border border-destructive/40 bg-destructive/5 p-2 text-sm text-foreground">
+                    <span className="font-medium text-destructive">Changes requested: </span>
+                    {item.question_review_note}
+                  </p>
+                )}
               </CardHeader>
               <div className="flex flex-wrap gap-2 px-4 pb-4">
                 <Button asChild size="sm">
                   <Link href={`/teacher/exams/${item.id}`}>
-                    {item.question_submitted_at ? "View submission" : "Prepare questions"}
+                    {item.question_status === "revision_requested"
+                      ? "Revise questions"
+                      : item.question_submitted_at
+                        ? "View submission"
+                        : "Prepare questions"}
                   </Link>
                 </Button>
                 {!item.question_submitted_at && !item.extension_requested && (

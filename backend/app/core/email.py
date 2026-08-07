@@ -168,6 +168,30 @@ async def send_deadline_extension_request_email(
     await send_email(to_email, subject, html_body, text_body)
 
 
+async def send_question_revision_requested_email(
+    to_email: str, teacher_name: str, *, exam_name: str, class_name: str, subject_name: str, note: str
+) -> None:
+    subject = f"Revision requested: {subject_name} — {exam_name}"
+    text_body = (
+        f"Hi {teacher_name},\n\n"
+        f"Your submitted questions for {subject_name} ({class_name}), {exam_name} need changes "
+        "before they can be approved.\n\n"
+        f"What to change: {note}\n\n"
+        "Open the Exams module to edit and resubmit your questions.\n\n"
+        "- Codex Edumine"
+    )
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1e1b2e;">
+      <h2 style="color: #4f46e5;">Revision requested</h2>
+      <p>Hi {teacher_name},</p>
+      <p>Your submitted questions for <strong>{subject_name}</strong> ({class_name}), {exam_name} need changes before they can be approved.</p>
+      <p><strong>What to change:</strong> {note}</p>
+      <p>Open the Exams module to edit and resubmit your questions.</p>
+    </div>
+    """
+    await send_email(to_email, subject, html_body, text_body)
+
+
 async def send_deadline_extended_email(
     to_email: str, teacher_name: str, *, exam_name: str, class_name: str, subject_name: str, new_deadline: str
 ) -> None:

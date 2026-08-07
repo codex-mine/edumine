@@ -83,6 +83,19 @@ class ExamStatus(str, enum.Enum):
     published = "published"
 
 
+class QuestionApprovalStatus(str, enum.Enum):
+    """Review state of one exam subject's question paper.
+
+    `draft` covers both "never submitted" and "teacher is still editing", so the
+    column is never null and admin filters do not need to special-case it.
+    """
+
+    draft = "draft"
+    pending = "pending"
+    approved = "approved"
+    revision_requested = "revision_requested"
+
+
 class PublicationStatus(str, enum.Enum):
     pending = "pending"
     approved = "approved"

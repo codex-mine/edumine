@@ -8,7 +8,28 @@
       "Bash(python -m alembic history)",
       "Bash(python -m alembic current)",
       "Bash(python -m py_compile app/db/migrations/versions/9c1e5f2a7b48_convert_student_blood_group_to_enum.py)",
-      "Bash(./.venv/Scripts/python.exe -m pytest tests -q)"
+      "Bash(./.venv/Scripts/python.exe -m pytest tests -q)",
+      "Bash(./.venv/Scripts/python.exe -c \"import app.main; print\\('imports OK'\\)\")",
+      "Bash(curl -s -o /dev/null -m 20 -w \"api:%{http_code}\\\\n\" http://localhost:8000/api/v1/health)",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login -H \"Content-Type: application/json\" -d '{\"identifier\":\"admin@codexedumine.test\",\"password\":\"Passw0rd!123\"}' -c cq.txt)",
+      "Bash(curl -s \"http://127.0.0.1:8000/api/v1/exams/subjects/question-review?status=pending\" -b cq.txt)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/exams/subjects/__TRACKED_VAR__/question-paper -b cq.txt)",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login -H \"Content-Type: application/json\" -d '{\"identifier\":\"admin@codexedumine.test\",\"password\":\"Passw0rd!123\"}' -c cq.txt -b cq.txt)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/exams/subjects/__TRACKED_VAR__/question-paper -b cq.txt -c cq.txt)",
+      "Bash(curl -s -o /dev/null -m 25 -w \"api:%{http_code}\\\\n\" http://localhost:8000/api/v1/health)",
+      "Bash(curl -s \"http://127.0.0.1:8000/api/v1/exams/subjects/question-review?status=revision_requested\" -b cq.txt -c cq.txt)",
+      "Bash(curl -s -X PUT http://127.0.0.1:8000/api/v1/exams/subjects/__TRACKED_VAR__/questions -H 'Content-Type: application/json' -d '{\"questions\":[{\"question_text\":\"Only worth 10\",\"marks\":10,\"type\":\"short\",\"options\":null}]}' -b cq.txt -c cq.txt)",
+      "Bash(m:/advanced/codexmine/projects/codex-edumine/backend/.venv/Scripts/python.exe sections_test.py)",
+      "Bash(curl -s -o /dev/null -m 10 -w \"api:%{http_code} \" http://localhost:8000/api/v1/health)",
+      "Bash(curl -s -o /dev/null -m 10 -w \"next:%{http_code}\\\\n\" http://localhost:3000/login)",
+      "Bash(NODE_PATH=\"C:/Users/User/node_modules\" node qflow.js)",
+      "Bash(curl -s \"http://127.0.0.1:8000/api/v1/exams/subjects/question-review?status=approved\" -b cq.txt -c cq.txt)",
+      "Bash(curl -s -X PUT http://127.0.0.1:8000/api/v1/exams/subjects/__TRACKED_VAR__/questions -H 'Content-Type: application/json' -d '{\"questions\":[{\"question_text\":\"Question 1 \\(seed data\\)\",\"marks\":25,\"type\":\"short\",\"options\":null},{\"question_text\":\"Question 2 \\(seed data\\)\",\"marks\":25,\"type\":\"short\",\"options\":null},{\"question_text\":\"Question 3 \\(seed data\\)\",\"marks\":25,\"type\":\"short\",\"options\":null},{\"question_text\":\"Question 4 \\(seed data\\)\",\"marks\":25,\"type\":\"short\",\"options\":null}]}' -b cq.txt -c cq.txt)",
+      "Bash(python -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\(d['message'],'|',d['data']['class_name'],d['data']['subject_name'],'| qs=',[q['question_text'] for q in d['data']['questions']]\\)\")",
+      "Bash(grep -oE \"app\\\\\\\\\\\\\\\\[a-z_\\\\\\\\\\\\\\\\]+\\\\.py\")",
+      "Bash(./.venv/Scripts/python.exe -m pytest tests/test_e2e_workflow.py::test_04_attendance -q)",
+      "Bash(./.venv/Scripts/python.exe -m pytest tests/test_e2e_workflow.py::test_04_attendance -q --tb=long -p no:logging)",
+      "Bash(./.venv/Scripts/python.exe -m pytest tests -q --deselect tests/test_e2e_workflow.py::test_04_attendance)"
     ]
   }
 }

@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.common.enums import ExamStatus
+from app.common.enums import ExamStatus, QuestionApprovalStatus
 
 QuestionType = Literal["mcq", "short", "long"]
 
@@ -114,6 +114,12 @@ class QuestionItem(BaseModel):
     marks: int = Field(..., ge=1)
     type: QuestionType
     options: list[str] | None = None
+    section: str | None = Field(
+        default=None,
+        max_length=50,
+        description="Optional exam-subject section this question belongs to (CQ, MCQ, Practical, ...). "
+        "Groups the question on the printed paper.",
+    )
 
 
 class ExamSubjectResponse(BaseModel):
@@ -139,6 +145,11 @@ class ExamSubjectResponse(BaseModel):
     extension_requested: bool
     questions: list[QuestionItem] | None = None
     sections: list[ExamSubjectSectionResponse] = Field(default_factory=list)
+    question_status: QuestionApprovalStatus
+    question_reviewed_by: str | None = None
+    question_reviewer_name: str | None = None
+    question_reviewed_at: datetime | None = None
+    question_review_note: str | None = None
 
 
 class SubmitQuestionsRequest(BaseModel):
@@ -150,6 +161,51 @@ class SubmitQuestionsRequest(BaseModel):
             if item.type == "mcq" and (not item.options or len(item.options) < 2):
                 raise ValueError("MCQ questions require at least two options")
         return self
+
+
+class RequestRevisionRequest(BaseModel):
+    note: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        description="What the teacher needs to change — shown to them on their submission",
+    )
+
+
+class QuestionPaperSectionQuestion(BaseModel):
+    number: int
+    question_text: str
+    marks: int
+    type: QuestionType
+    options: list[str] | None = None
+
+
+class QuestionPaperSection(BaseModel):
+    name: str
+    full_marks: int | None
+    questions: list[QuestionPaperSectionQuestion]
+
+
+class QuestionPaperResponse(BaseModel):
+    """Everything needed to render one printable subject paper — no further
+    lookups required by the client."""
+
+    exam_subject_id: str
+    exam_id: str
+    exam_name: str
+    term: str | None
+    academic_year_name: str
+    class_name: str
+    subject_name: str
+    subject_code: str
+    teacher_name: str
+    full_marks: int
+    pass_marks: int
+    exam_date: date
+    question_status: QuestionApprovalStatus
+    total_questions: int
+    total_marks: int
+    sections: list[QuestionPaperSection]
 
 
 class RequestExtensionRequest(BaseModel):

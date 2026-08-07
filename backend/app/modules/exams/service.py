@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.audit import record_audit_log
 from app.common.dependencies import CurrentUser
-from app.common.enums import ExamStatus
+from app.common.enums import ExamStatus, QuestionApprovalStatus
 from app.core import email as email_service
 from app.core.exceptions import ConflictException, NotFoundException, PermissionDeniedException, ValidationException
 from app.modules.academic import repository as academic_repository
@@ -18,6 +18,7 @@ from app.modules.exams.schemas import (
     DraftQuestionsRequest,
     ExtendDeadlineRequest,
     RequestExtensionRequest,
+    RequestRevisionRequest,
     SubmitQuestionsRequest,
 )
 from app.modules.teachers import repository as teachers_repository
@@ -257,6 +258,60 @@ async def _assert_owns_exam_subject(db: AsyncSession, actor: CurrentUser, exam_s
         raise PermissionDeniedException("You can only manage question submission for your own assigned subjects")
 
 
+def _assert_marks_total(exam_subject: ExamSubject, questions: list) -> int:
+    total_marks = sum(item.marks for item in questions)
+    if total_marks != exam_subject.full_marks:
+        raise ValidationException(
+            f"Marks must sum to exactly {exam_subject.full_marks} (got {total_marks})"
+        )
+    return total_marks
+
+
+def _assert_sections_match(sections: list, questions: list) -> None:
+    """When a subject declares CQ/MCQ/Practical sections, questions tagged with a
+    section must name one that exists and each section's marks must add up."""
+    known = {section.name for section in sections}
+
+    if not known:
+        stray = sorted({item.section for item in questions if item.section})
+        if stray:
+            raise ValidationException(
+                f"This subject has no sections configured, so questions cannot be tagged with one "
+                f"(got: {', '.join(stray)}). Configure the subject's sections first."
+            )
+        return
+
+    tagged = [item for item in questions if item.section]
+    unknown = {item.section for item in tagged} - known
+    if unknown:
+        raise ValidationException(
+            f"Unknown question section(s): {', '.join(sorted(unknown))}. "
+            f"Configured sections are: {', '.join(sorted(known))}"
+        )
+
+    # Untagged questions are allowed (the paper prints them ungrouped), but a
+    # section that *is* used must be filled to its exact total.
+    for section in sections:
+        section_questions = [item for item in tagged if item.section == section.name]
+        if not section_questions:
+            continue
+        section_total = sum(item.marks for item in section_questions)
+        if section_total != section.full_marks:
+            raise ValidationException(
+                f"Section '{section.name}' must total exactly {section.full_marks} marks (got {section_total})"
+            )
+
+
+async def _sync_exam_readiness(db: AsyncSession, exam: Exam) -> None:
+    """An exam becomes `ready` only once every subject's paper is approved, and
+    drops back to `question_pending` if one is later sent back for revision."""
+    remaining = await repository.count_unapproved_exam_subjects(db, exam.id)
+    if remaining == 0 and exam.status == ExamStatus.question_pending:
+        await repository.update_exam_fields(db, exam, {"status": ExamStatus.ready})
+    elif remaining > 0 and exam.status == ExamStatus.ready:
+        await repository.update_exam_fields(db, exam, {"status": ExamStatus.question_pending})
+
+
 async def submit_questions(
     db: AsyncSession, actor: CurrentUser, exam_subject_id: uuid.UUID, payload: SubmitQuestionsRequest
 ) -> ExamSubjectRow:
@@ -264,19 +319,26 @@ async def submit_questions(
     exam_subject, exam, _class_entity, _subject, _teacher, _teacher_user = row
     await _assert_owns_exam_subject(db, actor, exam_subject)
 
+    is_admin = actor.has_role("admin", "principal")
+    if exam_subject.question_status == QuestionApprovalStatus.approved and not is_admin:
+        raise ValidationException(
+            "These questions have already been approved and can no longer be edited. "
+            "Ask an admin to request a revision if a change is needed."
+        )
+
     now = _now()
     if exam_subject.question_window_opens_at is not None and now < _ensure_aware(exam_subject.question_window_opens_at):
         raise ValidationException("The question submission window has not opened yet.")
-    if now > _ensure_aware(exam_subject.question_deadline):
+    # A revision was explicitly asked for, so the teacher must be able to act on
+    # it — holding them to the original deadline would make the request unusable.
+    deadline_applies = exam_subject.question_status != QuestionApprovalStatus.revision_requested
+    if deadline_applies and now > _ensure_aware(exam_subject.question_deadline):
         raise ValidationException(
             "The question submission deadline has passed. Ask an admin to extend it before submitting."
         )
 
-    total_marks = sum(item.marks for item in payload.questions)
-    if total_marks != exam_subject.full_marks:
-        raise ValidationException(
-            f"Marks must sum to exactly {exam_subject.full_marks} (got {total_marks})"
-        )
+    total_marks = _assert_marks_total(exam_subject, payload.questions)
+    _assert_sections_match(await repository.list_exam_subject_sections(db, exam_subject.id), payload.questions)
 
     await repository.update_exam_subject_fields(
         db,
@@ -284,6 +346,11 @@ async def submit_questions(
         {
             "questions_payload": [item.model_dump() for item in payload.questions],
             "question_submitted_at": _now(),
+            "question_status": QuestionApprovalStatus.pending,
+            # Clear the previous verdict so a resubmission reads as a fresh review.
+            "question_reviewed_by": None,
+            "question_reviewed_at": None,
+            "question_review_note": None,
         },
     )
     await record_audit_log(
@@ -292,16 +359,222 @@ async def submit_questions(
         action="submit_questions",
         entity_type="exam_subject",
         entity_id=exam_subject.id,
-        new_value={"question_count": len(payload.questions), "total_marks": total_marks},
+        new_value={"question_count": len(payload.questions), "total_marks": total_marks, "status": "pending"},
     )
 
-    if exam.status == ExamStatus.question_pending:
-        remaining = await repository.count_unsubmitted_exam_subjects(db, exam.id)
-        if remaining == 0:
-            await repository.update_exam_fields(db, exam, {"status": ExamStatus.ready})
-
+    await _sync_exam_readiness(db, exam)
     await db.commit()
     return await get_exam_subject_or_404(db, exam_subject_id)
+
+
+# --- Question review (Admin) --------------------------------------------------
+
+
+async def list_questions_for_review(
+    db: AsyncSession,
+    *,
+    statuses: list[QuestionApprovalStatus] | None,
+    exam_id: uuid.UUID | None,
+    class_id: uuid.UUID | None,
+    teacher_id: uuid.UUID | None,
+) -> list[ExamSubjectRow]:
+    return await repository.list_exam_subjects_for_review(
+        db, statuses=statuses, exam_id=exam_id, class_id=class_id, teacher_id=teacher_id
+    )
+
+
+async def get_reviewer_names(db: AsyncSession, user_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
+    return await repository.get_reviewer_names(db, user_ids)
+
+
+async def approve_questions(db: AsyncSession, actor: CurrentUser, exam_subject_id: uuid.UUID) -> ExamSubjectRow:
+    row = await get_exam_subject_or_404(db, exam_subject_id)
+    exam_subject, exam, _class_entity, _subject, _teacher, _teacher_user = row
+
+    if exam_subject.question_status == QuestionApprovalStatus.draft or not exam_subject.questions_payload:
+        raise ValidationException("There are no submitted questions to approve for this subject.")
+    if exam_subject.question_status == QuestionApprovalStatus.approved:
+        raise ConflictException("These questions are already approved.")
+
+    await repository.update_exam_subject_fields(
+        db,
+        exam_subject,
+        {
+            "question_status": QuestionApprovalStatus.approved,
+            "question_reviewed_by": actor.id,
+            "question_reviewed_at": _now(),
+            "question_review_note": None,
+        },
+    )
+    await record_audit_log(
+        db,
+        actor_id=actor.id,
+        action="approve_questions",
+        entity_type="exam_subject",
+        entity_id=exam_subject.id,
+        new_value={"status": QuestionApprovalStatus.approved.value},
+    )
+
+    await _sync_exam_readiness(db, exam)
+    await db.commit()
+    return await get_exam_subject_or_404(db, exam_subject_id)
+
+
+async def request_question_revision(
+    db: AsyncSession, actor: CurrentUser, exam_subject_id: uuid.UUID, payload: RequestRevisionRequest
+) -> ExamSubjectRow:
+    row = await get_exam_subject_or_404(db, exam_subject_id)
+    exam_subject, exam, class_entity, subject, _teacher, teacher_user = row
+
+    if exam_subject.question_status == QuestionApprovalStatus.draft or not exam_subject.questions_payload:
+        raise ValidationException("There are no submitted questions to send back for this subject.")
+
+    await repository.update_exam_subject_fields(
+        db,
+        exam_subject,
+        {
+            "question_status": QuestionApprovalStatus.revision_requested,
+            "question_reviewed_by": actor.id,
+            "question_reviewed_at": _now(),
+            "question_review_note": payload.note,
+        },
+    )
+    await record_audit_log(
+        db,
+        actor_id=actor.id,
+        action="request_question_revision",
+        entity_type="exam_subject",
+        entity_id=exam_subject.id,
+        new_value={"status": QuestionApprovalStatus.revision_requested.value, "note": payload.note},
+    )
+
+    await _sync_exam_readiness(db, exam)
+    await db.commit()
+
+    if teacher_user.email:
+        await email_service.send_question_revision_requested_email(
+            teacher_user.email,
+            teacher_user.full_name,
+            exam_name=exam.name,
+            class_name=class_entity.name,
+            subject_name=subject.name,
+            note=payload.note,
+        )
+
+    return await get_exam_subject_or_404(db, exam_subject_id)
+
+
+async def set_questions_as_admin(
+    db: AsyncSession, actor: CurrentUser, exam_subject_id: uuid.UUID, payload: SubmitQuestionsRequest
+) -> ExamSubjectRow:
+    """Admin authoring a paper directly, bypassing teacher submission entirely.
+
+    Admin-written questions land approved: the reviewer and the author are the
+    same person, so a separate approval step would be theatre.
+    """
+    row = await get_exam_subject_or_404(db, exam_subject_id)
+    exam_subject, exam, _class_entity, _subject, _teacher, _teacher_user = row
+
+    total_marks = _assert_marks_total(exam_subject, payload.questions)
+    _assert_sections_match(await repository.list_exam_subject_sections(db, exam_subject.id), payload.questions)
+
+    now = _now()
+    await repository.update_exam_subject_fields(
+        db,
+        exam_subject,
+        {
+            "questions_payload": [item.model_dump() for item in payload.questions],
+            "question_submitted_at": now,
+            "question_status": QuestionApprovalStatus.approved,
+            "question_reviewed_by": actor.id,
+            "question_reviewed_at": now,
+            "question_review_note": None,
+        },
+    )
+    await record_audit_log(
+        db,
+        actor_id=actor.id,
+        action="create_questions_as_admin",
+        entity_type="exam_subject",
+        entity_id=exam_subject.id,
+        new_value={"question_count": len(payload.questions), "total_marks": total_marks, "status": "approved"},
+    )
+
+    await _sync_exam_readiness(db, exam)
+    await db.commit()
+    return await get_exam_subject_or_404(db, exam_subject_id)
+
+
+# --- Printable question paper -------------------------------------------------
+
+
+async def get_question_paper(db: AsyncSession, actor: CurrentUser, exam_subject_id: uuid.UUID) -> dict:
+    row = await get_exam_subject_or_404(db, exam_subject_id)
+    exam_subject, exam, class_entity, subject, _teacher, teacher_user = row
+
+    if not exam_subject.questions_payload:
+        raise ValidationException("No questions have been set for this subject yet.")
+    if exam_subject.question_status != QuestionApprovalStatus.approved:
+        raise ValidationException(
+            "Only approved question papers can be generated. This paper is currently "
+            f"'{exam_subject.question_status.value}'."
+        )
+
+    year = await academic_repository.get_academic_year(db, exam.academic_year_id)
+    sections = await repository.list_exam_subject_sections(db, exam_subject.id)
+    questions = exam_subject.questions_payload or []
+
+    # Group into printed sections, preserving the configured display order and
+    # keeping question numbering continuous across the whole paper.
+    grouped: list[dict] = []
+    numbering = 1
+
+    def take(predicate) -> list[dict]:
+        nonlocal numbering
+        picked = []
+        for item in questions:
+            if not predicate(item):
+                continue
+            picked.append(
+                {
+                    "number": numbering,
+                    "question_text": item.get("question_text", ""),
+                    "marks": item.get("marks", 0),
+                    "type": item.get("type", "short"),
+                    "options": item.get("options"),
+                }
+            )
+            numbering += 1
+        return picked
+
+    for section in sections:
+        picked = take(lambda item, name=section.name: item.get("section") == name)
+        if picked:
+            grouped.append({"name": section.name, "full_marks": section.full_marks, "questions": picked})
+
+    known_names = {section.name for section in sections}
+    loose = take(lambda item: item.get("section") not in known_names)
+    if loose:
+        grouped.append({"name": "Questions" if grouped else "", "full_marks": None, "questions": loose})
+
+    return {
+        "exam_subject_id": str(exam_subject.id),
+        "exam_id": str(exam.id),
+        "exam_name": exam.name,
+        "term": exam.term,
+        "academic_year_name": year.name if year else "",
+        "class_name": class_entity.name,
+        "subject_name": subject.name,
+        "subject_code": subject.code,
+        "teacher_name": teacher_user.full_name,
+        "full_marks": exam_subject.full_marks,
+        "pass_marks": exam_subject.pass_marks,
+        "exam_date": exam.start_date.isoformat(),
+        "question_status": exam_subject.question_status.value,
+        "total_questions": len(questions),
+        "total_marks": sum(item.get("marks", 0) for item in questions),
+        "sections": grouped,
+    }
 
 
 def _ensure_aware(value: datetime) -> datetime:

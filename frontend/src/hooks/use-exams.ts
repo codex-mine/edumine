@@ -1,21 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  approveQuestions,
   configureExamSubjects,
   createExam,
   draftQuestions,
   extendDeadline,
   getExam,
+  getQuestionPaper,
   listCandidateSubjects,
   listExams,
   listExtensionRequests,
   listMySubmissions,
+  listQuestionsForReview,
   requestExtension,
+  requestQuestionRevision,
+  setQuestionsAsAdmin,
   submitQuestions,
   type CreateExamPayload,
   type DraftQuestionsPayload,
   type ExamSubjectConfigItem,
   type QuestionItem,
+  type QuestionReviewFilters,
 } from "@/lib/api/exams";
 
 // --- Admin: exams -------------------------------------------------------------
@@ -122,5 +128,68 @@ export function useDraftQuestionsMutation() {
   return useMutation({
     mutationFn: ({ examSubjectId, payload }: { examSubjectId: string; payload: DraftQuestionsPayload }) =>
       draftQuestions(examSubjectId, payload),
+  });
+}
+
+// --- Admin: question review & paper generation --------------------------------
+
+export const questionReviewQueryKey = (filters: QuestionReviewFilters) =>
+  ["exams", "question-review", filters] as const;
+
+export function useQuestionsForReviewQuery(filters: QuestionReviewFilters = {}) {
+  return useQuery({
+    queryKey: questionReviewQueryKey(filters),
+    queryFn: () => listQuestionsForReview(filters),
+    placeholderData: (previous) => previous,
+  });
+}
+
+/** Every review action shifts a paper between queues and can flip the parent
+ * exam's readiness, so invalidate the exam lists alongside the review queue. */
+function useReviewInvalidation() {
+  const queryClient = useQueryClient();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ["exams", "question-review"] });
+    queryClient.invalidateQueries({ queryKey: ["exams", "list"] });
+    queryClient.invalidateQueries({ queryKey: ["exams", "detail"] });
+    queryClient.invalidateQueries({ queryKey: mySubmissionsQueryKey });
+  };
+}
+
+export function useApproveQuestionsMutation() {
+  const invalidate = useReviewInvalidation();
+  return useMutation({
+    mutationFn: (examSubjectId: string) => approveQuestions(examSubjectId),
+    onSuccess: invalidate,
+  });
+}
+
+export function useRequestQuestionRevisionMutation() {
+  const invalidate = useReviewInvalidation();
+  return useMutation({
+    mutationFn: ({ examSubjectId, note }: { examSubjectId: string; note: string }) =>
+      requestQuestionRevision(examSubjectId, note),
+    onSuccess: invalidate,
+  });
+}
+
+export function useSetQuestionsAsAdminMutation() {
+  const invalidate = useReviewInvalidation();
+  return useMutation({
+    mutationFn: ({ examSubjectId, questions }: { examSubjectId: string; questions: QuestionItem[] }) =>
+      setQuestionsAsAdmin(examSubjectId, questions),
+    onSuccess: invalidate,
+  });
+}
+
+export const questionPaperQueryKey = (examSubjectId: string) =>
+  ["exams", "question-paper", examSubjectId] as const;
+
+export function useQuestionPaperQuery(examSubjectId: string | null) {
+  return useQuery({
+    queryKey: questionPaperQueryKey(examSubjectId ?? ""),
+    queryFn: () => getQuestionPaper(examSubjectId as string),
+    enabled: Boolean(examSubjectId),
+    retry: false,
   });
 }

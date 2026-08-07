@@ -1,11 +1,11 @@
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, Index, SmallInteger, String, UniqueConstraint, text
+from sqlalchemy import Date, DateTime, ForeignKey, Index, SmallInteger, String, Text, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.common.base_model import TimestampMixin, UUIDPrimaryKeyMixin
-from app.common.enums import ExamStatus, pg_enum
+from app.common.enums import ExamStatus, QuestionApprovalStatus, pg_enum
 from app.db.base import Base
 
 
@@ -59,6 +59,18 @@ class ExamSubject(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     question_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     question_submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     questions_payload: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    question_status: Mapped[QuestionApprovalStatus] = mapped_column(
+        pg_enum(QuestionApprovalStatus, "question_approval_status"),
+        nullable=False,
+        default=QuestionApprovalStatus.draft,
+        server_default=text("'draft'"),
+    )
+    question_reviewed_by: Mapped[UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
+    question_reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Why a revision was requested — shown back to the teacher so they know what to fix.
+    question_review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     marks_window_opens_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     marks_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     marks_submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

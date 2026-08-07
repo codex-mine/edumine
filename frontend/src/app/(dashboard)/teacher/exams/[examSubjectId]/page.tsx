@@ -17,7 +17,11 @@ import { LoadingState } from "@/components/shared/loading-state";
 import { QuestionEditor } from "@/components/modules/exams/question-editor";
 import { loginErrorMessage } from "@/hooks/use-auth";
 import { useDraftQuestionsMutation, useMySubmissionsQuery, useSubmitQuestionsMutation } from "@/hooks/use-exams";
-import type { QuestionItem } from "@/lib/api/exams";
+import {
+  QUESTION_STATUS_LABELS,
+  QUESTION_STATUS_VARIANT,
+  type QuestionItem,
+} from "@/lib/api/exams";
 
 export default function ExamSubjectWorkspacePage() {
   const params = useParams<{ examSubjectId: string }>();
@@ -85,7 +89,13 @@ export default function ExamSubjectWorkspacePage() {
   if (!item) return <EmptyState message="This exam question assignment was not found." />;
 
   const totalMarks = questions.reduce((sum, q) => sum + (Number.isFinite(q.marks) ? q.marks : 0), 0);
-  const canSubmit = questions.length > 0 && totalMarks === item.full_marks && !item.is_overdue;
+  const isApproved = item.question_status === "approved";
+  const needsRevision = item.question_status === "revision_requested";
+  // A revision request reopens the paper regardless of the original deadline —
+  // the server applies the same rule, so the button matches what it will accept.
+  const deadlineBlocks = item.is_overdue && !needsRevision;
+  const canSubmit =
+    questions.length > 0 && totalMarks === item.full_marks && !deadlineBlocks && !isApproved;
 
   return (
     <div className="flex w-full flex-col gap-5">
@@ -97,8 +107,10 @@ export default function ExamSubjectWorkspacePage() {
           <h1 className="text-2xl font-semibold text-foreground">
             {item.subject_name} — {item.class_name}
           </h1>
-          {item.question_submitted_at ? (
-            <Badge variant="success">Submitted</Badge>
+          {item.question_status !== "draft" ? (
+            <Badge variant={QUESTION_STATUS_VARIANT[item.question_status]}>
+              {QUESTION_STATUS_LABELS[item.question_status]}
+            </Badge>
           ) : item.is_overdue ? (
             <Badge variant="destructive">Overdue</Badge>
           ) : (
@@ -110,8 +122,30 @@ export default function ExamSubjectWorkspacePage() {
         </p>
       </div>
 
-      {item.is_overdue && !item.question_submitted_at && (
+      {item.is_overdue && !item.question_submitted_at && !needsRevision && (
         <ErrorState message="The submission deadline has passed. Request an extension from your assignments list before you can submit." />
+      )}
+
+      {needsRevision && item.question_review_note && (
+        <div className="rounded border border-destructive/40 bg-destructive/5 p-3 text-sm">
+          <p className="font-medium text-destructive">
+            Changes requested
+            {item.question_reviewer_name ? ` by ${item.question_reviewer_name}` : ""}
+          </p>
+          <p className="mt-1 text-foreground">{item.question_review_note}</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Edit the questions below and resubmit — the original deadline no longer blocks you.
+          </p>
+        </div>
+      )}
+
+      {isApproved && (
+        <div className="rounded border border-success/40 bg-success/5 p-3 text-sm">
+          <p className="font-medium text-success">Approved</p>
+          <p className="mt-1 text-muted-foreground">
+            This paper is locked. Ask an admin to request a revision if something needs to change.
+          </p>
+        </div>
       )}
 
       <Card>
@@ -173,7 +207,7 @@ export default function ExamSubjectWorkspacePage() {
               type="button"
               variant="outline"
               onClick={handleGenerateDraft}
-              disabled={draftMutation.isPending || !topics.trim() || Boolean(item.question_submitted_at)}
+              disabled={draftMutation.isPending || !topics.trim() || isApproved}
             >
               <Sparkles className="size-4" /> {draftMutation.isPending ? "Drafting..." : "Generate draft"}
             </Button>
@@ -187,14 +221,23 @@ export default function ExamSubjectWorkspacePage() {
           <CardDescription>Review and edit the questions before submitting.</CardDescription>
         </CardHeader>
         <div className="flex flex-col gap-4 px-4 pb-4">
-          <QuestionEditor questions={questions} onChange={setQuestions} fullMarks={item.full_marks} />
+          <QuestionEditor
+            questions={questions}
+            onChange={setQuestions}
+            fullMarks={item.full_marks}
+            sections={item.sections}
+          />
 
           {submitError && <p className="text-sm text-destructive">{submitError}</p>}
           {submitSuccess && <p className="text-sm text-success">Questions submitted successfully.</p>}
 
           <div className="flex justify-end">
             <Button onClick={handleSubmit} disabled={!canSubmit || submitMutation.isPending}>
-              {item.question_submitted_at ? "Re-submit questions" : "Submit questions"}
+              {needsRevision
+                ? "Resubmit for approval"
+                : item.question_submitted_at
+                  ? "Re-submit questions"
+                  : "Submit questions"}
             </Button>
           </div>
         </div>

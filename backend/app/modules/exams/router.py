@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.dependencies import CurrentUser, get_db_session, require_permission
+from app.common.enums import QuestionApprovalStatus
 from app.core.response import success_response
 from app.modules.exams import service
 from app.modules.exams.models import Exam
@@ -15,6 +16,7 @@ from app.modules.exams.schemas import (
     DraftQuestionsRequest,
     ExtendDeadlineRequest,
     RequestExtensionRequest,
+    RequestRevisionRequest,
     SubmitQuestionsRequest,
 )
 
@@ -36,13 +38,25 @@ def _exam_response(exam: Exam, classes: list) -> dict:
     }
 
 
-async def _exam_subject_response(db: AsyncSession, row: ExamSubjectRow, *, extension_requested: bool = False) -> dict:
+async def _exam_subject_response(
+    db: AsyncSession,
+    row: ExamSubjectRow,
+    *,
+    extension_requested: bool = False,
+    reviewer_name: str | None = None,
+) -> dict:
     exam_subject, exam, class_entity, subject, teacher, teacher_user = row
     now = datetime.now(timezone.utc)
     deadline = exam_subject.question_deadline
     deadline_aware = deadline if deadline.tzinfo is not None else deadline.replace(tzinfo=timezone.utc)
     is_overdue = exam_subject.question_submitted_at is None and now > deadline_aware
     sections = await service.get_exam_subject_sections(db, exam_subject.id)
+    # List endpoints resolve reviewer names in one batch and pass them in; single-record
+    # responses fall back to a lookup here so the reviewer is never silently blank.
+    if reviewer_name is None and exam_subject.question_reviewed_by is not None:
+        reviewer_name = (await service.get_reviewer_names(db, [exam_subject.question_reviewed_by])).get(
+            exam_subject.question_reviewed_by
+        )
     return {
         "id": str(exam_subject.id),
         "exam_id": str(exam.id),
@@ -69,6 +83,15 @@ async def _exam_subject_response(db: AsyncSession, row: ExamSubjectRow, *, exten
         "is_overdue": is_overdue,
         "extension_requested": extension_requested,
         "questions": exam_subject.questions_payload,
+        "question_status": exam_subject.question_status.value,
+        "question_reviewed_by": str(exam_subject.question_reviewed_by)
+        if exam_subject.question_reviewed_by
+        else None,
+        "question_reviewer_name": reviewer_name,
+        "question_reviewed_at": exam_subject.question_reviewed_at.isoformat()
+        if exam_subject.question_reviewed_at
+        else None,
+        "question_review_note": exam_subject.question_review_note,
         "sections": [
             {
                 "id": str(section.id),
@@ -164,6 +187,90 @@ async def extend_deadline(
 ):
     row = await service.extend_deadline(db, current_user, exam_subject_id, payload)
     return success_response(data=await _exam_subject_response(db, row), message="Question deadline extended")
+
+
+# --- Question review (Admin) --------------------------------------------------
+
+
+@router.get("/subjects/question-review", dependencies=[Depends(require_permission("exams.manage"))])
+async def list_questions_for_review(
+    status: list[QuestionApprovalStatus] | None = Query(
+        default=None, description="Filter by review status; repeat the param for several"
+    ),
+    exam_id: uuid.UUID | None = Query(default=None),
+    class_id: uuid.UUID | None = Query(default=None),
+    teacher_id: uuid.UUID | None = Query(default=None),
+    db: AsyncSession = Depends(get_db_session),
+):
+    rows = await service.list_questions_for_review(
+        db, statuses=status, exam_id=exam_id, class_id=class_id, teacher_id=teacher_id
+    )
+    reviewer_ids = [row[0].question_reviewed_by for row in rows if row[0].question_reviewed_by]
+    reviewer_names = await service.get_reviewer_names(db, reviewer_ids)
+    data = [
+        await _exam_subject_response(
+            db, row, reviewer_name=reviewer_names.get(row[0].question_reviewed_by)
+        )
+        for row in rows
+    ]
+    return success_response(data=data, message="Questions awaiting review")
+
+
+@router.post(
+    "/subjects/{exam_subject_id}/approve-questions",
+    dependencies=[Depends(require_permission("exams.manage"))],
+)
+async def approve_questions(
+    exam_subject_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_permission("exams.manage")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    row = await service.approve_questions(db, current_user, exam_subject_id)
+    return success_response(data=await _exam_subject_response(db, row), message="Questions approved")
+
+
+@router.post(
+    "/subjects/{exam_subject_id}/request-revision",
+    dependencies=[Depends(require_permission("exams.manage"))],
+)
+async def request_question_revision(
+    exam_subject_id: uuid.UUID,
+    payload: RequestRevisionRequest,
+    current_user: CurrentUser = Depends(require_permission("exams.manage")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    row = await service.request_question_revision(db, current_user, exam_subject_id, payload)
+    return success_response(
+        data=await _exam_subject_response(db, row), message="Revision requested — the teacher has been notified"
+    )
+
+
+@router.put(
+    "/subjects/{exam_subject_id}/questions",
+    dependencies=[Depends(require_permission("exams.manage"))],
+)
+async def set_questions_as_admin(
+    exam_subject_id: uuid.UUID,
+    payload: SubmitQuestionsRequest,
+    current_user: CurrentUser = Depends(require_permission("exams.manage")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    """Admin authors a paper directly — no teacher submission needed. Saved as approved."""
+    row = await service.set_questions_as_admin(db, current_user, exam_subject_id, payload)
+    return success_response(data=await _exam_subject_response(db, row), message="Questions saved and approved")
+
+
+@router.get(
+    "/subjects/{exam_subject_id}/question-paper",
+    dependencies=[Depends(require_permission("exams.view"))],
+)
+async def get_question_paper(
+    exam_subject_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_permission("exams.view")),
+    db: AsyncSession = Depends(get_db_session),
+):
+    data = await service.get_question_paper(db, current_user, exam_subject_id)
+    return success_response(data=data, message="Question paper generated")
 
 
 # --- Teacher-facing question submission --------------------------------------

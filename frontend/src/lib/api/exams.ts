@@ -2,6 +2,30 @@ import { apiClient } from "@/lib/api/client";
 
 export type ExamStatus = "draft" | "question_pending" | "ready" | "results_pending" | "published";
 export type QuestionType = "mcq" | "short" | "long";
+export type QuestionApprovalStatus = "draft" | "pending" | "approved" | "revision_requested";
+
+export const QUESTION_STATUS_LABELS: Record<QuestionApprovalStatus, string> = {
+  draft: "Not submitted",
+  pending: "Pending approval",
+  approved: "Approved",
+  revision_requested: "Revision requested",
+};
+
+export const QUESTION_STATUS_VARIANT: Record<
+  QuestionApprovalStatus,
+  "muted" | "warning" | "success" | "destructive"
+> = {
+  draft: "muted",
+  pending: "warning",
+  approved: "success",
+  revision_requested: "destructive",
+};
+
+export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
+  mcq: "MCQ",
+  short: "Short",
+  long: "Long",
+};
 
 export const EXAM_STATUS_LABELS: Record<ExamStatus, string> = {
   draft: "Draft",
@@ -98,6 +122,11 @@ export interface ExamSubject {
   extension_requested: boolean;
   questions: QuestionItem[] | null;
   sections: ExamSubjectSection[];
+  question_status: QuestionApprovalStatus;
+  question_reviewed_by: string | null;
+  question_reviewer_name: string | null;
+  question_reviewed_at: string | null;
+  question_review_note: string | null;
 }
 
 export interface QuestionItem {
@@ -105,6 +134,41 @@ export interface QuestionItem {
   marks: number;
   type: QuestionType;
   options?: string[] | null;
+  /** Which configured exam-subject section (CQ/MCQ/Practical/...) this belongs to. */
+  section?: string | null;
+}
+
+export interface QuestionPaperQuestion {
+  number: number;
+  question_text: string;
+  marks: number;
+  type: QuestionType;
+  options: string[] | null;
+}
+
+export interface QuestionPaperSection {
+  name: string;
+  full_marks: number | null;
+  questions: QuestionPaperQuestion[];
+}
+
+export interface QuestionPaper {
+  exam_subject_id: string;
+  exam_id: string;
+  exam_name: string;
+  term: string | null;
+  academic_year_name: string;
+  class_name: string;
+  subject_name: string;
+  subject_code: string;
+  teacher_name: string;
+  full_marks: number;
+  pass_marks: number;
+  exam_date: string;
+  question_status: QuestionApprovalStatus;
+  total_questions: number;
+  total_marks: number;
+  sections: QuestionPaperSection[];
 }
 
 export interface ExtensionRequest {
@@ -207,5 +271,51 @@ export async function draftQuestions(
     `/exams/subjects/${examSubjectId}/draft-questions`,
     payload
   );
+  return data;
+}
+
+// --- Admin: question review & paper generation -------------------------------
+
+export interface QuestionReviewFilters {
+  status?: QuestionApprovalStatus[];
+  exam_id?: string;
+  class_id?: string;
+  teacher_id?: string;
+}
+
+export async function listQuestionsForReview(filters: QuestionReviewFilters = {}): Promise<ExamSubject[]> {
+  const { data } = await apiClient.get<ExamSubject[]>("/exams/subjects/question-review", {
+    params: filters,
+    // FastAPI reads repeated `status=a&status=b`; axios' default bracket form is not parsed.
+    paramsSerializer: { indexes: null },
+  });
+  return data;
+}
+
+export async function approveQuestions(examSubjectId: string): Promise<ExamSubject> {
+  const { data } = await apiClient.post<ExamSubject>(`/exams/subjects/${examSubjectId}/approve-questions`);
+  return data;
+}
+
+export async function requestQuestionRevision(examSubjectId: string, note: string): Promise<ExamSubject> {
+  const { data } = await apiClient.post<ExamSubject>(`/exams/subjects/${examSubjectId}/request-revision`, {
+    note,
+  });
+  return data;
+}
+
+/** Admin authors a paper directly — saved already approved. */
+export async function setQuestionsAsAdmin(
+  examSubjectId: string,
+  questions: QuestionItem[]
+): Promise<ExamSubject> {
+  const { data } = await apiClient.put<ExamSubject>(`/exams/subjects/${examSubjectId}/questions`, {
+    questions,
+  });
+  return data;
+}
+
+export async function getQuestionPaper(examSubjectId: string): Promise<QuestionPaper> {
+  const { data } = await apiClient.get<QuestionPaper>(`/exams/subjects/${examSubjectId}/question-paper`);
   return data;
 }

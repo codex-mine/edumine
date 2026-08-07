@@ -7,13 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { QuestionItem, QuestionType } from "@/lib/api/exams";
+import type { ExamSubjectSection, QuestionItem, QuestionType } from "@/lib/api/exams";
 
 const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
   { value: "mcq", label: "Multiple choice" },
   { value: "short", label: "Short answer" },
   { value: "long", label: "Long answer" },
 ];
+
+const NO_SECTION = "__none__";
 
 function emptyQuestion(): QuestionItem {
   return { question_text: "", marks: 1, type: "short", options: null };
@@ -23,12 +25,23 @@ export function QuestionEditor({
   questions,
   onChange,
   fullMarks,
+  sections = [],
 }: {
   questions: QuestionItem[];
   onChange: (questions: QuestionItem[]) => void;
   fullMarks: number;
+  /** Configured CQ/MCQ/Practical breakdown. When present each question can be
+   * filed under one, and every used section must hit its own marks total. */
+  sections?: ExamSubjectSection[];
 }) {
   const totalMarks = questions.reduce((sum, q) => sum + (Number.isFinite(q.marks) ? q.marks : 0), 0);
+
+  const sectionTotals = sections.map((section) => ({
+    ...section,
+    used: questions
+      .filter((q) => q.section === section.name)
+      .reduce((sum, q) => sum + (Number.isFinite(q.marks) ? q.marks : 0), 0),
+  }));
 
   function updateQuestion(index: number, patch: Partial<QuestionItem>) {
     const next = questions.map((q, i) => (i === index ? { ...q, ...patch } : q));
@@ -122,6 +135,29 @@ export function QuestionEditor({
                 onChange={(e) => updateQuestion(index, { marks: Number(e.target.value) || 0 })}
               />
             </div>
+            {sections.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor={`q_section_${index}`}>Section</Label>
+                <Select
+                  value={question.section ?? NO_SECTION}
+                  onValueChange={(value) =>
+                    updateQuestion(index, { section: value === NO_SECTION ? null : value })
+                  }
+                >
+                  <SelectTrigger id={`q_section_${index}`} className="w-44">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_SECTION}>Ungrouped</SelectItem>
+                    {sections.map((section) => (
+                      <SelectItem key={section.id} value={section.name}>
+                        {section.name} ({section.full_marks})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {question.type === "mcq" && (
@@ -161,6 +197,27 @@ export function QuestionEditor({
         Total marks: {totalMarks} / {fullMarks}
         {totalMarks !== fullMarks && " — must sum exactly to the full marks before submitting"}
       </p>
+
+      {sectionTotals.length > 0 && (
+        <div className="flex flex-wrap gap-3 text-sm">
+          {sectionTotals.map((section) => {
+            // A section left entirely empty is allowed; one that is used at all
+            // has to be filled exactly, matching the server-side rule.
+            const untouched = section.used === 0;
+            const balanced = section.used === section.full_marks;
+            return (
+              <span
+                key={section.id}
+                className={
+                  untouched ? "text-muted-foreground" : balanced ? "text-success" : "text-destructive"
+                }
+              >
+                {section.name}: {section.used} / {section.full_marks}
+              </span>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

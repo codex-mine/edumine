@@ -5,6 +5,7 @@ from typing import Any
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.enums import QuestionApprovalStatus
 from app.common.models import AuditLog
 from app.modules.academic.models import Class, Subject
 from app.modules.auth.models import Role, User
@@ -185,16 +186,52 @@ async def list_exam_subjects_for_teacher(db: AsyncSession, teacher_id: uuid.UUID
     return list(result.all())
 
 
+async def list_exam_subjects_for_review(
+    db: AsyncSession,
+    *,
+    statuses: list[QuestionApprovalStatus] | None,
+    exam_id: uuid.UUID | None,
+    class_id: uuid.UUID | None,
+    teacher_id: uuid.UUID | None,
+) -> list[ExamSubjectRow]:
+    """The admin review queue. Ordered oldest-submission-first so the papers that
+    have been waiting longest surface at the top."""
+    query = _exam_subject_select()
+    if statuses:
+        query = query.where(ExamSubject.question_status.in_(statuses))
+    if exam_id is not None:
+        query = query.where(ExamSubject.exam_id == exam_id)
+    if class_id is not None:
+        query = query.where(ExamSubject.class_id == class_id)
+    if teacher_id is not None:
+        query = query.where(ExamSubject.teacher_id == teacher_id)
+
+    result = await db.execute(
+        query.order_by(ExamSubject.question_submitted_at.asc().nulls_last(), Class.numeric_order, Subject.name)
+    )
+    return list(result.all())
+
+
+async def get_reviewer_names(db: AsyncSession, user_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
+    if not user_ids:
+        return {}
+    result = await db.execute(select(User.id, User.full_name).where(User.id.in_(user_ids)))
+    return {row[0]: row[1] for row in result.all()}
+
+
 async def update_exam_subject_fields(db: AsyncSession, entity: ExamSubject, fields: dict[str, Any]) -> None:
     for key, value in fields.items():
         setattr(entity, key, value)
     await db.flush()
 
 
-async def count_unsubmitted_exam_subjects(db: AsyncSession, exam_id: uuid.UUID) -> int:
+async def count_unapproved_exam_subjects(db: AsyncSession, exam_id: uuid.UUID) -> int:
+    """An exam is only paper-ready once every subject's questions are approved —
+    a submitted-but-unreviewed paper is not something you can print."""
     result = await db.execute(
         select(ExamSubject.id).where(
-            ExamSubject.exam_id == exam_id, ExamSubject.question_submitted_at.is_(None)
+            ExamSubject.exam_id == exam_id,
+            ExamSubject.question_status != QuestionApprovalStatus.approved,
         )
     )
     return len(result.all())

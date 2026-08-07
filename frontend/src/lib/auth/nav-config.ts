@@ -89,6 +89,7 @@ const EXAMS_BRANCH: NavNode = {
   icon: ClipboardList,
   children: [
     { label: "All Exams", href: "/admin/exams", icon: ClipboardList },
+    { label: "Question Review", href: "/admin/exams/question-review", icon: ClipboardCheck },
     { label: "Extension Requests", href: "/admin/exams/extension-requests", icon: Hourglass },
   ],
 };
